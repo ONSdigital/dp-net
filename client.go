@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ONSdigital/go-ns/common"
+	netHttp "github.com/ONSdigital/dp-net/http"
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 )
@@ -124,15 +124,15 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 
 	// TODO: Remove this once user token (Florence token) is propegated throughout apps
 	// Used for audit purposes
-	if common.IsUserPresent(ctx) {
+	if netHttp.IsUserPresent(ctx) {
 		// only add this header if not already set
-		if len(req.Header.Get(common.UserHeaderKey)) == 0 {
-			common.AddUserHeader(req, common.User(ctx))
+		if len(req.Header.Get(netHttp.UserHeaderKey)) == 0 {
+			netHttp.AddUserHeader(req, netHttp.User(ctx))
 		}
 	}
 
 	// get any existing correlation-id (might be "id1,id2"), append a new one, add to headers
-	upstreamCorrelationIDs := common.GetRequestId(ctx)
+	upstreamCorrelationIDs := netHttp.GetRequestId(ctx)
 	addedIDLen := 20
 	if upstreamCorrelationIDs != "" {
 		// get length of (first of) IDs (e.g. "id1" is 3), new ID will be half that size
@@ -142,7 +142,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 		}
 		upstreamCorrelationIDs += ","
 	}
-	common.AddRequestIdHeader(req, upstreamCorrelationIDs+common.NewRequestID(addedIDLen))
+	netHttp.AddRequestIdHeader(req, upstreamCorrelationIDs+netHttp.NewRequestID(addedIDLen))
 
 	doer := func(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, error) {
 		if req.ContentLength > 0 {

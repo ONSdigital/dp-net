@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
+	netHttp "github.com/ONSdigital/dp-net/http"
 	"github.com/ONSdigital/dp-rchttp/rchttptest"
-	"github.com/ONSdigital/go-ns/common"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -316,8 +316,8 @@ func TestClientAddsRequestIDHeader(t *testing.T) {
 				So(call.Method, ShouldEqual, "POST")
 				So(call.Body, ShouldEqual, `{"hello":"there"}`)
 				So(call.Error, ShouldEqual, "")
-				So(len(call.Headers[common.RequestHeaderKey]), ShouldEqual, 1)
-				So(len(call.Headers[common.RequestHeaderKey][0]), ShouldEqual, 20)
+				So(len(call.Headers[netHttp.RequestHeaderKey]), ShouldEqual, 1)
+				So(len(call.Headers[netHttp.RequestHeaderKey][0]), ShouldEqual, 20)
 			})
 		})
 	})
@@ -335,7 +335,7 @@ func TestClientAppendsRequestIDHeader(t *testing.T) {
 
 		Convey("When Post() is called on a URL", func() {
 			expectedCallCount++
-			resp, err := httpClient.Post(common.WithRequestId(context.Background(), upstreamRequestID), ts.URL, rchttptest.JsonContentType, strings.NewReader(`{}`))
+			resp, err := httpClient.Post(netHttp.WithRequestId(context.Background(), upstreamRequestID), ts.URL, rchttptest.JsonContentType, strings.NewReader(`{}`))
 			So(resp, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 
@@ -346,9 +346,9 @@ func TestClientAppendsRequestIDHeader(t *testing.T) {
 				So(call.CallCount, ShouldEqual, expectedCallCount)
 				So(call.Method, ShouldEqual, "POST")
 				So(call.Error, ShouldEqual, "")
-				So(len(call.Headers[common.RequestHeaderKey]), ShouldEqual, 1)
-				So(call.Headers[common.RequestHeaderKey][0], ShouldStartWith, upstreamRequestID+",")
-				So(len(call.Headers[common.RequestHeaderKey][0]), ShouldBeGreaterThan, len(upstreamRequestID)*3/2)
+				So(len(call.Headers[netHttp.RequestHeaderKey]), ShouldEqual, 1)
+				So(call.Headers[netHttp.RequestHeaderKey][0], ShouldStartWith, upstreamRequestID+",")
+				So(len(call.Headers[netHttp.RequestHeaderKey][0]), ShouldBeGreaterThan, len(upstreamRequestID)*3/2)
 			})
 		})
 	})
