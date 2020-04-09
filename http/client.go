@@ -1,6 +1,6 @@
 package http
 
-//go:generate moq -out rchttptest/mock_client.go . Clienter
+//go:generate moq -out mock_client.go . Clienter
 
 import (
 	"io"
