@@ -1,6 +1,6 @@
-package rchttp
+package http
 
-//go:generate moq -out mock_client.go . Clienter
+//go:generate moq -out rchttptest/mock_client.go . Clienter
 
 import (
 	"io"
@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	netHttp "github.com/ONSdigital/dp-net/http"
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 )
@@ -124,15 +123,15 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 
 	// TODO: Remove this once user token (Florence token) is propegated throughout apps
 	// Used for audit purposes
-	if netHttp.IsUserPresent(ctx) {
+	if IsUserPresent(ctx) {
 		// only add this header if not already set
-		if len(req.Header.Get(netHttp.UserHeaderKey)) == 0 {
-			netHttp.AddUserHeader(req, netHttp.User(ctx))
+		if len(req.Header.Get(UserHeaderKey)) == 0 {
+			AddUserHeader(req, User(ctx))
 		}
 	}
 
 	// get any existing correlation-id (might be "id1,id2"), append a new one, add to headers
-	upstreamCorrelationIDs := netHttp.GetRequestId(ctx)
+	upstreamCorrelationIDs := GetRequestId(ctx)
 	addedIDLen := 20
 	if upstreamCorrelationIDs != "" {
 		// get length of (first of) IDs (e.g. "id1" is 3), new ID will be half that size
@@ -142,7 +141,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 		}
 		upstreamCorrelationIDs += ","
 	}
-	netHttp.AddRequestIdHeader(req, upstreamCorrelationIDs+netHttp.NewRequestID(addedIDLen))
+	AddRequestIdHeader(req, upstreamCorrelationIDs+NewRequestID(addedIDLen))
 
 	doer := func(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, error) {
 		if req.ContentLength > 0 {

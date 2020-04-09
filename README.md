@@ -1,17 +1,26 @@
-# rchttp
+# dp-net
+Network library, containing an HTTP client and Server, handlers and other utilities for network communications.
+
+## http
+
+Http package contains a base http Server and Client to be used by all ONS digital publishing services that require HTTP communication.
+
+The package also includes http utilities like constants, error definitions, a requestID handler required by the HTTP server, and validation utilities for identity, locale and models.
+
+### rchttp Client
 
 rchttp stands for robust contextual HTTP, and provides a default client
 that inherits the methods associated with the standard HTTP client,
 but with the addition of production-ready timeouts and context-sensitivity,
 and the ability to perform exponential backoff when calling another HTTP server.
 
-### How to use
+#### How to use
 
 rchttp should have a familiar feel to it when it is used - with an example given
 below:
 
 ```go
-import rchttp "github.com/ONSdigital/dp-rchttp"
+import rchttp "github.com/ONSdigital/dp-net/http"
 
 func httpHandlerFunc(w http.ResponseWriter, req *http.Request) {
     client := rchttp.NewClient()
@@ -36,7 +45,7 @@ timeouts or do not wish to use exponential backoff. The following example shows
 how to configure your own rchttp client:
 
 ```go
-import rchttp "github.com/ONSdigital/dp-rchttp"
+import rchttp "github.com/ONSdigital/dp-net/http"
 
 func main() {
     rcClient := &rchttp.Client{
@@ -65,3 +74,54 @@ func main() {
     }
 }
 ```
+
+### Server
+
+The Serer extends the default golang HTTP Server by adding a requestID and logger middleware. By default it handles the OSSignals, and it has a default shutdown timeout of 10 seconds.
+
+This Server is intended to be used by all ONS digital publishing services that require to serve HTTP. The following example shows how to use the Server:
+
+#### Creation
+
+Assuming you have created a router with your API handlers, you can create the http server like so:
+
+```go
+import rchttp "github.com/ONSdigital/dp-net/http"
+    ...
+	httpServer := server.New(bindAddr, router)
+    httpServer.HandleOSSignals = false
+    ...
+```
+Note that HandleOSSignal is set to false, so that the main thread will be responsible to shutdown the server during graceful shutdown.
+
+#### Start
+
+Start the server in a new go-routine, because this operation is blocking:
+```go
+    ...
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Event(ctx, "error starting http server", log.ERROR, 
+		}
+    }()
+    ...
+```
+Note that we ignore ErrServerClosed, because this is a valid scenario during graceful shutdown.
+
+#### Shutdown
+
+Shutdown the server when you no longer require it. Usually you will need to do this as part of the service graceful shutdown, after receiving a SIGINT or SIGTERM system call in your signal channel:
+```go
+    ...
+    err := httpServer.Shutdown(shutdownCtx)
+    if err != nil {
+		log.Event(shutdownCtx, "http server shutdown error", log.ERROR, log.Error(err))
+    } else {
+        log.Event(shutdownCtx, "http server successful shutdown", log.INFO)
+	}
+    ...
+```
+
+## Handlers
+
+This module includes handlers for accessToken, collectionID, localeCode, and finally a JSON response writer and a Proxy creation utility.
