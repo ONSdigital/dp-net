@@ -8,7 +8,7 @@ import (
 
 	"context"
 
-	"github.com/ONSdigital/go-ns/handlers/requestID"
+	"github.com/ONSdigital/dp-net/handlers/requestID"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/justinas/alice"
 )

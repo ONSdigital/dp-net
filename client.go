@@ -26,7 +26,7 @@ type Client struct {
 	HTTPClient         *http.Client
 }
 
-// DefaultClient is a go-ns specific http client with sensible timeouts,
+// DefaultClient is a dp-net specific http client with sensible timeouts,
 // exponential backoff, and a contextual dialer.
 var DefaultClient = &Client{
 	MaxRetries: 10,

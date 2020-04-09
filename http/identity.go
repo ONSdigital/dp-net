@@ -11,7 +11,7 @@ import (
 // ContextKey is an alias of type string
 type ContextKey string
 
-// A list of common constants used across go-ns packages
+// A list of common constants used across dp-net packages
 const (
 	FlorenceHeaderKey        = "X-Florence-Token"
 	DownloadServiceHeaderKey = "X-Download-Service-Token"
