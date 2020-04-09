@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"net/http"
@@ -8,7 +8,6 @@ import (
 
 	"context"
 
-	"github.com/ONSdigital/dp-net/handlers/requestID"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/justinas/alice"
 )
@@ -33,7 +32,7 @@ type Server struct {
 // New creates a new server
 func New(bindAddr string, router http.Handler) *Server {
 	middleware := map[string]alice.Constructor{
-		RequestIDHandlerKey: requestID.Handler(16),
+		RequestIDHandlerKey: HandlerRequestID(16),
 		LogHandlerKey:       log.Middleware,
 	}
 
