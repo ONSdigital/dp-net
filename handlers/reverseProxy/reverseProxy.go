@@ -1,4 +1,4 @@
-package reverseProxy
+package reverseproxy
 
 import (
 	"net"

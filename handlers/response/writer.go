@@ -5,25 +5,30 @@ import (
 	"net/http"
 )
 
-const contentTypeHeader = "Content-Type"
-const contentTypeJSON = "application/json"
+// ContentType header possible values
+const (
+	ContentTypeHeader = "Content-Type"
+	ContentTypeJSON   = "application/json"
+)
 
 // JSONEncoder interface defining a JSON encoder.
 type JSONEncoder interface {
-	writeResponseJSON(w http.ResponseWriter, value interface{}, status int) error
+	WriteResponseJSON(w http.ResponseWriter, value interface{}, status int) error
 }
 
-type onsJSONEncoder struct{}
+// OnsJSONEncoder is a JSON encoder
+type OnsJSONEncoder struct{}
 
-var jsonResponseEncoder JSONEncoder = &onsJSONEncoder{}
+var JsonResponseEncoder JSONEncoder = &OnsJSONEncoder{}
 
 // WriteJSON set the content type header to JSON, writes the response object as json and sets the http status code.
 func WriteJSON(w http.ResponseWriter, value interface{}, status int) error {
-	return jsonResponseEncoder.writeResponseJSON(w, value, status)
+	return JsonResponseEncoder.WriteResponseJSON(w, value, status)
 }
 
-func (j *onsJSONEncoder) writeResponseJSON(w http.ResponseWriter, value interface{}, status int) error {
-	w.Header().Set(contentTypeHeader, contentTypeJSON)
+// WriteResponseJSON marshals the provided value as json body, and sets the status code to the provided value
+func (j *OnsJSONEncoder) WriteResponseJSON(w http.ResponseWriter, value interface{}, status int) error {
+	w.Header().Set(ContentTypeHeader, ContentTypeJSON)
 
 	b, err := json.Marshal(value)
 	if err != nil {

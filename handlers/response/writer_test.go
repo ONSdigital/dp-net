@@ -1,11 +1,13 @@
-package response
+package response_test
 
 import (
 	"encoding/json"
-	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/ONSdigital/dp-net/handlers/response"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 type child struct {
@@ -21,20 +23,20 @@ type mockOnsJSONEncoder struct {
 	mockedBehaviour func(w http.ResponseWriter, value interface{}, status int) error
 }
 
-func (mock *mockOnsJSONEncoder) writeResponseJSON(w http.ResponseWriter, value interface{}, status int) error {
+func (mock *mockOnsJSONEncoder) WriteResponseJSON(w http.ResponseWriter, value interface{}, status int) error {
 	mock.encodeCalls++
 	return mock.mockedBehaviour(w, value, status)
 }
 
 func initMock() *mockOnsJSONEncoder {
-	actualImpl := &onsJSONEncoder{}
+	actualImpl := &response.OnsJSONEncoder{}
 	mock := &mockOnsJSONEncoder{
 		encodeCalls: 0,
 		mockedBehaviour: func(w http.ResponseWriter, value interface{}, status int) error {
-			return actualImpl.writeResponseJSON(w, value, status)
+			return actualImpl.WriteResponseJSON(w, value, status)
 		},
 	}
-	jsonResponseEncoder = mock
+	response.JsonResponseEncoder = mock
 	return mock
 }
 
@@ -50,7 +52,7 @@ func TestWriteJSONResponse(t *testing.T) {
 		rec = httptest.NewRecorder()
 
 		Convey("When the encoder is invoked", func() {
-			WriteJSON(rec, input, http.StatusOK)
+			response.WriteJSON(rec, input, http.StatusOK)
 
 			Convey("Then the input value is written to the response body.", func() {
 				var actual parent
@@ -63,7 +65,7 @@ func TestWriteJSONResponse(t *testing.T) {
 			})
 
 			Convey("And the response content type header is 'application/json'", func() {
-				So(rec.Header().Get(contentTypeHeader), ShouldEqual, contentTypeJSON)
+				So(rec.Header().Get(response.ContentTypeHeader), ShouldEqual, response.ContentTypeJSON)
 			})
 
 			Convey("And the encoder is invoked the expected number of times.", func() {
@@ -87,10 +89,10 @@ func TestWriteJSONResponseWithInvalidData(t *testing.T) {
 		statusCode = http.StatusInternalServerError
 
 		Convey("When the encoder is invoked", func() {
-			WriteJSON(rec, invalidInput, http.StatusOK)
+			response.WriteJSON(rec, invalidInput, http.StatusOK)
 
 			Convey("And the response content type header is 'application/json'", func() {
-				So(rec.Header().Get(contentTypeHeader), ShouldEqual, contentTypeJSON)
+				So(rec.Header().Get(response.ContentTypeHeader), ShouldEqual, response.ContentTypeJSON)
 			})
 
 			Convey("Then an http internal server error status is written to the response.", func() {

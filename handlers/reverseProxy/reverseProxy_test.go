@@ -1,17 +1,19 @@
-package reverseProxy
+package reverseproxy_test
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"testing"
+
+	"github.com/ONSdigital/dp-net/handlers/reverseproxy"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestDirectorFunc(t *testing.T) {
 	proxyURL, _ := url.Parse("https://www.ons.gov.uk")
 	Convey("Create proxy", t, func() {
-		reverseProxy := Create(proxyURL, nil)
+		reverseProxy := reverseproxy.Create(proxyURL, nil)
 
 		So(reverseProxy, ShouldNotBeNil)
 		So(reverseProxy, ShouldImplement, (*http.Handler)(nil))
@@ -23,7 +25,7 @@ func TestDirectorFunc(t *testing.T) {
 
 	Convey("Create proxy with director func", t, func() {
 		var directorCalled bool
-		reverseProxy := Create(proxyURL, func(req *http.Request) {
+		reverseProxy := reverseproxy.Create(proxyURL, func(req *http.Request) {
 			directorCalled = true
 			req.URL.Host = `host`
 		})
