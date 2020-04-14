@@ -7,25 +7,25 @@ Http package contains a base http Server and Client to be used by all ONS digita
 
 The package also includes http utilities like constants, error definitions, a requestID handler required by the HTTP server, and validation utilities for identity, locale and models.
 
-### rchttp Client
+### Client
 
-rchttp stands for robust contextual HTTP, and provides a default client
+The dp-net/http Client provides for robust contextual HTTP, and a default client
 that inherits the methods associated with the standard HTTP client,
 but with the addition of production-ready timeouts and context-sensitivity,
 and the ability to perform exponential backoff when calling another HTTP server.
 
 #### How to use
 
-rchttp should have a familiar feel to it when it is used - with an example given
+this client should have a familiar feel to it when it is used - with an example given
 below:
 
 ```go
-import rchttp "github.com/ONSdigital/dp-net/http"
+import http "github.com/ONSdigital/dp-net/http"
 
 func httpHandlerFunc(w http.ResponseWriter, req *http.Request) {
-    client := rchttp.NewClient()
+    client := http.NewClient()
 
-    resp, err := rcClient.Get(req.Context(), "https://www.google.com")
+    resp, err := client.Get(req.Context(), "https://www.google.com")
     if err != nil {
         fmt.Println(err)
         return
@@ -42,13 +42,16 @@ and this will be noticed by the client.
 
 You also do not have to use the default client if you don't like the configured
 timeouts or do not wish to use exponential backoff. The following example shows
-how to configure your own rchttp client:
+how to configure your own dp-net/http client:
 
 ```go
-import rchttp "github.com/ONSdigital/dp-net/http"
+import (
+    "net/http"
+    dphttp "github.com/ONSdigital/dp-net/http"
+)
 
 func main() {
-    rcClient := &rchttp.Client{
+    rcClient := &dphttp.Client{
         // MaxRetries is the maximum number of retries you wish to
         // wait for, the retry method implements exponential backoff
         MaxRetries:         10,
@@ -57,8 +60,8 @@ func main() {
         // PathsWithNoRetries is a list of all paths that you do not wish to retry call on failure,
         // the path should be set to true (default client has empty map)
         PathsWithNoRetries: map[string]bool{
-			"/health": true,
-		},
+            "/health": true,
+        },
         // Create your own http client with configured timeouts
         HTTPClient: &http.Client{
             Timeout: 10 * time.Second,
@@ -86,9 +89,9 @@ This Server is intended to be used by all ONS digital publishing services that r
 Assuming you have created a router with your API handlers, you can create the http server like so:
 
 ```go
-import rchttp "github.com/ONSdigital/dp-net/http"
+import http "github.com/ONSdigital/dp-net/http"
     ...
-	httpServer := server.New(bindAddr, router)
+    httpServer := http.NewServer(bindAddr, router)
     httpServer.HandleOSSignals = false
     ...
 ```
@@ -99,10 +102,11 @@ Note that HandleOSSignal is set to false, so that the main thread will be respon
 Start the server in a new go-routine, because this operation is blocking:
 ```go
     ...
-	go func() {
-		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Event(ctx, "error starting http server", log.ERROR, 
-		}
+    go func() {
+        if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            log.Event(ctx, "error starting http server", log.ERROR, log.Error(err))
+            return
+        }
     }()
     ...
 ```
@@ -115,10 +119,10 @@ Shutdown the server when you no longer require it. Usually you will need to do t
     ...
     err := httpServer.Shutdown(shutdownCtx)
     if err != nil {
-		log.Event(shutdownCtx, "http server shutdown error", log.ERROR, log.Error(err))
+        log.Event(shutdownCtx, "http server shutdown error", log.ERROR, log.Error(err))
     } else {
         log.Event(shutdownCtx, "http server successful shutdown", log.INFO)
-	}
+    }
     ...
 ```
 

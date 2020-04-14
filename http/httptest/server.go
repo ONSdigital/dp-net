@@ -1,4 +1,4 @@
-package rchttptest
+package httptest
 
 import (
 	"encoding/json"

@@ -1,3 +1,8 @@
+// This file contains a testing for the Params struct, which is used by go-ns/audit
+// as part of the initial code migration, it was copied across from go-ns/common
+// but when go-ns/audit is migrated to its own repository, we should also
+// move this file (and models.go).
+
 package http
 
 import (

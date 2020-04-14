@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ONSdigital/dp-net/http/rchttptest"
+	"github.com/ONSdigital/dp-net/http/httptest"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestHappyPaths(t *testing.T) {
-	ts := rchttptest.NewTestServer(200)
+	ts := httptest.NewTestServer(200)
 	defer ts.Close()
 	expectedCallCount := 0
 
@@ -43,7 +43,7 @@ func TestHappyPaths(t *testing.T) {
 
 		Convey("When Post() is called on a URL", func() {
 			expectedCallCount++
-			resp, err := httpClient.Post(context.Background(), ts.URL, rchttptest.JsonContentType, strings.NewReader(`{"dummy":"ook"}`))
+			resp, err := httpClient.Post(context.Background(), ts.URL, httptest.JsonContentType, strings.NewReader(`{"dummy":"ook"}`))
 			So(resp, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 
@@ -55,13 +55,13 @@ func TestHappyPaths(t *testing.T) {
 				So(call.Method, ShouldEqual, "POST")
 				So(call.Body, ShouldEqual, `{"dummy":"ook"}`)
 				So(call.Error, ShouldEqual, "")
-				So(call.Headers[rchttptest.ContentTypeHeader], ShouldResemble, []string{rchttptest.JsonContentType})
+				So(call.Headers[httptest.ContentTypeHeader], ShouldResemble, []string{httptest.JsonContentType})
 			})
 		})
 
 		Convey("When Put() is called on a URL", func() {
 			expectedCallCount++
-			resp, err := httpClient.Put(context.Background(), ts.URL, rchttptest.JsonContentType, strings.NewReader(`{"dummy":"ook2"}`))
+			resp, err := httpClient.Put(context.Background(), ts.URL, httptest.JsonContentType, strings.NewReader(`{"dummy":"ook2"}`))
 			So(resp, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 
@@ -73,7 +73,7 @@ func TestHappyPaths(t *testing.T) {
 				So(call.Method, ShouldEqual, "PUT")
 				So(call.Body, ShouldEqual, `{"dummy":"ook2"}`)
 				So(call.Error, ShouldEqual, "")
-				So(call.Headers[rchttptest.ContentTypeHeader], ShouldResemble, []string{rchttptest.JsonContentType})
+				So(call.Headers[httptest.ContentTypeHeader], ShouldResemble, []string{httptest.JsonContentType})
 			})
 		})
 
@@ -91,14 +91,14 @@ func TestHappyPaths(t *testing.T) {
 				So(call.Method, ShouldEqual, "POST")
 				So(call.Body, ShouldEqual, "ook=koo&zoo=ooz")
 				So(call.Error, ShouldEqual, "")
-				So(call.Headers[rchttptest.ContentTypeHeader], ShouldResemble, []string{rchttptest.FormEncodedType})
+				So(call.Headers[httptest.ContentTypeHeader], ShouldResemble, []string{httptest.FormEncodedType})
 			})
 		})
 	})
 }
 
 func TestClientDoesRetry(t *testing.T) {
-	ts := rchttptest.NewTestServer(200)
+	ts := httptest.NewTestServer(200)
 	defer ts.Close()
 	expectedCallCount := 0
 
@@ -110,7 +110,7 @@ func TestClientDoesRetry(t *testing.T) {
 			delayByOneSecondOnNext := delayByOneSecondOn(expectedCallCount + 1)
 			/// XXX this is two for the retry due to the delayed response to first POST
 			expectedCallCount += 2
-			resp, err := httpClient.Post(context.Background(), ts.URL, rchttptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
+			resp, err := httpClient.Post(context.Background(), ts.URL, httptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
 			So(resp, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 
@@ -123,14 +123,14 @@ func TestClientDoesRetry(t *testing.T) {
 				So(call.Method, ShouldEqual, "POST")
 				So(call.Body, ShouldEqual, delayByOneSecondOnNext)
 				So(call.Error, ShouldEqual, "")
-				So(resp.Header.Get(rchttptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
+				So(resp.Header.Get(httptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
 			})
 		})
 	})
 }
 
 func TestClientDoesRetryAndContextCancellation(t *testing.T) {
-	ts := rchttptest.NewTestServer(200)
+	ts := httptest.NewTestServer(200)
 	defer ts.Close()
 	expectedCallCount := 0
 
@@ -147,7 +147,7 @@ func TestClientDoesRetryAndContextCancellation(t *testing.T) {
 				cancel()
 			}()
 
-			resp, err := httpClient.Post(ctx, ts.URL, rchttptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
+			resp, err := httpClient.Post(ctx, ts.URL, httptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "context canceled")
 			So(resp, ShouldBeNil)
@@ -160,7 +160,7 @@ func TestClientDoesRetryAndContextCancellation(t *testing.T) {
 }
 
 func TestClientDoesRetryAndContextTimeout(t *testing.T) {
-	ts := rchttptest.NewTestServer(200)
+	ts := httptest.NewTestServer(200)
 	defer ts.Close()
 	expectedCallCount := 0
 
@@ -173,7 +173,7 @@ func TestClientDoesRetryAndContextTimeout(t *testing.T) {
 
 			ctx, _ := context.WithTimeout(context.Background(), time.Duration(200*time.Millisecond))
 
-			resp, err := httpClient.Post(ctx, ts.URL, rchttptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
+			resp, err := httpClient.Post(ctx, ts.URL, httptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldEqual, "context deadline exceeded")
 			So(resp, ShouldBeNil)
@@ -186,7 +186,7 @@ func TestClientDoesRetryAndContextTimeout(t *testing.T) {
 }
 
 func TestClientNoRetries(t *testing.T) {
-	ts := rchttptest.NewTestServer(200)
+	ts := httptest.NewTestServer(200)
 	defer ts.Close()
 	expectedCallCount := 0
 
@@ -196,7 +196,7 @@ func TestClientNoRetries(t *testing.T) {
 
 		Convey("When Post() is called on a URL with a delay on the first call", func() {
 			delayByOneSecondOnNext := delayByOneSecondOn(expectedCallCount + 1)
-			resp, err := httpClient.Post(context.Background(), ts.URL, rchttptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
+			resp, err := httpClient.Post(context.Background(), ts.URL, httptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
 			Convey("Then the server has no response", func() {
 				So(resp, ShouldBeNil)
 				So(err.Error(), ShouldContainSubstring, "Timeout exceeded")
@@ -212,7 +212,7 @@ func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 		httpClient.SetMaxRetries(0)
 
 		Convey("When the server tries to make a request to a service it is unable to connect to", func() {
-			ts := rchttptest.NewTestServer(500)
+			ts := httptest.NewTestServer(500)
 			defer ts.Close()
 
 			Convey("Then the server responds with a internal server error", func() {
@@ -229,13 +229,13 @@ func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 					So(call.CallCount, ShouldEqual, 1)
 					So(call.Method, ShouldEqual, "GET")
 					So(call.Error, ShouldEqual, "")
-					So(resp.Header.Get(rchttptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
+					So(resp.Header.Get(httptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
 				})
 			})
 		})
 
 		Convey("When the server tries to make a request to a service that currently denying its services", func() {
-			ts := rchttptest.NewTestServer(429)
+			ts := httptest.NewTestServer(429)
 			defer ts.Close()
 
 			Convey("Then the server responds with too many requests", func() {
@@ -252,7 +252,7 @@ func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 					So(call.CallCount, ShouldEqual, 1)
 					So(call.Method, ShouldEqual, "GET")
 					So(call.Error, ShouldEqual, "")
-					So(resp.Header.Get(rchttptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
+					So(resp.Header.Get(httptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
 				})
 			})
 		})
@@ -264,7 +264,7 @@ func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 
 		Convey("When the server tries to make a request to a service it is unable to"+
 			"connect to and is a path that should not handle retries", func() {
-			ts := rchttptest.NewTestServer(500)
+			ts := httptest.NewTestServer(500)
 			defer ts.Close()
 
 			path := "/testing"
@@ -285,7 +285,7 @@ func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 					So(call.Method, ShouldEqual, "GET")
 					So(call.Path, ShouldEqual, path)
 					So(call.Error, ShouldEqual, "")
-					So(resp.Header.Get(rchttptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
+					So(resp.Header.Get(httptest.ContentTypeHeader), ShouldContainSubstring, "text/plain")
 				})
 			})
 		})
@@ -293,7 +293,7 @@ func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 }
 
 func TestClientAddsRequestIDHeader(t *testing.T) {
-	ts := rchttptest.NewTestServer(200)
+	ts := httptest.NewTestServer(200)
 	defer ts.Close()
 	expectedCallCount := 0
 
@@ -303,7 +303,7 @@ func TestClientAddsRequestIDHeader(t *testing.T) {
 
 		Convey("When Post() is called on a URL", func() {
 			expectedCallCount++
-			resp, err := httpClient.Post(context.Background(), ts.URL, rchttptest.JsonContentType, strings.NewReader(`{"hello":"there"}`))
+			resp, err := httpClient.Post(context.Background(), ts.URL, httptest.JsonContentType, strings.NewReader(`{"hello":"there"}`))
 			So(resp, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 
@@ -323,7 +323,7 @@ func TestClientAddsRequestIDHeader(t *testing.T) {
 }
 
 func TestClientAppendsRequestIDHeader(t *testing.T) {
-	ts := rchttptest.NewTestServer(200)
+	ts := httptest.NewTestServer(200)
 	defer ts.Close()
 	expectedCallCount := 0
 
@@ -334,7 +334,7 @@ func TestClientAppendsRequestIDHeader(t *testing.T) {
 
 		Convey("When Post() is called on a URL", func() {
 			expectedCallCount++
-			resp, err := httpClient.Post(WithRequestId(context.Background(), upstreamRequestID), ts.URL, rchttptest.JsonContentType, strings.NewReader(`{}`))
+			resp, err := httpClient.Post(WithRequestId(context.Background(), upstreamRequestID), ts.URL, httptest.JsonContentType, strings.NewReader(`{}`))
 			So(resp, ShouldNotBeNil)
 			So(err, ShouldBeNil)
 
@@ -379,9 +379,9 @@ func delayByOneSecondOn(delayOnCall int) string {
 	return `{"delay":"1s","delay_on_call":` + strconv.Itoa(delayOnCall) + `}`
 }
 
-func unmarshallResp(resp *http.Response) (*rchttptest.Responder, error) {
-	responder := &rchttptest.Responder{}
-	body := rchttptest.GetBody(resp.Body)
+func unmarshallResp(resp *http.Response) (*httptest.Responder, error) {
+	responder := &httptest.Responder{}
+	body := httptest.GetBody(resp.Body)
 	err := json.Unmarshal(body, responder)
 	if err != nil {
 		panic(err.Error() + string(body))

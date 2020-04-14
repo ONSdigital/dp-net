@@ -1,6 +1,11 @@
+// This file contains a Params struct, which is used by go-ns/audit
+// as part of the initial code migration, it was copied across from go-ns/common
+// but when go-ns/audit is migrated to its own repository, we should also
+// move this file (and its test).
+
 package http
 
-// Params represents a generic map of key value pairs
+// Params represents a generic map of key value pairs, expected by go-ns/audit Auditor.Record()
 type Params map[string]string
 
 // Copy preserves the original params value (key value pair)

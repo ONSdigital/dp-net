@@ -17,13 +17,13 @@ func newWithPort(h http.Handler) (string, *Server) {
 
 	sPort := fmt.Sprintf(":%d", port)
 
-	return sPort, New(sPort, h)
+	return sPort, NewServer(sPort, h)
 }
 
 func TestNew(t *testing.T) {
 	Convey("New should return a new server with sensible defaults", t, func() {
 		h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-		s := New(":0", h)
+		s := NewServer(":0", h)
 
 		So(s, ShouldNotBeNil)
 		So(s.Handler, ShouldEqual, h)
@@ -61,7 +61,7 @@ func TestNew(t *testing.T) {
 	Convey("prep should prepare the server correctly", t, func() {
 		Convey("prep should create a valid Server instance", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := New(":0", h)
+			s := NewServer(":0", h)
 
 			s.prep()
 			So(s.Server.Addr, ShouldEqual, ":0")
@@ -69,7 +69,7 @@ func TestNew(t *testing.T) {
 
 		Convey("invalid middleware should panic", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := New(":0", h)
+			s := NewServer(":0", h)
 
 			s.MiddlewareOrder = []string{"foo"}
 
@@ -80,7 +80,7 @@ func TestNew(t *testing.T) {
 
 		Convey("ListenAndServe with invalid middleware should panic", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := New(":0", h)
+			s := NewServer(":0", h)
 
 			s.MiddlewareOrder = []string{"foo"}
 
@@ -91,7 +91,7 @@ func TestNew(t *testing.T) {
 
 		Convey("ListenAndServeTLS with invalid middleware should panic", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := New(":0", h)
+			s := NewServer(":0", h)
 
 			s.MiddlewareOrder = []string{"foo"}
 
@@ -116,7 +116,7 @@ func TestNew(t *testing.T) {
 
 		Convey("ListenAndServeTLS with only CertFile should panic", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := New(":0", h)
+			s := NewServer(":0", h)
 
 			So(func() {
 				s.ListenAndServeTLS("certFile", "")
@@ -125,7 +125,7 @@ func TestNew(t *testing.T) {
 
 		Convey("ListenAndServeTLS with only KeyFile should panic", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := New(":0", h)
+			s := NewServer(":0", h)
 
 			So(func() {
 				s.ListenAndServeTLS("", "keyFile")

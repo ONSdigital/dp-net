@@ -29,8 +29,8 @@ type Server struct {
 	HandleOSSignals        bool
 }
 
-// New creates a new server
-func New(bindAddr string, router http.Handler) *Server {
+// NewServer creates a new server
+func NewServer(bindAddr string, router http.Handler) *Server {
 	middleware := map[string]alice.Constructor{
 		RequestIDHandlerKey: HandlerRequestID(16),
 		LogHandlerKey:       log.Middleware,
