@@ -20,7 +20,7 @@ func TestHappyPaths(t *testing.T) {
 	defer ts.Close()
 	expectedCallCount := 0
 
-	Convey("Given a default rchttp client and happy paths", t, func() {
+	Convey("Given a default client and happy paths", t, func() {
 		httpClient := NewClient()
 
 		Convey("When Get() is called on a URL", func() {
@@ -102,7 +102,7 @@ func TestClientDoesRetry(t *testing.T) {
 	defer ts.Close()
 	expectedCallCount := 0
 
-	Convey("Given an rchttp client with small client timeout", t, func() {
+	Convey("Given a client with small client timeout", t, func() {
 		// force client to abandon requests before the requested one second delay on the (next) server response
 		httpClient := ClientWithTimeout(nil, 100*time.Millisecond)
 
@@ -134,7 +134,7 @@ func TestClientDoesRetryAndContextCancellation(t *testing.T) {
 	defer ts.Close()
 	expectedCallCount := 0
 
-	Convey("Given an rchttp client with small client timeout", t, func() {
+	Convey("Given a client with small client timeout", t, func() {
 		// force client to abandon requests before the requested one second delay on the (next) server response
 		httpClient := ClientWithTimeout(nil, 500*time.Millisecond)
 		Convey("When Post() is called on a URL with a delay on the first response", func() {
@@ -164,7 +164,7 @@ func TestClientDoesRetryAndContextTimeout(t *testing.T) {
 	defer ts.Close()
 	expectedCallCount := 0
 
-	Convey("Given an rchttp client with small client timeout", t, func() {
+	Convey("Given a client with small client timeout", t, func() {
 		// force client to abandon requests before the requested one second delay on the (next) server response
 		httpClient := ClientWithTimeout(nil, 500*time.Millisecond)
 		Convey("When Post() is called on a URL with a delay on the first response", func() {
@@ -190,7 +190,7 @@ func TestClientNoRetries(t *testing.T) {
 	defer ts.Close()
 	expectedCallCount := 0
 
-	Convey("Given an rchttp client with no retries", t, func() {
+	Convey("Given a client with no retries", t, func() {
 		httpClient := ClientWithTimeout(nil, 100*time.Millisecond)
 		httpClient.SetMaxRetries(0)
 
@@ -207,7 +207,7 @@ func TestClientNoRetries(t *testing.T) {
 
 func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 
-	Convey("Given an rchttp client with no retries", t, func() {
+	Convey("Given a client with no retries", t, func() {
 		httpClient := ClientWithTimeout(nil, 5*time.Second)
 		httpClient.SetMaxRetries(0)
 
@@ -258,7 +258,7 @@ func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
 		})
 	})
 
-	Convey("Given an rchttp client with retries", t, func() {
+	Convey("Given a client with retries", t, func() {
 		httpClient := ClientWithTimeout(nil, 5*time.Second)
 		httpClient.SetMaxRetries(1)
 
@@ -297,7 +297,7 @@ func TestClientAddsRequestIDHeader(t *testing.T) {
 	defer ts.Close()
 	expectedCallCount := 0
 
-	Convey("Given an rchttp client with no correlation ID in context", t, func() {
+	Convey("Given a client with no correlation ID in context", t, func() {
 		// throw in a check for wrapped client instantiation
 		httpClient := ClientWithTimeout(nil, 5*time.Second)
 
@@ -327,7 +327,7 @@ func TestClientAppendsRequestIDHeader(t *testing.T) {
 	defer ts.Close()
 	expectedCallCount := 0
 
-	Convey("Given an rchttp client with existing correlation ID in context", t, func() {
+	Convey("Given a client with existing correlation ID in context", t, func() {
 		upstreamRequestID := "call1234"
 		// throw in a check for wrapped client instantiation
 		httpClient := ClientWithTimeout(nil, 5*time.Second)
