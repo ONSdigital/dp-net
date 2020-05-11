@@ -28,7 +28,7 @@ type Client struct {
 // DefaultClient is a dp-net specific http client with sensible timeouts,
 // exponential backoff, and a contextual dialer.
 var DefaultClient = &Client{
-	MaxRetries: 10,
+	MaxRetries: 3,
 	RetryTime:  20 * time.Millisecond,
 
 	HTTPClient: &http.Client{
