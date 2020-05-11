@@ -6,7 +6,7 @@ The mapping is done using enumeration of possible header and cookie keys, and th
 
 ## Usage
 
-- Read a header from a request and add its value to the output request context:
+- Read a header from a request and add its value to the underlying request context:
 
 ```go
     // Access token

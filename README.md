@@ -80,7 +80,7 @@ func main() {
 
 ### Server
 
-The Serer extends the default golang HTTP Server by adding a requestID and logger middleware. By default it handles the OSSignals, and it has a default shutdown timeout of 10 seconds.
+The Server extends the default golang HTTP Server by adding a requestID and logger middleware. By default it handles the OSSignals, and it has a default shutdown timeout of 10 seconds.
 
 This Server is intended to be used by all ONS digital publishing services that require to serve HTTP. The following example shows how to use the Server:
 
