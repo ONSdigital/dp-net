@@ -76,6 +76,14 @@ func (ck CookieKey) ContextKey() interface{} {
 	return cookieContextKeys[ck]
 }
 
+// CheckHeaderMiddleware returns a CheckHeader function for the provided header key as a middleware function
+// (alice middleware Constructor, ie. func(http.Handler) -> (http.Handler))
+func CheckHeaderMiddleware(headerKey HeaderKey) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return CheckHeader(h, headerKey)
+	}
+}
+
 // CheckHeader is a wrapper which adds a value from the request header to context if one does not yet exist.
 func CheckHeader(h http.Handler, headerKey HeaderKey) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -86,6 +94,14 @@ func CheckHeader(h http.Handler, headerKey HeaderKey) http.Handler {
 
 		h.ServeHTTP(w, req)
 	})
+}
+
+// CheckCookieMiddleware returns a CheckCookie function for the provided cookie key as a middleware function
+// (alice middleware Constructor, ie. func(http.Handler) -> (http.Handler))
+func CheckCookieMiddleware(cookieKey CookieKey) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return CheckCookie(h, cookieKey)
+	}
 }
 
 // CheckCookie is a wrapper which adds a cookie value to context if one does not yet exist
