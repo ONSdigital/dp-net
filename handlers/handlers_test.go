@@ -33,7 +33,7 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.CheckHeader(mockHandler, handlers.UserAccess)
+		target := handlers.DoCheckHeader(mockHandler, handlers.UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -58,7 +58,7 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.CheckHeader(mockHandler, handlers.UserAccess)
+		target := handlers.DoCheckHeader(mockHandler, handlers.UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -85,7 +85,7 @@ func TestCheckHeaderLocale(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.CheckHeader(mockHandler, handlers.Locale)
+		target := handlers.DoCheckHeader(mockHandler, handlers.Locale)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -114,7 +114,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.CheckCookie(mockHandler, handlers.UserAccess)
+		target := handlers.DoCheckCookie(mockHandler, handlers.UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -139,7 +139,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.CheckCookie(mockHandler, handlers.UserAccess)
+		target := handlers.DoCheckCookie(mockHandler, handlers.UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -167,7 +167,7 @@ func TestCheckCookieLocale(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.CheckCookie(mockHandler, handlers.Locale)
+		target := handlers.DoCheckCookie(mockHandler, handlers.Locale)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)

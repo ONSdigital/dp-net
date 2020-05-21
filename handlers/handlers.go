@@ -7,38 +7,35 @@ import (
 	"github.com/ONSdigital/log.go/log"
 )
 
-// CheckHeaderMiddleware returns a CheckHeader function for the provided key as a middleware function
-// (alice middleware Constructor, ie. func(http.Handler) -> (http.Handler))
-func CheckHeaderMiddleware(key Key) func(http.Handler) http.Handler {
+// CheckHeader is a wrapper which adds a value from the request header (if found) to the request context.
+// This function complies with alice middleware Constructor type: func(http.Handler) -> (http.Handler)
+func CheckHeader(key Key) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
-		return CheckHeader(h, key)
+		return DoCheckHeader(h, key)
 	}
 }
 
-// CheckHeader is a wrapper which adds a value from the request header to context if one does not yet exist.
-func CheckHeader(h http.Handler, key Key) http.Handler {
+// DoCheckHeader returns a handler that performs the CheckHeader logic
+func DoCheckHeader(h http.Handler, key Key) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-
 		if headerValue := req.Header.Get(key.Header()); headerValue != "" {
 			req = req.WithContext(context.WithValue(req.Context(), key.Context(), headerValue))
 		}
-
 		h.ServeHTTP(w, req)
 	})
 }
 
-// CheckCookieMiddleware returns a CheckCookie function for the provided key as a middleware function
-// (alice middleware Constructor, ie. func(http.Handler) -> (http.Handler))
-func CheckCookieMiddleware(key Key) func(http.Handler) http.Handler {
+// CheckCookie is a wrapper which adds a cookie value (if found) to the request context.
+// This function complies with alice middleware Constructor type: func(http.Handler) -> (http.Handler))
+func CheckCookie(key Key) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
-		return CheckCookie(h, key)
+		return DoCheckCookie(h, key)
 	}
 }
 
-// CheckCookie is a wrapper which adds a cookie value to context if one does not yet exist
-func CheckCookie(h http.Handler, key Key) http.Handler {
+// DoCheckCookie returns a handler that performs the CheckCookie logic
+func DoCheckCookie(h http.Handler, key Key) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-
 		cookieValue, err := req.Cookie(key.Cookie())
 		if err != nil {
 			if err != http.ErrNoCookie {
@@ -48,7 +45,6 @@ func CheckCookie(h http.Handler, key Key) http.Handler {
 		} else {
 			req = req.WithContext(context.WithValue(req.Context(), key.Context(), cookieValue.Value))
 		}
-
 		h.ServeHTTP(w, req)
 	})
 }

@@ -2,7 +2,7 @@
 
 This package contains handlers to forward values coming from a request header or a cookie, to a request context.
 
-The mapping is done using enumeration of possible header and cookie keys, and their corresponding context key.
+The mapping is done using enumeration of possible keys, and their mappings to header, context or cookie keys.
 
 ## Usage
 
@@ -10,24 +10,37 @@ The mapping is done using enumeration of possible header and cookie keys, and th
 
 ```go
     // Access token
-    handler := handlers.CheckHeader(h, handlers.UserAccessHeaderKey)
+    handler := handlers.CheckHeader(handlers.UserAccess)
 
     // Locale
-    handler := handlers.CheckHeader(h, handlers.LocaleHeaderKey)
+    handler := handlers.CheckHeader(handlers.Locale)
 
     // CollectionID
-    handler := handlers.CheckHeader(h, handlers.CollectionIDHeaderKey)
+    handler := handlers.CheckHeader(handlers.CollectionID)
 ```
 
 - Read a cookie and add its value to the output request context:
 
 ```go
     // Access token
-    handler := handlers.CheckCookie(h, handlers.UserAccessCookieKey)
+    handler := handlers.CheckCookie(handlers.UserAccess)
 
     // Locale
-    handler := handlers.CheckCookie(h, handlers.LocaleCookieKey)
+    handler := handlers.CheckCookie(handlers.Locale)
 
     // CollectionID
-    handler := handlers.CheckCookie(h, handlers.CollectionIDCookieKey)
+    handler := handlers.CheckCookie(handlers.CollectionID)
+```
+
+- Access the context value:
+
+```go
+    // Access token
+    accessToken := ctx.Value(handlers.UserAccess.Context())
+
+    // Locale
+    locale := ctx.Value(handlers.Locale.Context())
+
+    // CollectionID
+    collectionID := ctx.Value(handlers.CollectionID.Context())
 ```
