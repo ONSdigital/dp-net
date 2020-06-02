@@ -1,6 +1,6 @@
 package handlers
 
-import dpHTTP "github.com/ONSdigital/dp-net/http"
+import dphttp "github.com/ONSdigital/dp-net/http"
 
 // Key - iota enum of possible sets of keys for middleware manipulation
 type Key int
@@ -9,7 +9,7 @@ type Key int
 type KeyMap struct {
 	Header  string
 	Cookie  string
-	Context dpHTTP.ContextKey
+	Context dphttp.ContextKey
 }
 
 // Possible values for sets of keys
@@ -30,25 +30,25 @@ func (k Key) Cookie() string {
 }
 
 // Context returns the context key
-func (k Key) Context() dpHTTP.ContextKey {
+func (k Key) Context() dphttp.ContextKey {
 	return KeyMaps[k].Context
 }
 
 // KeyMaps maps the possible values of Key enumeration to their Header, Cookie and Context correspnding keys
 var KeyMaps = map[Key]*KeyMap{
 	UserAccess: {
-		Header:  dpHTTP.FlorenceHeaderKey,
-		Cookie:  dpHTTP.FlorenceCookieKey,
-		Context: dpHTTP.FlorenceIdentityKey,
+		Header:  dphttp.FlorenceHeaderKey,
+		Cookie:  dphttp.FlorenceCookieKey,
+		Context: dphttp.FlorenceIdentityKey,
 	},
 	Locale: {
-		Header:  dpHTTP.LocaleHeaderKey,
-		Cookie:  dpHTTP.LocaleCookieKey,
-		Context: dpHTTP.ContextKey(dpHTTP.LocaleHeaderKey),
+		Header:  dphttp.LocaleHeaderKey,
+		Cookie:  dphttp.LocaleCookieKey,
+		Context: dphttp.ContextKey(dphttp.LocaleHeaderKey),
 	},
 	CollectionID: {
-		Header:  dpHTTP.CollectionIDHeaderKey,
-		Cookie:  dpHTTP.CollectionIDCookieKey,
-		Context: dpHTTP.ContextKey(dpHTTP.CollectionIDHeaderKey),
+		Header:  dphttp.CollectionIDHeaderKey,
+		Cookie:  dphttp.CollectionIDCookieKey,
+		Context: dphttp.ContextKey(dphttp.CollectionIDHeaderKey),
 	},
 }
