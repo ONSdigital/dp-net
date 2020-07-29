@@ -17,6 +17,7 @@ const (
 	UserAccess Key = iota
 	Locale
 	CollectionID
+	RequestID
 )
 
 // Header returns the header key
@@ -50,5 +51,10 @@ var KeyMaps = map[Key]*KeyMap{
 		Header:  dphttp.CollectionIDHeaderKey,
 		Cookie:  dphttp.CollectionIDCookieKey,
 		Context: dphttp.ContextKey(dphttp.CollectionIDHeaderKey),
+	},
+	RequestID: {
+		Header:  dphttp.RequestHeaderKey,
+		Cookie:  "",
+		Context: dphttp.ContextKey(dphttp.RequestHeaderKey),
 	},
 }
