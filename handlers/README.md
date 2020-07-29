@@ -20,6 +20,9 @@ The mapping is done using enumeration of possible keys, and their mappings to he
 
     // RequestID
     handler := handlers.CheckHeader(handlers.RequestID)
+
+    // User Identity
+    handler := handlers.CheckHeader(handlers.UserIdentity)
 ```
 
 - Read a cookie and add its value to the output request context:
@@ -49,4 +52,7 @@ The mapping is done using enumeration of possible keys, and their mappings to he
 
     // RequestID
     requestID := ctx.Value(handlers.RequestID.Context())
+
+    // User Identity
+    handler := ctx.Value(handlers.UserIdentity.Context())
 ```

@@ -18,6 +18,7 @@ const (
 	Locale
 	CollectionID
 	RequestID
+	UserIdentity
 )
 
 // Header returns the header key
@@ -55,6 +56,11 @@ var KeyMaps = map[Key]*KeyMap{
 	RequestID: {
 		Header:  dphttp.RequestHeaderKey,
 		Cookie:  "",
-		Context: dphttp.ContextKey(dphttp.RequestHeaderKey),
+		Context: dphttp.RequestIdKey,
+	},
+	UserIdentity: {
+		Header:  dphttp.UserHeaderKey,
+		Cookie:  "",
+		Context: dphttp.UserIdentityKey,
 	},
 }
