@@ -1,6 +1,9 @@
 package handlers
 
-import dphttp "github.com/ONSdigital/dp-net/http"
+import (
+	dphttp "github.com/ONSdigital/dp-net/http"
+	"github.com/ONSdigital/go-ns/common"
+)
 
 // Key - iota enum of possible sets of keys for middleware manipulation
 type Key int
@@ -9,7 +12,7 @@ type Key int
 type KeyMap struct {
 	Header  string
 	Cookie  string
-	Context dphttp.ContextKey
+	Context common.ContextKey
 }
 
 // Possible values for sets of keys
@@ -30,7 +33,7 @@ func (k Key) Cookie() string {
 }
 
 // Context returns the context key
-func (k Key) Context() dphttp.ContextKey {
+func (k Key) Context() common.ContextKey {
 	return KeyMaps[k].Context
 }
 
@@ -39,16 +42,16 @@ var KeyMaps = map[Key]*KeyMap{
 	UserAccess: {
 		Header:  dphttp.FlorenceHeaderKey,
 		Cookie:  dphttp.FlorenceCookieKey,
-		Context: dphttp.FlorenceIdentityKey,
+		Context: common.FlorenceIdentityKey,
 	},
 	Locale: {
 		Header:  dphttp.LocaleHeaderKey,
 		Cookie:  dphttp.LocaleCookieKey,
-		Context: dphttp.ContextKey(dphttp.LocaleHeaderKey),
+		Context: common.ContextKey(dphttp.LocaleHeaderKey),
 	},
 	CollectionID: {
 		Header:  dphttp.CollectionIDHeaderKey,
 		Cookie:  dphttp.CollectionIDCookieKey,
-		Context: dphttp.ContextKey(dphttp.CollectionIDHeaderKey),
+		Context: common.ContextKey(dphttp.CollectionIDHeaderKey),
 	},
 }

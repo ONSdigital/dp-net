@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ONSdigital/go-ns/common"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -211,7 +212,7 @@ func TestNewRequestID(t *testing.T) {
 func TestGetRequestId(t *testing.T) {
 	Convey("should return requestID if it exists in the provided context", t, func() {
 		ctx := WithRequestId(context.Background(), "666")
-		So(ctx.Value(ContextKey("request-id")).(string), ShouldEqual, "666")
+		So(ctx.Value(common.ContextKey("request-id")).(string), ShouldEqual, "666")
 	})
 
 	Convey("should return empty value if requestID is not in the provided context", t, func() {
@@ -223,11 +224,11 @@ func TestGetRequestId(t *testing.T) {
 func TestSetRequestId(t *testing.T) {
 	Convey("set request id in empty context", t, func() {
 		ctx := WithRequestId(context.Background(), "123")
-		So(ctx.Value(ContextKey("request-id")), ShouldEqual, "123")
+		So(ctx.Value(common.ContextKey("request-id")), ShouldEqual, "123")
 
 		Convey("overwrite context request id with new value", func() {
 			newCtx := WithRequestId(ctx, "456")
-			So(newCtx.Value(ContextKey("request-id")), ShouldEqual, "456")
+			So(newCtx.Value(common.ContextKey("request-id")), ShouldEqual, "456")
 		})
 	})
 }

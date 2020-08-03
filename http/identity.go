@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"sync"
 	"time"
-)
 
-// ContextKey is an alias of type string
-type ContextKey string
+	"github.com/ONSdigital/go-ns/common"
+)
 
 // A list of common constants used across dp-net packages
 const (
@@ -26,10 +25,10 @@ const (
 	LegacyUser           = "legacyUser"
 	BearerPrefix         = "Bearer "
 
-	UserIdentityKey     = ContextKey("User-Identity")
-	CallerIdentityKey   = ContextKey("Caller-Identity")
-	RequestIdKey        = ContextKey("request-id")
-	FlorenceIdentityKey = ContextKey("florence-id")
+	UserIdentityKey     = common.ContextKey("User-Identity")
+	CallerIdentityKey   = common.ContextKey("Caller-Identity")
+	RequestIdKey        = common.ContextKey("request-id")
+	FlorenceIdentityKey = common.ContextKey("florence-id")
 )
 
 // CheckRequester is an interface to allow mocking of auth.CheckRequest
