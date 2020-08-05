@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	request "github.com/ONSdigital/dp-net/request"
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 )
@@ -123,15 +124,15 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 
 	// TODO: Remove this once user token (Florence token) is propegated throughout apps
 	// Used for audit purposes
-	if IsUserPresent(ctx) {
+	if request.IsUserPresent(ctx) {
 		// only add this header if not already set
-		if len(req.Header.Get(UserHeaderKey)) == 0 {
-			AddUserHeader(req, User(ctx))
+		if len(req.Header.Get(request.UserHeaderKey)) == 0 {
+			request.AddUserHeader(req, request.User(ctx))
 		}
 	}
 
 	// get any existing correlation-id (might be "id1,id2"), append a new one, add to headers
-	upstreamCorrelationIDs := GetRequestId(ctx)
+	upstreamCorrelationIDs := request.GetRequestId(ctx)
 	addedIDLen := 20
 	if upstreamCorrelationIDs != "" {
 		// get length of (first of) IDs (e.g. "id1" is 3), new ID will be half that size
@@ -141,7 +142,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 		}
 		upstreamCorrelationIDs += ","
 	}
-	AddRequestIdHeader(req, upstreamCorrelationIDs+NewRequestID(addedIDLen))
+	request.AddRequestIdHeader(req, upstreamCorrelationIDs+request.NewRequestID(addedIDLen))
 
 	doer := func(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, error) {
 		if req.ContentLength > 0 {

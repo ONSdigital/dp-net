@@ -37,9 +37,9 @@ func TestNew(t *testing.T) {
 		})
 
 		Convey("Default middleware should include RequestID and Log", func() {
-			So(s.Middleware, ShouldContainKey, RequestIDHandlerKey)
-			So(s.Middleware, ShouldContainKey, LogHandlerKey)
-			So(s.MiddlewareOrder, ShouldResemble, []string{RequestIDHandlerKey, LogHandlerKey})
+			So(s.middleware, ShouldContainKey, RequestIDHandlerKey)
+			So(s.middleware, ShouldContainKey, LogHandlerKey)
+			So(s.middlewareOrder, ShouldResemble, []string{RequestIDHandlerKey, LogHandlerKey})
 		})
 
 		Convey("Default timeouts should be sensible", func() {
@@ -71,7 +71,7 @@ func TestNew(t *testing.T) {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 			s := NewServer(":0", h)
 
-			s.MiddlewareOrder = []string{"foo"}
+			s.middlewareOrder = []string{"foo"}
 
 			So(func() {
 				s.prep()
@@ -82,7 +82,7 @@ func TestNew(t *testing.T) {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 			s := NewServer(":0", h)
 
-			s.MiddlewareOrder = []string{"foo"}
+			s.middlewareOrder = []string{"foo"}
 
 			So(func() {
 				s.ListenAndServe()
@@ -93,7 +93,7 @@ func TestNew(t *testing.T) {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 			s := NewServer(":0", h)
 
-			s.MiddlewareOrder = []string{"foo"}
+			s.middlewareOrder = []string{"foo"}
 
 			So(func() {
 				s.ListenAndServeTLS("testdata/certFile", "testdata/keyFile")

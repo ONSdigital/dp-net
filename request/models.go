@@ -3,7 +3,7 @@
 // but when go-ns/audit is migrated to its own repository, we should also
 // move this file (and its test).
 
-package http
+package request
 
 // Params represents a generic map of key value pairs, expected by go-ns/audit Auditor.Record()
 type Params map[string]string

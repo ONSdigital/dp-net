@@ -8,6 +8,7 @@ import (
 
 	"context"
 
+	request "github.com/ONSdigital/dp-net/request"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/justinas/alice"
 )
@@ -20,8 +21,8 @@ const LogHandlerKey string = "Log"
 // on SIGINT/SIGTERM
 type Server struct {
 	http.Server
-	Middleware             map[string]alice.Constructor
-	MiddlewareOrder        []string
+	middleware             map[string]alice.Constructor
+	middlewareOrder        []string
 	Alice                  *alice.Chain
 	CertFile               string
 	KeyFile                string
@@ -32,14 +33,14 @@ type Server struct {
 // NewServer creates a new server
 func NewServer(bindAddr string, router http.Handler) *Server {
 	middleware := map[string]alice.Constructor{
-		RequestIDHandlerKey: HandlerRequestID(16),
+		RequestIDHandlerKey: request.HandlerRequestID(16),
 		LogHandlerKey:       log.Middleware,
 	}
 
 	return &Server{
 		Alice:           nil,
-		Middleware:      middleware,
-		MiddlewareOrder: []string{RequestIDHandlerKey, LogHandlerKey},
+		middleware:      middleware,
+		middlewareOrder: []string{RequestIDHandlerKey, LogHandlerKey},
 		Server: http.Server{
 			Handler:           router,
 			Addr:              bindAddr,
@@ -56,8 +57,8 @@ func NewServer(bindAddr string, router http.Handler) *Server {
 
 func (s *Server) prep() {
 	var m []alice.Constructor
-	for _, v := range s.MiddlewareOrder {
-		if mw, ok := s.Middleware[v]; ok {
+	for _, v := range s.middlewareOrder {
+		if mw, ok := s.middleware[v]; ok {
 			m = append(m, mw)
 			continue
 		}

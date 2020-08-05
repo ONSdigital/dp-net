@@ -3,7 +3,7 @@
 // but when go-ns/audit is migrated to its own repository, we should also
 // move this file (and models.go).
 
-package http
+package request
 
 import (
 	"testing"
