@@ -1,4 +1,4 @@
-package handlers_test
+package handlers
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ONSdigital/dp-net/handlers"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -26,14 +25,14 @@ func (m *mockHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func TestCheckHeaderUserAccess(t *testing.T) {
 	Convey("given the request with a florence access token header ", t, func() {
 		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
-		r.Header.Set(handlers.UserAccess.Header(), testToken)
+		r.Header.Set(UserAccess.Header(), testToken)
 		w := httptest.NewRecorder()
 
 		mockHandler := &mockHandler{
 			invocations: 0,
 		}
 
-		target := handlers.DoCheckHeader(mockHandler, handlers.UserAccess)
+		target := DoCheckHeader(mockHandler, UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -43,7 +42,7 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 			})
 
 			Convey("and the request context contains a value for key florence-id", func() {
-				xFlorenceToken, ok := mockHandler.ctx.Value(handlers.UserAccess.Context()).(string)
+				xFlorenceToken, ok := mockHandler.ctx.Value(UserAccess.Context()).(string)
 				So(ok, ShouldBeTrue)
 				So(xFlorenceToken, ShouldEqual, testToken)
 			})
@@ -58,7 +57,7 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.DoCheckHeader(mockHandler, handlers.UserAccess)
+		target := DoCheckHeader(mockHandler, UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -68,7 +67,7 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 			})
 
 			Convey("and the request context contains a value for key florence-id", func() {
-				xFlorenceToken := mockHandler.ctx.Value(handlers.UserAccess.Context())
+				xFlorenceToken := mockHandler.ctx.Value(UserAccess.Context())
 				So(xFlorenceToken, ShouldBeNil)
 			})
 		})
@@ -78,14 +77,14 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 func TestCheckHeaderLocale(t *testing.T) {
 	Convey("given the request with a locale header ", t, func() {
 		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
-		r.Header.Set(handlers.Locale.Header(), testLocale)
+		r.Header.Set(Locale.Header(), testLocale)
 		w := httptest.NewRecorder()
 
 		mockHandler := &mockHandler{
 			invocations: 0,
 		}
 
-		target := handlers.DoCheckHeader(mockHandler, handlers.Locale)
+		target := DoCheckHeader(mockHandler, Locale)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -95,7 +94,7 @@ func TestCheckHeaderLocale(t *testing.T) {
 			})
 
 			Convey("and the request context contains a value for key localeCode", func() {
-				localeCode, ok := mockHandler.ctx.Value(handlers.Locale.Context()).(string)
+				localeCode, ok := mockHandler.ctx.Value(Locale.Context()).(string)
 				So(ok, ShouldBeTrue)
 				So(localeCode, ShouldEqual, testLocale)
 			})
@@ -106,7 +105,7 @@ func TestCheckHeaderLocale(t *testing.T) {
 func TestCheckCookieUserAccess(t *testing.T) {
 	Convey("given the request contain a cookie for a florence access token header ", t, func() {
 		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
-		r.AddCookie(&http.Cookie{Name: handlers.UserAccess.Cookie(), Value: testToken})
+		r.AddCookie(&http.Cookie{Name: UserAccess.Cookie(), Value: testToken})
 
 		w := httptest.NewRecorder()
 
@@ -114,7 +113,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.DoCheckCookie(mockHandler, handlers.UserAccess)
+		target := DoCheckCookie(mockHandler, UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -124,7 +123,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 			})
 
 			Convey("and the request context contains a value for key florence-id", func() {
-				xFlorenceToken, ok := mockHandler.ctx.Value(handlers.UserAccess.Context()).(string)
+				xFlorenceToken, ok := mockHandler.ctx.Value(UserAccess.Context()).(string)
 				So(ok, ShouldBeTrue)
 				So(xFlorenceToken, ShouldEqual, testToken)
 			})
@@ -139,7 +138,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.DoCheckCookie(mockHandler, handlers.UserAccess)
+		target := DoCheckCookie(mockHandler, UserAccess)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -149,7 +148,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 			})
 
 			Convey("and the request context does not contain value for key florence-id", func() {
-				xFlorenceToken := mockHandler.ctx.Value(handlers.UserAccess.Context())
+				xFlorenceToken := mockHandler.ctx.Value(UserAccess.Context())
 				So(xFlorenceToken, ShouldBeNil)
 			})
 		})
@@ -159,7 +158,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 func TestCheckCookieLocale(t *testing.T) {
 	Convey("given the request contain a cookie for locale code ", t, func() {
 		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
-		r.AddCookie(&http.Cookie{Name: handlers.Locale.Cookie(), Value: testLocale})
+		r.AddCookie(&http.Cookie{Name: Locale.Cookie(), Value: testLocale})
 
 		w := httptest.NewRecorder()
 
@@ -167,7 +166,7 @@ func TestCheckCookieLocale(t *testing.T) {
 			invocations: 0,
 		}
 
-		target := handlers.DoCheckCookie(mockHandler, handlers.Locale)
+		target := DoCheckCookie(mockHandler, Locale)
 
 		Convey("when the handler is called", func() {
 			target.ServeHTTP(w, r)
@@ -177,7 +176,7 @@ func TestCheckCookieLocale(t *testing.T) {
 			})
 
 			Convey("and the request context contains a value for key localeCode", func() {
-				localeCode, ok := mockHandler.ctx.Value(handlers.Locale.Context()).(string)
+				localeCode, ok := mockHandler.ctx.Value(Locale.Context()).(string)
 				So(ok, ShouldBeTrue)
 				So(localeCode, ShouldEqual, testLocale)
 			})
