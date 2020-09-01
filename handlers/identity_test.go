@@ -14,6 +14,7 @@ import (
 
 	"io"
 
+	healthcheck "github.com/ONSdigital/dp-api-clients-go/health"
 	clientsidentity "github.com/ONSdigital/dp-api-clients-go/identity"
 	dphttp "github.com/ONSdigital/dp-net/http"
 	dprequest "github.com/ONSdigital/dp-net/request"
@@ -38,8 +39,8 @@ func TestHandler_NoHeaders(t *testing.T) {
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		responseRecorder := httptest.NewRecorder()
 
-		httpClient := &dphttp.ClienterMock{}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		httpClient := newMockHTTPClient()
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		httpHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -78,12 +79,11 @@ func TestHandler_IdentityServiceError(t *testing.T) {
 		}
 		responseRecorder := httptest.NewRecorder()
 
-		httpClient := &dphttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return nil, errors.New("broken")
-			},
+		httpClient := newMockHTTPClient()
+		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
+			return nil, errors.New("broken")
 		}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		httpHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -127,14 +127,13 @@ func TestHandler_IdentityServiceErrorResponseCode(t *testing.T) {
 		}
 		responseRecorder := httptest.NewRecorder()
 
-		httpClient := &dphttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{
-					StatusCode: http.StatusNotFound,
-				}, nil
-			},
+		httpClient := newMockHTTPClient()
+		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusNotFound,
+			}, nil
 		}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		httpHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -178,21 +177,20 @@ func TestHandler_florenceToken(t *testing.T) {
 		}
 		responseRecorder := httptest.NewRecorder()
 
-		httpClient := &dphttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
+		httpClient := newMockHTTPClient()
+		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
 
-				response := &dprequest.IdentityResponse{Identifier: userIdentifier}
+			response := &dprequest.IdentityResponse{Identifier: userIdentifier}
 
-				body, _ := json.Marshal(response)
-				readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
+			body, _ := json.Marshal(response)
+			readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
 
-				return &http.Response{
-					StatusCode: http.StatusOK,
-					Body:       readCloser,
-				}, nil
-			},
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       readCloser,
+			}, nil
 		}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		var handlerReq *http.Request
@@ -241,18 +239,17 @@ func TestHandler_InvalidIdentityResponse(t *testing.T) {
 		}
 		responseRecorder := httptest.NewRecorder()
 
-		httpClient := &dphttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
+		httpClient := newMockHTTPClient()
+		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
 
-				readCloser := ioutil.NopCloser(bytes.NewBufferString("{ invalid JSON"))
+			readCloser := ioutil.NopCloser(bytes.NewBufferString("{ invalid JSON"))
 
-				return &http.Response{
-					StatusCode: http.StatusOK,
-					Body:       readCloser,
-				}, nil
-			},
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       readCloser,
+			}, nil
 		}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		httpHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -299,21 +296,20 @@ func TestHandler_authToken(t *testing.T) {
 		}
 		responseRecorder := httptest.NewRecorder()
 
-		httpClient := &dphttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
+		httpClient := newMockHTTPClient()
+		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
 
-				response := &dprequest.IdentityResponse{Identifier: serviceIdentifier}
+			response := &dprequest.IdentityResponse{Identifier: serviceIdentifier}
 
-				body, _ := json.Marshal(response)
-				readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
+			body, _ := json.Marshal(response)
+			readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
 
-				return &http.Response{
-					StatusCode: http.StatusOK,
-					Body:       readCloser,
-				}, nil
-			},
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       readCloser,
+			}, nil
 		}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		var handlerReq *http.Request
@@ -366,21 +362,20 @@ func TestHandler_bothTokens(t *testing.T) {
 		}
 		responseRecorder := httptest.NewRecorder()
 
-		httpClient := &dphttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
+		httpClient := newMockHTTPClient()
+		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
 
-				response := &dprequest.IdentityResponse{Identifier: userIdentifier}
+			response := &dprequest.IdentityResponse{Identifier: userIdentifier}
 
-				body, _ := json.Marshal(response)
-				readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
+			body, _ := json.Marshal(response)
+			readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
 
-				return &http.Response{
-					StatusCode: http.StatusOK,
-					Body:       readCloser,
-				}, nil
-			},
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       readCloser,
+			}, nil
 		}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		var handlerReq *http.Request
@@ -423,8 +418,8 @@ func TestHandler_GetTokenError(t *testing.T) {
 
 	Convey("Given getting the user auth token from the request returns an error", t, func() {
 
-		httpClient := &dphttp.ClienterMock{}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		httpClient := newMockHTTPClient()
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -469,8 +464,8 @@ func TestHandler_GetTokenError(t *testing.T) {
 
 	Convey("Given getting the service auth token from the request returns an error", t, func() {
 
-		httpClient := &dphttp.ClienterMock{}
-		idClient := clientsidentity.NewAPIClient(httpClient, zebedeeURL)
+		httpClient := newMockHTTPClient()
+		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
 		wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -612,5 +607,16 @@ func TestGetServiceAuthToken(t *testing.T) {
 func getTokenFunc(token string, err error) getTokenFromReqFunc {
 	return func(ctx context.Context, r *http.Request) (string, error) {
 		return token, err
+	}
+}
+
+func newMockHTTPClient() *dphttp.ClienterMock {
+	return &dphttp.ClienterMock{
+		SetPathsWithNoRetriesFunc: func(paths []string) {
+			return
+		},
+		GetPathsWithNoRetriesFunc: func() []string {
+			return []string{"/healthcheck"}
+		},
 	}
 }

@@ -16,11 +16,11 @@ type getTokenFromReqFunc func(ctx context.Context, r *http.Request) (string, err
 
 // Identity is a handler that controls the authenticating of a request
 func Identity(zebedeeURL string) func(http.Handler) http.Handler {
-	authClient := clientsidentity.NewAPIClient(nil, zebedeeURL)
+	authClient := clientsidentity.New(zebedeeURL)
 	return IdentityWithHTTPClient(authClient)
 }
 
-// IdentityWithHTTPClient allows a handler to be created that uses the given HTTP client
+// IdentityWithHTTPClient allows a handler to be created that uses the given identity client
 func IdentityWithHTTPClient(cli *clientsidentity.Client) func(http.Handler) http.Handler {
 	// maintain the public interface to ensure backwards compatible and allow the get X token functions to be passed into the handler func.
 	return identityWithHTTPClient(cli, getFlorenceToken, getServiceAuthToken)
