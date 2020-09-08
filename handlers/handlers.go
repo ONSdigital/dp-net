@@ -66,11 +66,11 @@ type ControllerHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *h
 
 //WIP - as above not 100% if this should be done here or in app but this is roughly what it could look like
 func ControllerHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) (http.Handler, error) {
-	var controllerHandlerFunc ControllerHandlerFunc = func(ctx, w, r, lang, collectionID, accessToken) (http.Handler, error) {
+	var controllerHandlerFunc ControllerHandlerFunc = func(ctx context.Context, w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) (http.Handler, error) {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			// TODO set headers here
 			//	h.ServeHTTP(w, req) // The app should handle the serving right? Ok to remove this.
-		})
+		}), nil
 	}
 	return ControllerHandlerMiddleware(ctx, w, r, controllerHandlerFunc)
 }
