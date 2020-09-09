@@ -8,6 +8,9 @@ import (
 	"net/http"
 )
 
+// ControllerHandlerFunc is a function type that accepts arguments required for logical flow in handlers Implementation of function should set headers as needed
+type ControllerHandlerFunc func(w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) http.Handler
+
 // CheckHeader is a wrapper which adds a value from the request header (if found) to the request context.
 // This function complies with alice middleware Constructor type: func(http.Handler) -> (http.Handler)
 func CheckHeader(key Key) func(http.Handler) http.Handler {
@@ -50,42 +53,19 @@ func DoCheckCookie(h http.Handler, key Key) http.Handler {
 	})
 }
 
-/* My head hurts...
-ControllerHandler is called from an app which then creates a function of type ControllerHandlerFunc which returns a http.Handler (and error)
-The former is then passed to the ControllerHandlerMiddleware function which checks all fields are present and accounted for
-then calls the ControllerHandlerFunc implementation which sets the headers as required to finally return a http.Handler back to the original app that called ControllerHandler
-*/
-//TODO all the error handling
+// ControllerHandler is a middleware handler that ensures all required logical arguments are being passed along and then returns a generic http.Handler
+func ControllerHandler(controllerHandlerFunc ControllerHandlerFunc) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		locale := request.GetLocaleCode(r)
+		collectionID := getCollectionIDFromContext(ctx)
+		accessToken := getUserAccessTokenFromContext(ctx)
 
-// TODO move type to top of file
-type ControllerHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) (http.Handler, error)
-
-/* Should ControllerHandlerFunc type be implemented here too or are the individual apps providing the
-'handlerFunc ControllerHandlerFunc' as seen on line 79? As the headers will have to be set somewhere. If here then line 68 shows how this might roughly be done
-*/
-
-//WIP - as above not 100% if this should be done here or in app but this is roughly what it could look like
-func ControllerHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) (http.Handler, error) {
-	var controllerHandlerFunc ControllerHandlerFunc = func(ctx context.Context, w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) (http.Handler, error) {
-		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			// TODO set headers here
-			//	h.ServeHTTP(w, req) // The app should handle the serving right? Ok to remove this.
-		}), nil
-	}
-	return ControllerHandlerMiddleware(ctx, w, r, controllerHandlerFunc)
+		controllerHandlerFunc(w, r, locale, collectionID, accessToken)
+	})
 }
 
-// TODO possibly rename but can't think of a better name atm.
-func ControllerHandlerMiddleware(ctx context.Context, w http.ResponseWriter, r *http.Request, handlerFunc ControllerHandlerFunc) (http.Handler, error) {
-	// This function checks subdomain and cookie then defaults to English if not set
-	// - Should this be grabbing it instead? It could then pass it as an argument in the 'lang' field instead shown below on line 85 4th argument as ""?
-	request.SetLocaleCode(r)
-	accessToken := getUserAccessTokenFromContext(ctx)
-	collectionID := getCollectionIDFromContext(ctx)
-	x, y := handlerFunc(ctx, w, r, "", collectionID, accessToken)
-	return x, y
-}
-
+// getUserAccessTokenFromContext will get the Florence Identity Key aka access token from a context
 func getUserAccessTokenFromContext(ctx context.Context) string {
 	if ctx.Value(request.FlorenceIdentityKey) != nil {
 		accessToken, ok := ctx.Value(request.FlorenceIdentityKey).(string)
@@ -97,6 +77,7 @@ func getUserAccessTokenFromContext(ctx context.Context) string {
 	return ""
 }
 
+// getCollectionIDFromContext will get the Collection ID token from a context
 func getCollectionIDFromContext(ctx context.Context) string {
 	if ctx.Value(request.CollectionIDHeaderKey) != nil {
 		collectionID, ok := ctx.Value(request.CollectionIDHeaderKey).(string)
