@@ -124,3 +124,80 @@ func TestSetLocaleCode(t *testing.T) {
 	})
 
 }
+
+func TestGetLocaleCode(t *testing.T) {
+
+	Convey("given a request on cy domain", t, func() {
+		req, _ := http.NewRequest("GET", "http://cy.localhost:21800/jobs", nil)
+		Convey(" and given a cookie containing 'en' lang", func() {
+			cookie := http.Cookie{Name: "lang", Value: LangEN}
+			req.AddCookie(&cookie)
+			localeCode := GetLocaleCode(req)
+			Convey("then lang returns a string 'en'", func() {
+				So(localeCode, ShouldEqual, LangEN)
+			})
+
+		})
+		Convey("and given a cookie containing 'cy' lang", func() {
+			cookie := http.Cookie{Name: "lang", Value: LangCY}
+			req.AddCookie(&cookie)
+			localeCode := GetLocaleCode(req)
+			Convey("then lang returns a string 'cy'", func() {
+				So(localeCode, ShouldEqual, LangCY)
+			})
+		})
+	})
+
+	Convey("given a request on no subdomain", t, func() {
+		req, _ := http.NewRequest("GET", "http://localhost:21800/jobs", nil)
+		Convey(" and given a cookie containing 'en' lang", func() {
+			cookie := http.Cookie{Name: "lang", Value: LangEN}
+			req.AddCookie(&cookie)
+			localeCode := GetLocaleCode(req)
+			Convey("then lang returns a string 'en'", func() {
+				So(localeCode, ShouldEqual, LangEN)
+			})
+
+		})
+		Convey("and given a cookie containing 'cy' lang", func() {
+			cookie := http.Cookie{Name: "lang", Value: LangCY}
+			req.AddCookie(&cookie)
+			localeCode := GetLocaleCode(req)
+			Convey("then lang returns a string 'cy'", func() {
+				So(localeCode, ShouldEqual, LangCY)
+			})
+		})
+	})
+
+	Convey("given a request on cy subdomain", t, func() {
+		req, _ := http.NewRequest("GET", "http://cy.localhost:21800/jobs", nil)
+		Convey(" and no cookie set", func() {
+			localeCode := GetLocaleCode(req)
+			Convey("then lang returns a string 'cy'", func() {
+				So(localeCode, ShouldEqual, LangCY)
+			})
+		})
+	})
+
+	Convey("given a request on no subdomain", t, func() {
+		req, _ := http.NewRequest("GET", "http://localhost:21800/jobs", nil)
+		Convey(" and no cookie set", func() {
+			localeCode := GetLocaleCode(req)
+			Convey("then lang returns a string 'en'", func() {
+				So(localeCode, ShouldEqual, LangEN)
+			})
+		})
+	})
+
+	Convey("given a request on no subdomain", t, func() {
+		req, _ := http.NewRequest("GET", "http://localhost:21800/jobs", nil)
+		Convey(" and cookie set to invalid/unused localeCode cookie set", func() {
+			cookie := http.Cookie{Name: "lang", Value: "foo"}
+			req.AddCookie(&cookie)
+			localeCode := GetLocaleCode(req)
+			Convey("then lang returns a string 'en'", func() {
+				So(localeCode, ShouldEqual, LangEN)
+			})
+		})
+	})
+}
