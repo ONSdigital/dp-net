@@ -26,7 +26,7 @@ func SetLocaleCode(req *http.Request) *http.Request {
 }
 
 // GetLocaleCode will grab the locale code from the request
-func GetLocaleCode(r *http.Request) string{
+func GetLocaleCode(r *http.Request) string {
 	locale := GetLangFromSubDomain(r)
 
 	// Language is overridden by cookie 'lang' here if present.

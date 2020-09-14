@@ -520,7 +520,7 @@ func TestGetFlorenceToken(t *testing.T) {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 		req.Header.Set(dprequest.FlorenceHeaderKey, expectedToken)
 
-		actual, err := getFlorenceToken(nil, req)
+		actual, err := GetFlorenceToken(nil, req)
 
 		So(actual, ShouldEqual, expectedToken)
 		So(err, ShouldBeNil)
@@ -530,7 +530,7 @@ func TestGetFlorenceToken(t *testing.T) {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 		req.AddCookie(&http.Cookie{Name: dprequest.FlorenceCookieKey, Value: expectedToken})
 
-		actual, err := getFlorenceToken(nil, req)
+		actual, err := GetFlorenceToken(nil, req)
 
 		So(actual, ShouldEqual, expectedToken)
 		So(err, ShouldBeNil)
@@ -539,14 +539,14 @@ func TestGetFlorenceToken(t *testing.T) {
 	Convey("should return empty token if no header or cookie is set", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 
-		actual, err := getFlorenceToken(nil, req)
+		actual, err := GetFlorenceToken(nil, req)
 
 		So(actual, ShouldBeEmpty)
 		So(err, ShouldBeNil)
 	})
 
 	Convey("should return empty token and error if get header returns an error that is not ErrHeaderNotFound", t, func() {
-		actual, err := getFlorenceToken(nil, nil)
+		actual, err := GetFlorenceToken(nil, nil)
 
 		So(actual, ShouldBeEmpty)
 		So(err, ShouldResemble, headers.ErrRequestNil)

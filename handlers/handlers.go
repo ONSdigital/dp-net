@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"context"
-	"errors"
-	"github.com/ONSdigital/dp-api-clients-go/headers"
 	"github.com/ONSdigital/dp-net/request"
 	"github.com/ONSdigital/log.go/log"
 	"net/http"
@@ -54,45 +52,19 @@ func DoCheckCookie(h http.Handler, key Key) http.Handler {
 	})
 }
 
-// ControllerHandler is a middleware handler that ensures all required logical arguments are being passed along and then returns a generic http.Handler
+// ControllerHandler is a middleware handler that ensures all required logical arguments are being passed along and then returns a generic http.HandlerFunc
 func ControllerHandler(controllerHandlerFunc ControllerHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		locale := request.GetLocaleCode(r)
-		collectionID := getCollectionIDFromContext(ctx)
-		accessToken := getUserAccessTokenFromContext(ctx, r)
-
+		collectionID, err := request.GetCollectionID(r)
+		if err != nil {
+			log.Event(ctx, "unexpected error when getting collection id", log.ERROR, log.Error(err))
+		}
+		accessToken, err := GetFlorenceToken(ctx, r)
+		if err != nil {
+			log.Event(ctx, "unexpected error when getting access token", log.ERROR, log.Error(err))
+		}
 		controllerHandlerFunc(w, r, locale, collectionID, accessToken)
 	}
-}
-
-// getUserAccessTokenFromContext will get the Florence Identity Key aka access token from a context or header
-func getUserAccessTokenFromContext(ctx context.Context, r *http.Request) string {
-	var err error = nil
-	accessToken := ""
-	ok := false
-	if ctx.Value(request.FlorenceIdentityKey) != nil {
-		accessToken, ok = ctx.Value(request.FlorenceIdentityKey).(string)
-		if !ok {
-			log.Event(ctx, "error retrieving user access token", log.WARN, log.Error(errors.New("error casting access token context value to string")))
-		}
-	} else {
-		accessToken, err = headers.GetUserAuthToken(r)
-		if err != nil {
-			log.Event(ctx, "access token not found", log.WARN, log.Error(err))
-		}
-	}
-	return accessToken
-}
-
-// getCollectionIDFromContext will get the Collection ID token from a context
-func getCollectionIDFromContext(ctx context.Context) string {
-	if ctx.Value(request.CollectionIDHeaderKey) != nil {
-		collectionID, ok := ctx.Value(request.CollectionIDHeaderKey).(string)
-		if !ok {
-			log.Event(ctx, "error retrieving collection ID", log.WARN, log.Error(errors.New("error casting collection ID context value to string")))
-		}
-		return collectionID
-	}
-	return ""
 }

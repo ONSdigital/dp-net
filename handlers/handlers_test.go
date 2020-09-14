@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	dprequest "github.com/ONSdigital/dp-net/request"
+
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -188,37 +189,32 @@ func TestCheckCookieLocale(t *testing.T) {
 }
 
 func TestControllerHandler(t *testing.T) {
-	Convey("given a controllerHandlerFunc and a context with a collectionID, florence ID and a cookie with a locale", t, func() {
+	Convey("given a controllerHandlerFunc with a collectionID, florence ID and a locale in cookies", t, func() {
 		request := httptest.NewRequest("GET", "http://localhost:8080", nil)
-		request = request.WithContext(context.WithValue(request.Context(), dprequest.CollectionIDHeaderKey, testCollectionID))
-		request = request.WithContext(context.WithValue(request.Context(), dprequest.FlorenceIdentityKey, testToken))
 		request.AddCookie(&http.Cookie{Name: Locale.Cookie(), Value: testLocale})
+		request.AddCookie(&http.Cookie{Name: dprequest.FlorenceCookieKey, Value: testToken})
+		request.AddCookie(&http.Cookie{Name: dprequest.CollectionIDCookieKey, Value: testCollectionID})
 		w := httptest.NewRecorder()
 
 		var controllerHandlerFunc ControllerHandlerFunc = func(w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) {
-			r.Header.Set(UserAccess.Header(), accessToken)
-			r.Header.Set(CollectionID.Header(), collectionID)
-			r.Header.Set(Locale.Header(), lang)
+			Convey("when the handler is called", func() {
+				Convey("the request lang should be sent", func() {
+					So(lang, ShouldEqual, testLocale)
+				})
+				Convey("the request collectionID should be sent", func() {
+					So(collectionID, ShouldEqual, testCollectionID)
+				})
+				Convey("the request user access token should be sent", func() {
+					So(accessToken, ShouldEqual, testToken)
+				})
+			})
 		}
 
 		h := ControllerHandler(controllerHandlerFunc)
-		Convey("when the handler is called", func() {
-			h.ServeHTTP(w, request)
-			Convey("the request context contains a value for the locale code", func() {
-				localeCode := request.Header.Get(Locale.Header())
-				So(localeCode, ShouldEqual, testLocale)
-			})
-			Convey("the request context contains a value for the Collection identity", func() {
-				localeCode := request.Header.Get(CollectionID.Header())
-				So(localeCode, ShouldEqual, testCollectionID)
-			})
-			Convey("the request context contains a value for UserAccess token", func() {
-				localeCode := request.Header.Get(UserAccess.Header())
-				So(localeCode, ShouldEqual, testToken)
-			})
-		})
+		h.ServeHTTP(w, request)
+
 	})
-	Convey("given a controllerHandlerFunc and a context with no collection ID or florence ID but with a locale in the subdomain", t, func() {
+	Convey("given a controllerHandlerFunc with a collection ID or florence ID and locale in the subdomain", t, func() {
 		target := fmt.Sprintf("http://%s.localhost:8080", testLocale)
 		request := httptest.NewRequest("GET", target, nil)
 		request.Header.Set(UserAccess.Header(), testToken)
@@ -226,27 +222,19 @@ func TestControllerHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		var controllerHandlerFunc ControllerHandlerFunc = func(w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) {
-			r.Header.Set(UserAccess.Header(), accessToken)
-			r.Header.Set(CollectionID.Header(), collectionID)
-			r.Header.Set(Locale.Header(), lang)
+			Convey("the request lang should be sent", func() {
+				So(lang, ShouldEqual, testLocale)
+			})
+			Convey("the request collectionID should be sent", func() {
+				So(collectionID, ShouldEqual, testCollectionID)
+			})
+			Convey("the request user access token should be sent", func() {
+				So(accessToken, ShouldEqual, testToken)
+			})
 		}
 
 		h := ControllerHandler(controllerHandlerFunc)
-		Convey("when the handler is called", func() {
-			h.ServeHTTP(w, request)
-			Convey("the request context contains a value for the locale code", func() {
-				localeCode := request.Header.Get(Locale.Header())
-				So(localeCode, ShouldEqual, testLocale)
-			})
-			Convey("the request context contains an empty string value for the Collection identity", func() {
-				localeCode := request.Header.Get(CollectionID.Header())
-				So(localeCode, ShouldEqual, "")
-			})
-			Convey("the request context contains an empty string value for UserAccess token", func() {
-				localeCode := request.Header.Get(UserAccess.Header())
-				So(localeCode, ShouldEqual, "")
-			})
-		})
+		h.ServeHTTP(w, request)
 	})
 
 	Convey("given a controllerHandlerFunc with no context, no cookies and no subdomain", t, func() {
@@ -254,20 +242,21 @@ func TestControllerHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		var controllerHandlerFunc ControllerHandlerFunc = func(w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) {
-			r.Header.Set(UserAccess.Header(), accessToken)
-			r.Header.Set(CollectionID.Header(), collectionID)
-			r.Header.Set(Locale.Header(), lang)
+			testDesc := fmt.Sprintf("the request lang should be defaulted to the locale code: %s", dprequest.DefaultLang)
+
+			Convey(testDesc, func() {
+				So(lang, ShouldEqual, dprequest.DefaultLang)
+			})
+			Convey("the request collectionID should be sent empty", func() {
+				So(collectionID, ShouldEqual, "")
+			})
+			Convey("the request user access token should be sent empty", func() {
+				So(accessToken, ShouldEqual, "")
+			})
 		}
 
 		h := ControllerHandler(controllerHandlerFunc)
-		Convey("when the handler is called", func() {
-			h.ServeHTTP(w, request)
+		h.ServeHTTP(w, request)
 
-			testDesc := fmt.Sprintf("the request context contains a value for the default locale code: %s", dprequest.DefaultLang)
-			Convey(testDesc, func() {
-				localeCode := request.Header.Get(Locale.Header())
-				So(localeCode, ShouldEqual, dprequest.DefaultLang)
-			})
-		})
 	})
 }

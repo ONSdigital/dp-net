@@ -23,7 +23,7 @@ func Identity(zebedeeURL string) func(http.Handler) http.Handler {
 // IdentityWithHTTPClient allows a handler to be created that uses the given identity client
 func IdentityWithHTTPClient(cli *clientsidentity.Client) func(http.Handler) http.Handler {
 	// maintain the public interface to ensure backwards compatible and allow the get X token functions to be passed into the handler func.
-	return identityWithHTTPClient(cli, getFlorenceToken, getServiceAuthToken)
+	return identityWithHTTPClient(cli, GetFlorenceToken, getServiceAuthToken)
 }
 
 func identityWithHTTPClient(cli *clientsidentity.Client, getFlorenceToken, getServiceToken getTokenFromReqFunc) func(http.Handler) http.Handler {
@@ -73,7 +73,7 @@ func handleFailedRequest(ctx context.Context, w http.ResponseWriter, r *http.Req
 	w.WriteHeader(status)
 }
 
-func getFlorenceToken(ctx context.Context, req *http.Request) (string, error) {
+func GetFlorenceToken(ctx context.Context, req *http.Request) (string, error) {
 	var florenceToken string
 
 	token, err := headers.GetUserAuthToken(req)
