@@ -17,17 +17,23 @@ const (
 
 var SupportedLanguages = [2]string{LangEN, LangCY}
 
-// SetLocaleCode sets the Locale code used to set the language
+// SetLocaleCode will fetch the locale code and then sets it
 func SetLocaleCode(req *http.Request) *http.Request {
-	localeCode := GetLangFromSubDomain(req)
-
-	// Language is overridden by cookie 'lang' here if present.
-	if c, err := req.Cookie(LocaleCookieKey); err == nil && len(c.Value) > 0 {
-		localeCode = GetLangFromCookieOrDefault(c)
-	}
+	localeCode := GetLocaleCode(req)
 	req.Header.Set(LocaleHeaderKey, localeCode)
 
 	return req
+}
+
+// GetLocaleCode will grab the locale code from the request
+func GetLocaleCode(r *http.Request) string {
+	locale := GetLangFromSubDomain(r)
+
+	// Language is overridden by cookie 'lang' here if present.
+	if c, err := r.Cookie(LocaleCookieKey); err == nil && len(c.Value) > 0 {
+		locale = GetLangFromCookieOrDefault(c)
+	}
+	return locale
 }
 
 // GetLangFromSubDomain returns a language based on subdomain

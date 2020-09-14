@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"context"
-	"net/http"
-
+	"github.com/ONSdigital/dp-net/request"
 	"github.com/ONSdigital/log.go/log"
+	"net/http"
 )
+
+// ControllerHandlerFunc is a function type that accepts arguments required for logical flow in handlers Implementation of function should set headers as needed
+type ControllerHandlerFunc func(w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string)
 
 // CheckHeader is a wrapper which adds a value from the request header (if found) to the request context.
 // This function complies with alice middleware Constructor type: func(http.Handler) -> (http.Handler)
@@ -47,4 +50,21 @@ func DoCheckCookie(h http.Handler, key Key) http.Handler {
 		}
 		h.ServeHTTP(w, req)
 	})
+}
+
+// ControllerHandler is a middleware handler that ensures all required logical arguments are being passed along and then returns a generic http.HandlerFunc
+func ControllerHandler(controllerHandlerFunc ControllerHandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		locale := request.GetLocaleCode(r)
+		collectionID, err := request.GetCollectionID(r)
+		if err != nil {
+			log.Event(ctx, "unexpected error when getting collection id", log.ERROR, log.Error(err))
+		}
+		accessToken, err := GetFlorenceToken(ctx, r)
+		if err != nil {
+			log.Event(ctx, "unexpected error when getting access token", log.ERROR, log.Error(err))
+		}
+		controllerHandlerFunc(w, r, locale, collectionID, accessToken)
+	}
 }
