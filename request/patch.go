@@ -27,6 +27,15 @@ func ErrMissingMember(members []string) error {
 	return fmt.Errorf("missing member(s) in patch: %v", members)
 }
 
+// ErrUnsupportedOp generates an error for unsupported ops
+func ErrUnsupportedOp(op string, supportedOps []PatchOp) error {
+	supported := []string{}
+	for _, op := range supportedOps {
+		supported = append(supported, op.String())
+	}
+	return fmt.Errorf("op '%s' not supported. Supported op(s): %v", op, supported)
+}
+
 func (o PatchOp) String() string {
 	return validOps[o]
 }
@@ -40,7 +49,7 @@ type Patch struct {
 }
 
 // Validate checks that the provided operation is correct and the expected members are provided
-func (p *Patch) Validate() error {
+func (p *Patch) Validate(supportedOps ...PatchOp) error {
 	missing := []string{}
 	switch p.Op {
 	case OpAdd.String(), OpReplace.String(), OpTest.String():
@@ -65,8 +74,22 @@ func (p *Patch) Validate() error {
 		return ErrInvalidOp
 	}
 
+	if p.isOpSupported(supportedOps) == false {
+		return ErrUnsupportedOp(p.Op, supportedOps)
+	}
+
 	if len(missing) > 0 {
 		return ErrMissingMember(missing)
 	}
 	return nil
+}
+
+// isOpSupported checks that the patch op is in the provided list of supported Ops
+func (p *Patch) isOpSupported(supportedOps []PatchOp) bool {
+	for _, op := range supportedOps {
+		if p.Op == op.String() {
+			return true
+		}
+	}
+	return false
 }

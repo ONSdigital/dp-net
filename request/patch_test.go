@@ -8,13 +8,13 @@ import (
 
 func TestPatch(t *testing.T) {
 
-	Convey("Validating a valid patch struct is successful", t, func() {
+	Convey("Validating a valid patch with a supported op is successful", t, func() {
 		patch := Patch{
 			Op:    "add",
 			Path:  "/a/b/c",
 			Value: []string{"foo"},
 		}
-		So(patch.Validate(), ShouldBeNil)
+		So(patch.Validate(OpAdd), ShouldBeNil)
 	})
 
 	Convey("Validating a patch struct with an invalid op fails with the expected error", t, func() {
@@ -26,35 +26,44 @@ func TestPatch(t *testing.T) {
 		So(patch.Validate(), ShouldResemble, ErrInvalidOp)
 	})
 
+	Convey("Validating a valid patch with an unsupported op fails with the expected error", t, func() {
+		patch := Patch{
+			Op:    "add",
+			Path:  "/a/b/c",
+			Value: []string{"foo"},
+		}
+		So(patch.Validate(OpRemove), ShouldResemble, ErrUnsupportedOp("add", []PatchOp{OpRemove}))
+	})
+
 	Convey("Validating a patch struct with missing members for an operation results in the expected error being returned", t, func() {
 		patch := Patch{
 			Op:   "add",
 			Path: "/a/b/c",
 		}
-		So(patch.Validate(), ShouldResemble, ErrMissingMember([]string{"value"}))
+		So(patch.Validate(OpAdd), ShouldResemble, ErrMissingMember([]string{"value"}))
 		patch = Patch{
 			Op:    "replace",
 			Value: []string{"foo"},
 		}
-		So(patch.Validate(), ShouldResemble, ErrMissingMember([]string{"path"}))
+		So(patch.Validate(OpReplace), ShouldResemble, ErrMissingMember([]string{"path"}))
 		patch = Patch{
 			Op: "test",
 		}
-		So(patch.Validate(), ShouldResemble, ErrMissingMember([]string{"path", "value"}))
+		So(patch.Validate(OpTest), ShouldResemble, ErrMissingMember([]string{"path", "value"}))
 		patch = Patch{
 			Op: "remove",
 		}
-		So(patch.Validate(), ShouldResemble, ErrMissingMember([]string{"path"}))
+		So(patch.Validate(OpRemove), ShouldResemble, ErrMissingMember([]string{"path"}))
 		patch = Patch{
 			Op:   "move",
 			Path: "/a/b/c",
 		}
-		So(patch.Validate(), ShouldResemble, ErrMissingMember([]string{"from"}))
+		So(patch.Validate(OpMove), ShouldResemble, ErrMissingMember([]string{"from"}))
 		patch = Patch{
 			Op:   "copy",
 			From: "/c/b/a",
 		}
-		So(patch.Validate(), ShouldResemble, ErrMissingMember([]string{"path"}))
+		So(patch.Validate(OpCopy), ShouldResemble, ErrMissingMember([]string{"path"}))
 	})
 
 }
