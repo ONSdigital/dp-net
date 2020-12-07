@@ -27,8 +27,6 @@ func CheckIdentity(handle func(http.ResponseWriter, *http.Request)) http.Handler
 		vars := mux.Vars(r)
 		logData := getLogData(ctx, r.URL.EscapedPath(), vars)
 
-		log.Event(ctx, "checking for an identity in request context", log.HTTP(r, 0, 0, nil, nil), logData)
-
 		// just checking if an identity exists until permissions are being provided.
 		if !request.IsCallerPresent(ctx) {
 			log.Event(ctx, "no identity found in context of request", log.HTTP(r, 0, 0, nil, nil), logData)
