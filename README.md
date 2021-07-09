@@ -20,7 +20,7 @@ this client should have a familiar feel to it when it is used - with an example 
 below:
 
 ```go
-import http "github.com/ONSdigital/dp-net/http"
+import http "github.com/ONSdigital/dp-net/v2/http"
 
 func httpHandlerFunc(w http.ResponseWriter, req *http.Request) {
     client := http.NewClient()
@@ -47,7 +47,7 @@ how to configure your own dp-net/http client:
 ```go
 import (
     "net/http"
-    dphttp "github.com/ONSdigital/dp-net/http"
+    dphttp "github.com/ONSdigital/dp-net/v2/http"
 )
 
 func main() {
@@ -89,7 +89,7 @@ This Server is intended to be used by all ONS digital publishing services that r
 Assuming you have created a router with your API handlers, you can create the http server like so:
 
 ```go
-import http "github.com/ONSdigital/dp-net/http"
+import http "github.com/ONSdigital/dp-net/v2/http"
     ...
     httpServer := http.NewServer(bindAddr, router)
     httpServer.HandleOSSignals = false

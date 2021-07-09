@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"github.com/ONSdigital/dp-net/request"
+	"github.com/ONSdigital/dp-net/v2/request"
 	"github.com/ONSdigital/log.go/log"
 	"net/http"
 )

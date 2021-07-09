@@ -16,7 +16,7 @@ import (
 
 	healthcheck "github.com/ONSdigital/dp-api-clients-go/health"
 	clientsidentity "github.com/ONSdigital/dp-api-clients-go/identity"
-	dphttp "github.com/ONSdigital/dp-net/http"
+	dphttp "github.com/ONSdigital/dp-net/v2/http"
 	dprequest "github.com/ONSdigital/dp-net/request"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"

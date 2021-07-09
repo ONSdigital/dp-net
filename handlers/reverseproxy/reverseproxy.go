@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Create(proxyURL *url.URL, directorFunc func(*http.Request)) http.Handler {
+func Create(proxyURL *url.URL, directorFunc func(*http.Request), modifyResponseFunc func(*http.Response) error) http.Handler {
 	proxy := httputil.NewSingleHostReverseProxy(proxyURL)
 	director := proxy.Director
 	proxy.Transport = &http.Transport{
@@ -29,5 +29,9 @@ func Create(proxyURL *url.URL, directorFunc func(*http.Request)) http.Handler {
 			directorFunc(req)
 		}
 	}
+	if modifyResponseFunc != nil {
+		proxy.ModifyResponse = modifyResponseFunc
+	}
+
 	return proxy
 }
