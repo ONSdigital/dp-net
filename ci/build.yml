@@ -1,0 +1,16 @@
+---
+
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: latest
+
+inputs:
+  - name: dp-net
+    path: dp-net
+
+run:
+  path: dp-net/ci/scripts/build.sh

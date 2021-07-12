@@ -101,17 +101,17 @@ func (s *Server) Shutdown(ctx context.Context) error {
 		ctx, _ = context.WithTimeout(context.Background(), s.DefaultShutdownTimeout)
 	}
 
-	return s.Server.Shutdown(ctx)
+	return doShutdown(ctx, &s.Server)
 }
 
 func (s *Server) listenAndServe() error {
 
 	s.prep()
 	if len(s.CertFile) > 0 || len(s.KeyFile) > 0 {
-		return s.Server.ListenAndServeTLS(s.CertFile, s.KeyFile)
+		return doListenAndServeTLS(&s.Server, s.CertFile, s.KeyFile)
 	}
 
-	return s.Server.ListenAndServe()
+	return doListenAndServe(&s.Server)
 }
 
 func (s *Server) listenAndServeHandleOSSignals() error {
@@ -131,17 +131,29 @@ func (s *Server) listenAndServeAsync() {
 	s.prep()
 	if len(s.CertFile) > 0 || len(s.KeyFile) > 0 {
 		go func() {
-			if err := s.Server.ListenAndServeTLS(s.CertFile, s.KeyFile); err != nil {
+			if err := doListenAndServeTLS(&s.Server, s.CertFile, s.KeyFile); err != nil {
 				log.Event(nil, "http server returned error", log.Error(err))
 				os.Exit(1)
 			}
 		}()
 	} else {
 		go func() {
-			if err := s.Server.ListenAndServe(); err != nil {
+			if err := doListenAndServe(&s.Server); err != nil {
 				log.Event(nil, "http server returned error", log.Error(err))
 				os.Exit(1)
 			}
 		}()
 	}
+}
+
+var doListenAndServe = func(httpServer *http.Server) error {
+	return httpServer.ListenAndServe()
+}
+
+var doListenAndServeTLS = func(httpServer *http.Server, certFile, keyFile string) error {
+	return httpServer.ListenAndServeTLS(certFile, keyFile)
+}
+
+var doShutdown = func(ctx context.Context, httpServer *http.Server) error {
+	return httpServer.Shutdown(ctx)
 }
