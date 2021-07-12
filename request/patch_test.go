@@ -8,11 +8,20 @@ import (
 
 func TestPatch(t *testing.T) {
 
-	Convey("Validating a valid patch with a supported op is successful", t, func() {
+	Convey("Validating a valid patch with a supported op and array of strings value is successful", t, func() {
 		patch := Patch{
 			Op:    "add",
 			Path:  "/a/b/c",
 			Value: []string{"foo"},
+		}
+		So(patch.Validate(OpAdd), ShouldBeNil)
+	})
+
+	Convey("Validating a valid patch with a supported op and float64 value is successful", t, func() {
+		patch := Patch{
+			Op:    "add",
+			Path:  "/a/b/c",
+			Value: float64(123.321),
 		}
 		So(patch.Validate(OpAdd), ShouldBeNil)
 	})

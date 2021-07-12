@@ -42,10 +42,10 @@ func (o PatchOp) String() string {
 
 // Patch models an HTTP patch operation request, according to RFC 6902
 type Patch struct {
-	Op    string   `json:"op"`
-	Path  string   `json:"path"`
-	From  string   `json:"from"`
-	Value []string `json:"value"`
+	Op    string      `json:"op"`
+	Path  string      `json:"path"`
+	From  string      `json:"from"`
+	Value interface{} `json:"value"`
 }
 
 // Validate checks that the provided operation is correct and the expected members are provided
