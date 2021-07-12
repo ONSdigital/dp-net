@@ -2,6 +2,6 @@
 
 cwd=$(pwd)
 
-pushd $cwd/dp-dataset-api
+pushd $cwd/dp-net
   make lint
 popd
