@@ -9,7 +9,7 @@ image_resource:
     tag: 1.16
 
 inputs:
-  - name: dp-dp-net
+  - name: dp-net
 
 run:
-  path: dp-dp-net/ci/scripts/lint.sh
+  path: dp-net/ci/scripts/lint.sh
