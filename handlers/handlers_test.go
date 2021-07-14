@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
-	dprequest "github.com/ONSdigital/dp-net/request"
+	dprequest "github.com/ONSdigital/dp-net/v2/request"
 
 	"net/http"
 	"net/http/httptest"

@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-
 	"github.com/ONSdigital/dp-api-clients-go/headers"
-
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -16,11 +14,14 @@ import (
 
 	healthcheck "github.com/ONSdigital/dp-api-clients-go/health"
 	clientsidentity "github.com/ONSdigital/dp-api-clients-go/identity"
-	dphttp "github.com/ONSdigital/dp-net/http"
 	dprequest "github.com/ONSdigital/dp-net/request"
+	dphttp "github.com/ONSdigital/dp-net/v2/http"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
+// TODO bump dp-net/request to dp-net/v2/request once the dp-api-clients has been bumped to use dp-net /v2
+// Can't do this yet as context key is set with v1 dp-net and would be read by v2 dp-net and so technically would be
+// different and cause tests to fail
 
 const (
 	url                = "/whatever"

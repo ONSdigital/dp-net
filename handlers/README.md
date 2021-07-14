@@ -76,7 +76,7 @@ Wrap authenticated endpoints using the `handlers.CheckIdentity(handler)` functio
 Add required headers to outbound requests to other services
 
 ```go
-    import "github.com/ONSdigital/dp-net/request"
+    import "github.com/ONSdigital/dp-net/v2/request"
 
     request.AddServiceTokenHeader(req, api.AuthToken)
     request.AddUserHeader(req, "UserA")
@@ -98,8 +98,8 @@ If you need to use the middleware component in unit tests you can call the const
 ```go
 import (
     clientsidentity "github.com/ONSdigital/dp-api-clients-go/identity"
-    dphttp "github.com/ONSdigital/dp-net/http"
-    dphandlers "github.com/ONSdigital/dp-net/handlers"
+    dphttp "github.com/ONSdigital/dp-net/v2/http"
+    dphandlers "github.com/ONSdigital/dp-net/v2/handlers"
 )
 
 httpClient := &dphttp.ClienterMock{

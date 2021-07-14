@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	dphttp "github.com/ONSdigital/dp-net/http"
-	request "github.com/ONSdigital/dp-net/request"
+	dphttp "github.com/ONSdigital/dp-net/v2/http"
+	request "github.com/ONSdigital/dp-net/v2/request"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/gorilla/mux"
 )

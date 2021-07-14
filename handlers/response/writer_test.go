@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ONSdigital/dp-net/handlers/response"
+	"github.com/ONSdigital/dp-net/v2/handlers/response"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
