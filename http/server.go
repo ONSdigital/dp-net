@@ -9,7 +9,7 @@ import (
 	"context"
 
 	request "github.com/ONSdigital/dp-net/v2/request"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/justinas/alice"
 )
 
@@ -132,14 +132,14 @@ func (s *Server) listenAndServeAsync() {
 	if len(s.CertFile) > 0 || len(s.KeyFile) > 0 {
 		go func() {
 			if err := doListenAndServeTLS(&s.Server, s.CertFile, s.KeyFile); err != nil {
-				log.Event(nil, "http server returned error", log.Error(err))
+				log.Error(context.Background(), "http server returned error", err)
 				os.Exit(1)
 			}
 		}()
 	} else {
 		go func() {
 			if err := doListenAndServe(&s.Server); err != nil {
-				log.Event(nil, "http server returned error", log.Error(err))
+				log.Error(context.Background(), "http server returned error", err)
 				os.Exit(1)
 			}
 		}()

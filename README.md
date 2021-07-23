@@ -104,7 +104,7 @@ Start the server in a new go-routine, because this operation is blocking:
     ...
     go func() {
         if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            log.Event(ctx, "error starting http server", log.ERROR, log.Error(err))
+            log.Error(ctx, "error starting http server", err)
             return
         }
     }()
@@ -119,9 +119,9 @@ Shutdown the server when you no longer require it. Usually you will need to do t
     ...
     err := httpServer.Shutdown(shutdownCtx)
     if err != nil {
-        log.Event(shutdownCtx, "http server shutdown error", log.ERROR, log.Error(err))
+        log.Error(shutdownCtx, "http server shutdown error", err)
     } else {
-        log.Event(shutdownCtx, "http server successful shutdown", log.INFO)
+        log.Info(shutdownCtx, "http server successful shutdown")
     }
     ...
 ```
