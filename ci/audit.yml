@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: onsdigital/dp-concourse-tools-nancy
+    tag: latest
+
+inputs:
+  - name: dp-net
+    path: dp-net
+
+run:
+  path: dp-net/ci/scripts/audit.sh
