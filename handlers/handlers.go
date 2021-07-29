@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"github.com/ONSdigital/dp-net/v2/request"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 	"net/http"
 )
 
@@ -42,7 +42,7 @@ func DoCheckCookie(h http.Handler, key Key) http.Handler {
 		cookieValue, err := req.Cookie(key.Cookie())
 		if err != nil {
 			if err != http.ErrNoCookie {
-				log.Event(req.Context(), "unexpected error while extracting value from cookie", log.ERROR, log.Error(err),
+				log.Error(req.Context(), "unexpected error while extracting value from cookie", err,
 					log.Data{"cookie_key": key.Cookie()})
 			}
 		} else {
@@ -59,11 +59,11 @@ func ControllerHandler(controllerHandlerFunc ControllerHandlerFunc) http.Handler
 		locale := request.GetLocaleCode(r)
 		collectionID, err := request.GetCollectionID(r)
 		if err != nil {
-			log.Event(ctx, "unexpected error when getting collection id", log.ERROR, log.Error(err))
+			log.Error(ctx, "unexpected error when getting collection id", err)
 		}
 		accessToken, err := GetFlorenceToken(ctx, r)
 		if err != nil {
-			log.Event(ctx, "unexpected error when getting access token", log.ERROR, log.Error(err))
+			log.Error(ctx, "unexpected error when getting access token", err)
 		}
 		controllerHandlerFunc(w, r, locale, collectionID, accessToken)
 	}
