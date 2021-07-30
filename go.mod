@@ -3,7 +3,7 @@ module github.com/ONSdigital/dp-net/v2
 go 1.16
 
 require (
-	github.com/ONSdigital/dp-api-clients-go v1.34.3
+	github.com/ONSdigital/dp-api-clients-go/v2 v2.1.7-beta
 	github.com/ONSdigital/dp-net v1.0.12
 	github.com/ONSdigital/log.go/v2 v2.0.5
 	github.com/gorilla/mux v1.8.0

@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ONSdigital/dp-api-clients-go/headers"
+	"github.com/ONSdigital/dp-api-clients-go/v2/headers"
 
-	clientsidentity "github.com/ONSdigital/dp-api-clients-go/identity"
+	clientsidentity "github.com/ONSdigital/dp-api-clients-go/v2/identity"
 	dphttp "github.com/ONSdigital/dp-net/v2/http"
 	dprequest "github.com/ONSdigital/dp-net/v2/request"
 	"github.com/ONSdigital/log.go/v2/log"

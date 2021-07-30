@@ -9,7 +9,7 @@ The package also includes http utilities like constants, error definitions, a re
 
 ### Client
 
-The dp-net/http Client provides for robust contextual HTTP, and a default client
+The dp-net/v2/http Client provides for robust contextual HTTP, and a default client
 that inherits the methods associated with the standard HTTP client,
 but with the addition of production-ready timeouts and context-sensitivity,
 and the ability to perform exponential backoff when calling another HTTP server.
@@ -42,7 +42,7 @@ and this will be noticed by the client.
 
 You also do not have to use the default client if you don't like the configured
 timeouts or do not wish to use exponential backoff. The following example shows
-how to configure your own dp-net/http client:
+how to configure your own dp-net/v2/http client:
 
 ```go
 import (

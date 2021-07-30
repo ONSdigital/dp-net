@@ -89,7 +89,7 @@ or, put less portably:
     req.Header.Add("User-Identity", "UserA")
 ```
 
-But most of this should be done by `dp-net/http` and `dp-api-clients-go/...`.
+But most of this should be done by `dp-net/v2/http` and `dp-api-clients-go/v2/...`.
 
 ### Testing
 
@@ -97,7 +97,7 @@ If you need to use the middleware component in unit tests you can call the const
 
 ```go
 import (
-    clientsidentity "github.com/ONSdigital/dp-api-clients-go/identity"
+    clientsidentity "github.com/ONSdigital/dp-api-clients-go/v2/identity"
     dphttp "github.com/ONSdigital/dp-net/v2/http"
     dphandlers "github.com/ONSdigital/dp-net/v2/handlers"
 )

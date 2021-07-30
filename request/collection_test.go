@@ -1,10 +1,11 @@
 package request
 
 import (
-	"github.com/ONSdigital/dp-api-clients-go/headers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/ONSdigital/dp-api-clients-go/v2/headers"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

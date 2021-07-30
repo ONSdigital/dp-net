@@ -1,8 +1,9 @@
 package request
 
 import (
-	"github.com/ONSdigital/dp-api-clients-go/headers"
 	"net/http"
+
+	"github.com/ONSdigital/dp-api-clients-go/v2/headers"
 )
 
 // CollectionID header and cookie keys
