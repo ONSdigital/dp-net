@@ -7,7 +7,7 @@ import (
 
 	dphttp "github.com/ONSdigital/dp-net/http"
 	request "github.com/ONSdigital/dp-net/request"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 )
 
@@ -27,18 +27,18 @@ func CheckIdentity(handle func(http.ResponseWriter, *http.Request)) http.Handler
 		vars := mux.Vars(r)
 		logData := getLogData(ctx, r.URL.EscapedPath(), vars)
 
-		log.Event(ctx, "checking for an identity in request context", log.HTTP(r, 0, 0, nil, nil), logData)
+		log.Info(ctx, "checking for an identity in request context", log.HTTP(r, 0, 0, nil, nil), logData)
 
 		// just checking if an identity exists until permissions are being provided.
 		if !request.IsCallerPresent(ctx) {
-			log.Event(ctx, "no identity found in context of request", log.HTTP(r, 0, 0, nil, nil), logData)
+			log.Info(ctx, "no identity found in context of request", log.HTTP(r, 0, 0, nil, nil), logData)
 			http.Error(w, "unauthenticated request", http.StatusUnauthorized)
 			dphttp.DrainBody(r)
 			return
 		}
 
 		// The request has been authenticated, now run the clients request
-		log.Event(ctx, "identity found in request context, calling downstream handler", log.HTTP(r, 0, 0, nil, nil), logData)
+		log.Info(ctx, "identity found in request context, calling downstream handler", log.HTTP(r, 0, 0, nil, nil), logData)
 		handle(w, r)
 	})
 }
