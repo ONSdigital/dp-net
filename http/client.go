@@ -26,6 +26,17 @@ type Client struct {
 	HTTPClient         *http.Client
 }
 
+// DefaultTransport is the default implementation of Transport and is
+// used by DefaultClient.
+var DefaultTransport = &http.Transport{
+	DialContext: (&net.Dialer{
+		Timeout: 5 * time.Second,
+	}).DialContext,
+	TLSHandshakeTimeout: 5 * time.Second,
+	MaxIdleConns:        10,
+	IdleConnTimeout:     30 * time.Second,
+}
+
 // DefaultClient is a dp-net specific http client with sensible timeouts,
 // exponential backoff, and a contextual dialer.
 var DefaultClient = &Client{
@@ -33,15 +44,8 @@ var DefaultClient = &Client{
 	RetryTime:  20 * time.Millisecond,
 
 	HTTPClient: &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			DialContext: (&net.Dialer{
-				Timeout: 5 * time.Second,
-			}).DialContext,
-			TLSHandshakeTimeout: 5 * time.Second,
-			MaxIdleConns:        10,
-			IdleConnTimeout:     30 * time.Second,
-		},
+		Timeout:   10 * time.Second,
+		Transport: DefaultTransport,
 	},
 }
 
@@ -60,11 +64,22 @@ type Clienter interface {
 	PostForm(ctx context.Context, uri string, data url.Values) (*http.Response, error)
 
 	Do(ctx context.Context, req *http.Request) (*http.Response, error)
+	RoundTrip(req *http.Request) (*http.Response, error)
 }
 
 // NewClient returns a copy of DefaultClient.
 func NewClient() Clienter {
 	newClient := *DefaultClient
+	return &newClient
+}
+
+func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) Clienter {
+	newClient := *DefaultClient
+	awsRoundTripper, ok := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport).(*awsSignerRoundTripper)
+	if !ok {
+		return nil
+	}
+	newClient.HTTPClient.Transport = awsRoundTripper
 	return &newClient
 }
 
@@ -75,6 +90,11 @@ func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 	}
 	c.SetTimeout(timeout)
 	return c
+}
+
+// Clienter roundtripper calls the httpclient roundtripper.
+func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
+	return c.HTTPClient.Transport.RoundTrip(req)
 }
 
 // ClientWithListOfNonRetriablePaths facilitates creating a client and setting a
