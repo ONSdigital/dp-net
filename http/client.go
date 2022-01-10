@@ -26,6 +26,17 @@ type Client struct {
 	HTTPClient         *http.Client
 }
 
+// DefaultTransport is the default implementation of Transport and is
+// used by DefaultClient.
+var DefaultTransport = &http.Transport{
+	DialContext: (&net.Dialer{
+		Timeout: 5 * time.Second,
+	}).DialContext,
+	TLSHandshakeTimeout: 5 * time.Second,
+	MaxIdleConns:        10,
+	IdleConnTimeout:     30 * time.Second,
+}
+
 // DefaultClient is a dp-net specific http client with sensible timeouts,
 // exponential backoff, and a contextual dialer.
 var DefaultClient = &Client{
@@ -33,15 +44,8 @@ var DefaultClient = &Client{
 	RetryTime:  20 * time.Millisecond,
 
 	HTTPClient: &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			DialContext: (&net.Dialer{
-				Timeout: 5 * time.Second,
-			}).DialContext,
-			TLSHandshakeTimeout: 5 * time.Second,
-			MaxIdleConns:        10,
-			IdleConnTimeout:     30 * time.Second,
-		},
+		Timeout:   10 * time.Second,
+		Transport: DefaultTransport,
 	},
 }
 
@@ -68,6 +72,17 @@ func NewClient() Clienter {
 	return &newClient
 }
 
+// NewClientWithAwsSigner return a new client with aws signer profile.
+func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) (Clienter, error) {
+	newClient := *DefaultClient
+	awsRoundTripper, err := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport)
+	if err != nil {
+		return nil, err
+	}
+	newClient.HTTPClient.Transport = awsRoundTripper
+	return &newClient, nil
+}
+
 // ClientWithTimeout facilitates creating a client and setting request timeout.
 func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 	if c == nil {
@@ -75,6 +90,11 @@ func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 	}
 	c.SetTimeout(timeout)
 	return c
+}
+
+// Clienter roundtripper calls the httpclient roundtripper.
+func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
+	return c.HTTPClient.Transport.RoundTrip(req)
 }
 
 // ClientWithListOfNonRetriablePaths facilitates creating a client and setting a
