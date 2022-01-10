@@ -1,4 +1,4 @@
-module github.com/ONSdigital/dp-net/v2
+module github.com/ONSdigital/dp-net
 
 go 1.16
 
