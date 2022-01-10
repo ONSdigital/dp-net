@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"log"
 	"net/http"
@@ -11,19 +10,19 @@ import (
 	awsAuth "github.com/ONSdigital/dp-elasticsearch/v2/awsauth"
 )
 
-type awsSignerRoundTripper struct {
+type AwsSignerRoundTripper struct {
 	signer       *awsAuth.Signer
 	roundTripper http.RoundTripper
 }
 
-func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string, customTransport http.RoundTripper) http.RoundTripper {
+func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string, customTransport http.RoundTripper) *AwsSignerRoundTripper {
 	var roundTripper http.RoundTripper
 	if awsRegion == "" || awsService == "" {
-		log.Fatal(context.Background(), "aws region and service should be valid options")
+		log.Fatal("aws region and service should be valid options")
 	}
 	awsSigner, err := awsAuth.NewAwsSigner(awsFilename, awsProfile, awsRegion, awsService)
 	if err != nil {
-		log.Fatal(context.Background(), "failed to create aws v4 signer", err)
+		log.Fatal("failed to create aws v4 signer", err)
 	}
 
 	if customTransport == nil {
@@ -32,13 +31,13 @@ func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService str
 		roundTripper = customTransport
 	}
 
-	return &awsSignerRoundTripper{
+	return &AwsSignerRoundTripper{
 		signer:       awsSigner,
 		roundTripper: roundTripper,
 	}
 }
 
-func (srt *awsSignerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+func (srt *AwsSignerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	var body []byte
 	var err error
 	if req.Body != nil {

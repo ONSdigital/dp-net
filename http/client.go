@@ -75,10 +75,7 @@ func NewClient() Clienter {
 
 func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) Clienter {
 	newClient := *DefaultClient
-	awsRoundTripper, ok := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport).(*awsSignerRoundTripper)
-	if !ok {
-		return nil
-	}
+	awsRoundTripper := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport)
 	newClient.HTTPClient.Transport = awsRoundTripper
 	return &newClient
 }
