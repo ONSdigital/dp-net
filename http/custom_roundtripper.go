@@ -2,8 +2,8 @@ package http
 
 import (
 	"bytes"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -15,14 +15,14 @@ type AwsSignerRoundTripper struct {
 	roundTripper http.RoundTripper
 }
 
-func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string, customTransport http.RoundTripper) *AwsSignerRoundTripper {
+func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string, customTransport http.RoundTripper) (*AwsSignerRoundTripper, error) {
 	var roundTripper http.RoundTripper
 	if awsRegion == "" || awsService == "" {
-		log.Fatal("aws region and service should be valid options")
+		return nil, fmt.Errorf("aws region and service should be valid options")
 	}
 	awsSigner, err := awsAuth.NewAwsSigner(awsFilename, awsProfile, awsRegion, awsService)
 	if err != nil {
-		log.Fatal("failed to create aws v4 signer", err)
+		return nil, fmt.Errorf("failed to create aws v4 signer")
 	}
 
 	if customTransport == nil {
@@ -34,7 +34,7 @@ func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService str
 	return &AwsSignerRoundTripper{
 		signer:       awsSigner,
 		roundTripper: roundTripper,
-	}
+	}, nil
 }
 
 func (srt *AwsSignerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -43,11 +43,11 @@ func (srt *AwsSignerRoundTripper) RoundTrip(req *http.Request) (*http.Response, 
 	if req.Body != nil {
 		body, err = io.ReadAll(req.Body)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to read request body: %w", err)
 		}
 	}
 	if err := srt.signer.Sign(req, bytes.NewReader(body), time.Now()); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to sign the request: %w", err)
 	}
 
 	return srt.roundTripper.RoundTrip(req)
