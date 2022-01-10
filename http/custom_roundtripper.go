@@ -22,7 +22,7 @@ func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService str
 	}
 	awsSigner, err := awsAuth.NewAwsSigner(awsFilename, awsProfile, awsRegion, awsService)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create aws v4 signer", err)
+		return nil, fmt.Errorf("failed to create aws v4 signer: %w", err)
 	}
 
 	if customTransport == nil {
