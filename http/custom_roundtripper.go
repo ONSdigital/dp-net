@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	awsAuth "github.com/ONSdigital/dp-elasticsearch/v2/awsauth"
+	awsAuth "github.com/ONSdigital/dp-net/awsauth"
 )
 
 type AwsSignerRoundTripper struct {
