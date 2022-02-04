@@ -86,8 +86,6 @@ func TestJSON(t *testing.T) {
 	})
 }
 
-
-
 func TestError(t *testing.T) {
 
 	r := responder.New()
@@ -191,6 +189,53 @@ func TestErrors(t *testing.T) {
 				Convey("the response writer should record the appropriate status code and response message", func() {
 					expectedCode := http.StatusForbidden
 					expectedBody := `{"errors":["test response 1","test response 2","test response 3"]}`
+
+					So(w.Code, ShouldEqual, expectedCode)
+					So(w.Body.String(), ShouldResemble, expectedBody)
+				})
+			})
+		})
+	})
+}
+
+func TestErrorWithStatus(t *testing.T) {
+
+	r := responder.New()
+
+	Convey("Given a valid context and response writer", t, func() {
+		ctx := context.Background()
+		w := httptest.NewRecorder()
+
+		Convey("Given a standard Go error", func() {
+			err := errors.New("test error")
+
+			Convey("when ErrorWithStatus() is called", func() {
+				r.ErrorWithStatus(ctx, w, http.StatusUnauthorized, err)
+
+				Convey("the response writer should record status code 401 and appropriate error response body", func() {
+					expectedCode := http.StatusUnauthorized
+					expectedBody := `{"errors":["test error"]}`
+
+					So(w.Code, ShouldEqual, expectedCode)
+					So(w.Body.String(), ShouldResemble, expectedBody)
+				})
+
+			})
+		})
+
+		Convey("Given an error that satisfies interfaces providing Code() and Response() functions", func() {
+			err := testError{
+				err:  errors.New("test error"),
+				msg: "test response",
+				code: http.StatusUnauthorized,
+			}
+
+			Convey("when ErrorWithStatus() is called", func() {
+				r.ErrorWithStatus(ctx, w, http.StatusForbidden, err)
+
+				Convey("the response writer should record the status code provided in the call and response message", func() {
+					expectedCode := http.StatusForbidden
+					expectedBody := `{"errors":["test response"]}`
 
 					So(w.Code, ShouldEqual, expectedCode)
 					So(w.Body.String(), ShouldResemble, expectedBody)

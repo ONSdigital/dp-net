@@ -10,6 +10,10 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+const (
+	packagePath = "dp-net/responder"
+)
+
 type testError struct {
 	err        error
 	statusCode int
@@ -168,16 +172,16 @@ func TestStackTraceHappy(t *testing.T){
 			st := stackTrace(err)
 			So(len(st), ShouldEqual, 19)
 			
-			So(st[0].File, ShouldContainSubstring, "dp-cantabular-filter-flex-api/responder/callback_test.go")
-			So(st[0].Line, ShouldEqual, 195)
+			So(st[0].File, ShouldContainSubstring, packagePath + "/callback_test.go")
+			So(st[0].Line, ShouldEqual, 199)
 			So(st[0].Function, ShouldEqual, "testCallStackFunc3")
 
-			So(st[1].File, ShouldContainSubstring, "dp-cantabular-filter-flex-api/responder/callback_test.go")
-			So(st[1].Line, ShouldEqual, 191)
+			So(st[1].File, ShouldContainSubstring, packagePath + "/callback_test.go")
+			So(st[1].Line, ShouldEqual, 195)
 			So(st[1].Function, ShouldEqual, "testCallStackFunc2")
 
-			So(st[2].File, ShouldContainSubstring, "dp-cantabular-filter-flex-api/responder/callback_test.go")
-			So(st[2].Line, ShouldEqual, 187)
+			So(st[2].File, ShouldContainSubstring, packagePath + "/callback_test.go")
+			So(st[2].Line, ShouldEqual, 191)
 			So(st[2].Function, ShouldEqual, "testCallStackFunc1")
 		})
 	})

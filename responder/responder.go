@@ -95,40 +95,12 @@ func respondError(ctx context.Context, w http.ResponseWriter, err error){
 // code and allows you to provide one directly. May be useful when you don't want to
 // create a new error type just to include a specific status code
 func (r *Responder) ErrorWithStatus(ctx context.Context, w http.ResponseWriter, status int, err error){
-	log.Info(ctx, "error responding to HTTP request", log.ERROR, &log.EventErrors{{
-			Message:    err.Error(),
-			StackTrace: stackTrace(err),
-			Data:       unwrapLogData(err),
-		}},
-	)
-
-	msg    := errorMessage(err)
-	resp   := errorResponse{
-		Errors: []string{msg},
-	}
-
-	logData := log.Data{
-		"error":       err.Error(),
-		"response":    msg,
-		"status_code": status,
-	}
-
-	b, err := json.Marshal(resp)
-	if err != nil {
-		log.Error(ctx, "badly formed error response", err, logData)
-		http.Error(w, msg, status)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(status)
-
-	if _, err := w.Write(b); err != nil {
-		log.Error(ctx, "failed to write error response", err, logData)
-		return
-	}
-
-	log.Info(ctx, "returned error response", logData)
+	respondError(ctx, w, Error{
+		statusCode: status,
+		err:        errors.Unwrap(err),
+		message:    errorMessage(err),
+		logData:    unwrapLogData(err),
+	})
 }
 
 // Errors responds with a slice of errors formatted to ONS's desired error response structure.
