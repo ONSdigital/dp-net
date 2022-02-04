@@ -37,13 +37,13 @@ func (h *testHandler) Get(w http.ResponseWriter, r *http.Request) {
 			logData:    log.Data{
 				"log": "me",
 			}
-			message:    "bad formed request",
+			message: "badly formed request",
 		)
 		return
 	}
 
-	// Basic Go errors work too, defaults to status 500 and returns
-	// original error string to user, no stack trace.
+	// Basic Go errors work too, defaults to status 500, logs and returns
+	// original error string to user, no stack trace or log data.
 	if req.Hello != "world"{
 		h.respond.Error(ctx, w, errors.New("Hello, world!"))
 		return
@@ -55,6 +55,13 @@ func (h *testHandler) Get(w http.ResponseWriter, r *http.Request) {
 	// stack trace always points to deepest point it was wrapped.
 	if err := h.someFunc(); err != nil{
 		h.respond.Error(ctx, w, fmt.Errorf("failed to someFunc: %w", err))
+		return
+	}
+
+	// ErrorWithStatus allows you to specify a status code without
+	// implementing a new error type
+	if err := h.someFunc(); err != nil{
+		h.respond.ErrorWithStatus(ctx, w, http.StatusForbidden, err)
 		return
 	}
 
