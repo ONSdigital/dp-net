@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
 
 	"github.com/ONSdigital/dp-net/v2/responder"
+	"github.com/ONSdigital/log.go/v2/log"
 
 	"github.com/pkg/errors"
 )
@@ -19,10 +20,10 @@ type testResponse struct{
 }
 
 type testHandler struct{
-	respond responder.Responder
+	respond *responder.Responder
 }
 
-func (h *testHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (h testHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// First error response takes full advantage of interfaces
@@ -30,15 +31,15 @@ func (h *testHandler) Get(w http.ResponseWriter, r *http.Request) {
 	// and stack trace (by wrapping with pkg/errors), responds to
 	// user with specified message and status code.
 	var req testRequest
-	if err json.NewDecoder(r.Body).Decode(&req); err != nil{
-		h.respond.Error(ctx, w, h.respond.Error(ctx, w, &testError{
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil{
+		h.respond.Error(ctx, w, &testError{
 			err:        errors.Wrap(err, "failed to decode"),
 			statusCode: http.StatusBadRequest,
 			logData:    log.Data{
 				"log": "me",
-			}
+			},
 			message: "badly formed request",
-		)
+		})
 		return
 	}
 
@@ -70,7 +71,7 @@ func (h *testHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.respond.JSON(ctx, w, http.StatusOK, resp)
-})
+}
 
 func (h *testHandler) someFunc() error{
 	// Any combination of information can be included in errors,
@@ -86,8 +87,41 @@ func main() {
 		respond: responder.New(),
 	}
 
-	mux := http.NewServeMux
-	mux.HandleFunc("/hello", testHandler)
+	mux := http.NewServeMux()
+	mux.Handle("/hello", handler)
 
 	http.ListenAndServe(":3333", mux)
+}
+
+type testError struct{
+	err        error
+	statusCode int
+	logData    map[string]interface{}
+	message    string
+}
+
+// standard Go error interfaces
+func (e *testError) Error() string{
+	if e.err == nil{
+		return "nil"
+	}
+	return e.err.Error()
+}
+
+func (e *testError) Unwrap() error{
+	return e.err
+}
+
+// Optional interfaces to implement to use full functionality
+// of responder
+func (e *testError) Code() int{
+	return e.statusCode
+}
+
+func (e *testError) LogData() map[string]interface{}{
+	return e.logData
+}
+
+func (e *testError) Message() string{
+	return e.message
 }
