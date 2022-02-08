@@ -120,18 +120,19 @@ func stackTrace(err error) []log.EventStackTrace{
 	var serr stacktracer
 	var resp []log.EventStackTrace
 
-	for errors.Unwrap(err) != nil && errors.As(err, &serr) {
-		st := serr.StackTrace()
-		resp = make([]log.EventStackTrace, 0)
-		for _, f := range st{
-			line, _ := strconv.Atoi(fmt.Sprintf("%d",  f))
-			resp = append(resp, log.EventStackTrace{
-				File:     fmt.Sprintf("%+s", f),
-				Function: fmt.Sprintf("%n",  f),
-				Line:     line,
-			})
+	for errors.Unwrap(err) != nil{
+		if errors.As(err, &serr) {
+			st := serr.StackTrace()
+			resp = make([]log.EventStackTrace, 0)
+			for _, f := range st{
+				line, _ := strconv.Atoi(fmt.Sprintf("%d",  f))
+				resp = append(resp, log.EventStackTrace{
+					File:     fmt.Sprintf("%+s", f),
+					Function: fmt.Sprintf("%n",  f),
+					Line:     line,
+				})
+			}
 		}
-
 		err = errors.Unwrap(err)
 	}
 

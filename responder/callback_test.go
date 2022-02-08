@@ -173,16 +173,33 @@ func TestStackTraceHappy(t *testing.T){
 			So(len(st), ShouldEqual, 19)
 			
 			So(st[0].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[0].Line, ShouldEqual, 199)
+			So(st[0].Line, ShouldEqual, 216)
 			So(st[0].Function, ShouldEqual, "testCallStackFunc3")
 
 			So(st[1].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[1].Line, ShouldEqual, 195)
+			So(st[1].Line, ShouldEqual, 212)
 			So(st[1].Function, ShouldEqual, "testCallStackFunc2")
 
 			So(st[2].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[2].Line, ShouldEqual, 191)
+			So(st[2].Line, ShouldEqual, 208)
 			So(st[2].Function, ShouldEqual, "testCallStackFunc1")
+		})
+	})
+
+	Convey("Given an error with intermittently embedded stack traces from pkg/errors", t, func() {
+		err := testCallStackFunc4()
+		Convey("When stackTrace(err) is called", func() {
+			st := stackTrace(err)
+			So(len(st), ShouldEqual, 18)
+			
+			So(st[0].File, ShouldContainSubstring, packagePath + "/callback_test.go")
+			So(st[0].Line, ShouldEqual, 216)
+			So(st[0].Function, ShouldEqual, "testCallStackFunc3")
+
+			So(st[1].File, ShouldContainSubstring, packagePath + "/callback_test.go")
+			So(st[1].Line, ShouldEqual, 221)
+			So(st[1].Function, ShouldEqual, "testCallStackFunc4")
+
 		})
 	})
 }
@@ -198,4 +215,11 @@ func testCallStackFunc2() error{
 func testCallStackFunc3() error{
 	cause := errors.New("I am the cause")
 	return errors.Wrap(cause, "I am the context")
+}
+
+func testCallStackFunc4() error{
+	if err := testCallStackFunc3(); err != nil{
+		return fmt.Errorf("I do not have embedded stack trace, but this cause does: %w", err)
+	}
+	return nil
 }
