@@ -373,6 +373,37 @@ func TestSetPathsWithNoRetries(t *testing.T) {
 	})
 }
 
+func TestNewClientWithTransport(t *testing.T) {
+	Convey("Given a custom http transport", t, func() {
+		customTransport := DefaultTransport
+		customTransport.IdleConnTimeout = 30 * time.Second
+
+		Convey("And a new http client is created with custom transport", func() {
+			httpClient := NewClientWithTransport(customTransport)
+
+			ts := httptest.NewTestServer(200)
+			expectedCallCount := 0
+			Convey("When Get() is called on a URL", func() {
+				expectedCallCount++
+				resp, err := httpClient.Get(context.Background(), ts.URL)
+				So(err, ShouldBeNil)
+				So(resp, ShouldNotBeNil)
+
+				call, err := unmarshallResp(resp)
+				So(err, ShouldBeNil)
+
+				Convey("Then the server sees a GET with no body", func() {
+					So(call.CallCount, ShouldEqual, expectedCallCount)
+					So(call.Method, ShouldEqual, "GET")
+					So(call.Body, ShouldEqual, "")
+					So(call.Error, ShouldEqual, "")
+					So(resp.Header.Get("Content-Type"), ShouldContainSubstring, "text/plain")
+				})
+			})
+		})
+	})
+}
+
 // end of tests //
 
 // delayByOneSecondOn returns the json which will instruct the server to delay responding on call-number `delayOnCall`

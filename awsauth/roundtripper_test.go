@@ -41,34 +41,40 @@ func TestNewAWSSignerRoundTripper_WhenAWSServiceIsEmpty_Returns(t *testing.T) {
 }
 
 func TestNewClientWithTransport(t *testing.T) {
-	Convey("Given a default client and awsauth round tripper", t, func() {
+	Convey("Given a access and secret key are set in the environement", t, func() {
+		accessKeyID, secretAccessKey := setEnvironmentVars()
 
-		awsSignerRT, err := NewAWSSignerRoundTripper("some_filename", "some_profile", "some_region", "some_service")
-		if err != nil {
-			t.Errorf(fmt.Sprintf("unable to implement roundtripper for test, error: %v", err))
-		}
+		Convey("When a new client is created with aws signer round tripper", func() {
 
-		httpClient := dphttp.NewClientWithTransport(awsSignerRT.roundTripper)
+			awsSignerRT, err := NewAWSSignerRoundTripper("", "", "eu-west-1", "es")
+			if err != nil {
+				t.Errorf(fmt.Sprintf("unable to implement roundtripper for test, error: %v", err))
+			}
 
-		ts := httptest.NewTestServer(200)
-		expectedCallCount := 0
-		Convey("When Get() is called on a URL", func() {
-			expectedCallCount++
-			resp, err := httpClient.Get(context.Background(), ts.URL)
-			So(resp, ShouldNotBeNil)
-			So(err, ShouldBeNil)
+			httpClient := dphttp.NewClientWithTransport(awsSignerRT)
 
-			call, err := unmarshallResp(resp)
-			So(err, ShouldBeNil)
+			ts := httptest.NewTestServer(200)
+			expectedCallCount := 0
+			Convey("When Get() is called on a URL", func() {
+				expectedCallCount++
+				resp, err := httpClient.Get(context.Background(), ts.URL)
+				So(err, ShouldBeNil)
+				So(resp, ShouldNotBeNil)
 
-			Convey("Then the server sees a GET with no body", func() {
-				So(call.CallCount, ShouldEqual, expectedCallCount)
-				So(call.Method, ShouldEqual, "GET")
-				So(call.Body, ShouldEqual, "")
-				So(call.Error, ShouldEqual, "")
-				So(resp.Header.Get("Content-Type"), ShouldContainSubstring, "text/plain")
+				call, err := unmarshallResp(resp)
+				So(err, ShouldBeNil)
+
+				Convey("Then the server sees a GET with no body", func() {
+					So(call.CallCount, ShouldEqual, expectedCallCount)
+					So(call.Method, ShouldEqual, "GET")
+					So(call.Body, ShouldEqual, "")
+					So(call.Error, ShouldEqual, "")
+					So(resp.Header.Get("Content-Type"), ShouldContainSubstring, "text/plain")
+				})
 			})
 		})
+
+		removeTestEnvironmentVariables(accessKeyID, secretAccessKey)
 	})
 }
 
