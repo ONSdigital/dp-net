@@ -178,17 +178,6 @@ func TestUnwrapStatusCodeHappy(t *testing.T){
 		})
 	})
 
-	Convey("Given an error with no embedded status code", t, func() {
-		err := &testError{}
-
-		Convey("When StatusCode(err) is called", func() {
-			status := dperrors.StatusCode(err)
-			expected := http.StatusInternalServerError
-
-			So(status, ShouldEqual, expected)
-		})
-	})
-
 	Convey("Given an error chain with embedded status code", t, func() {
 		err1 := &testError{
 			err:        errors.New("original error"),
@@ -235,4 +224,16 @@ func TestUnwrapStatusCodeHappy(t *testing.T){
 			})
 		})
 	})
+
+	Convey("Given an error with no embedded status code", t, func() {
+		err := &testError{}
+
+		Convey("When StatusCode(err) is called", func() {
+			status := dperrors.UnwrapStatusCode(err)
+			expected := http.StatusInternalServerError
+
+			So(status, ShouldEqual, expected)
+		})
+	})
+
 }
