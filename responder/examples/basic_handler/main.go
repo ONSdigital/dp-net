@@ -32,9 +32,8 @@ func (h testHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// user with specified message and status code.
 	var req testRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil{
-		h.respond.Error(ctx, w, &testError{
+		h.respond.Error(ctx, w, http.StatusBadRequest, &testError{
 			err:        errors.Wrap(err, "failed to decode"),
-			statusCode: http.StatusBadRequest,
 			logData:    log.Data{
 				"log": "me",
 			},
@@ -43,26 +42,19 @@ func (h testHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Basic Go errors work too, defaults to status 500, logs and returns
+	// Basic Go errors work too, logs and returns
 	// original error string to user, no stack trace or log data.
 	if req.Hello != "world"{
-		h.respond.Error(ctx, w, errors.New("Hello, world!"))
+		h.respond.Error(ctx, w,  http.StatusInternalServerError, errors.New("Hello, world!"))
 		return
 	}
 
-	// By making sure errors are wrapped at each level, logData, status codes
+	// By making sure errors are wrapped at each level, logData,
 	// response messages and stack traces can be propagated down the call stack.
 	// Status codes and error messages can be overwritten at any level,
 	// stack trace always points to deepest point it was wrapped.
 	if err := h.someFunc(); err != nil{
-		h.respond.Error(ctx, w, fmt.Errorf("failed to someFunc: %w", err))
-		return
-	}
-
-	// ErrorWithStatus allows you to specify a status code without
-	// implementing a new error type
-	if err := h.someFunc(); err != nil{
-		h.respond.ErrorWithStatus(ctx, w, http.StatusForbidden, err)
+		h.respond.Error(ctx, w, http.StatusUnauthorized, fmt.Errorf("failed to someFunc: %w", err))
 		return
 	}
 
@@ -78,7 +70,7 @@ func (h *testHandler) someFunc() error{
 	// ommitting what's unnecessary.
 	return &testError{
 		err:        errors.New("original cause"),
-		statusCode: http.StatusForbidden,
+		message:    "message returned to user",
 	}
 }
 
@@ -90,7 +82,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/hello", handler)
 
-	http.ListenAndServe(":3333", mux)
+	panic(http.ListenAndServe(":3333", mux))
 }
 
 type testError struct{
@@ -110,12 +102,6 @@ func (e *testError) Error() string{
 
 func (e *testError) Unwrap() error{
 	return e.err
-}
-
-// Optional interfaces to implement to use full functionality
-// of responder
-func (e *testError) Code() int{
-	return e.statusCode
 }
 
 func (e *testError) LogData() map[string]interface{}{
