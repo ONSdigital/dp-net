@@ -2,10 +2,10 @@ package errors
 
 import (
 	"errors"
-	"strconv"
 	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	"github.com/ONSdigital/log.go/v2/log"
 )
@@ -70,19 +70,19 @@ func UnwrapLogData(err error) log.Data {
 // and returns the slice of stack frames. These can are of type
 // log.go/EventStackTrace so can be used directly with log.Go's
 // available API to preserve the correct error logging format
-func StackTrace(err error) []log.EventStackTrace{
+func StackTrace(err error) []log.EventStackTrace {
 	var serr stacktracer
 	var resp []log.EventStackTrace
 
-	for errors.Unwrap(err) != nil{
+	for errors.Unwrap(err) != nil {
 		if errors.As(err, &serr) {
 			st := serr.StackTrace()
 			resp = make([]log.EventStackTrace, 0)
-			for _, f := range st{
-				line, _ := strconv.Atoi(fmt.Sprintf("%d",  f))
+			for _, f := range st {
+				line, _ := strconv.Atoi(fmt.Sprintf("%d", f))
 				resp = append(resp, log.EventStackTrace{
 					File:     fmt.Sprintf("%+s", f),
-					Function: fmt.Sprintf("%n",  f),
+					Function: fmt.Sprintf("%n", f),
 					Line:     line,
 				})
 			}

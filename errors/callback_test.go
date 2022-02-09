@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ONSdigital/log.go/v2/log"
 	dperrors "github.com/ONSdigital/dp-net/v2/errors"
+	"github.com/ONSdigital/log.go/v2/log"
 
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -54,28 +54,28 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 
 	Convey("Given an error chain with wrapped logData", t, func() {
 		err1 := &testError{
-			err:     errors.New("original error"),
+			err: errors.New("original error"),
 			logData: log.Data{
 				"log": "data",
 			},
 		}
 
 		err2 := &testError{
-			err:     fmt.Errorf("err1: %w", err1),
+			err: fmt.Errorf("err1: %w", err1),
 			logData: log.Data{
 				"additional": "data",
 			},
 		}
 
 		err3 := &testError{
-			err:     fmt.Errorf("err2: %w", err2),
+			err: fmt.Errorf("err2: %w", err2),
 			logData: log.Data{
 				"final": "data",
 			},
 		}
 
 		Convey("When unwrapLogData(err) is called", func() {
-			logData  := dperrors.UnwrapLogData(err3)
+			logData := dperrors.UnwrapLogData(err3)
 			expected := log.Data{
 				"final":      "data",
 				"additional": "data",
@@ -88,7 +88,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 
 	Convey("Given an error chain with intermittent wrapped logData", t, func() {
 		err1 := &testError{
-			err:     errors.New("original error"),
+			err: errors.New("original error"),
 			logData: log.Data{
 				"log": "data",
 			},
@@ -118,7 +118,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 
 	Convey("Given an error chain with wrapped logData with duplicate key values", t, func() {
 		err1 := &testError{
-			err:     errors.New("original error"),
+			err: errors.New("original error"),
 			logData: log.Data{
 				"log":        "data",
 				"duplicate":  "duplicate_data1",
@@ -127,7 +127,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 		}
 
 		err2 := &testError{
-			err:     fmt.Errorf("err1: %w", err1),
+			err: fmt.Errorf("err1: %w", err1),
 			logData: log.Data{
 				"additional": "data",
 				"duplicate":  "duplicate_data2",
@@ -136,7 +136,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 		}
 
 		err3 := &testError{
-			err:     fmt.Errorf("err2: %w", err2),
+			err: fmt.Errorf("err2: %w", err2),
 			logData: log.Data{
 				"final":      "data",
 				"duplicate":  "duplicate_data3",
@@ -163,7 +163,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 	})
 }
 
-func TestUnwrapStatusCodeHappy(t *testing.T){
+func TestUnwrapStatusCodeHappy(t *testing.T) {
 
 	Convey("Given an error with embedded status code", t, func() {
 		err := &testError{
@@ -185,15 +185,15 @@ func TestUnwrapStatusCodeHappy(t *testing.T){
 		}
 
 		err2 := &testError{
-			err:     fmt.Errorf("err1: %w", err1),
+			err: fmt.Errorf("err1: %w", err1),
 		}
 
 		err3 := &testError{
-			err:     fmt.Errorf("err2: %w", err2),
+			err: fmt.Errorf("err2: %w", err2),
 		}
 
 		Convey("When UnwrapStatusCode(err) is called", func() {
-			status  := dperrors.UnwrapStatusCode(err3)
+			status := dperrors.UnwrapStatusCode(err3)
 			expected := http.StatusTooManyRequests
 
 			So(status, ShouldEqual, expected)
@@ -207,16 +207,16 @@ func TestUnwrapStatusCodeHappy(t *testing.T){
 		}
 
 		err2 := &testError{
-			err:     fmt.Errorf("err1: %w", err1),
+			err:        fmt.Errorf("err1: %w", err1),
 			statusCode: http.StatusUnauthorized,
 		}
 
 		err3 := &testError{
-			err:     fmt.Errorf("err2: %w", err2),
+			err: fmt.Errorf("err2: %w", err2),
 		}
 
 		Convey("When UnwrapStatusCode(err) is called", func() {
-			status  := dperrors.UnwrapStatusCode(err3)
+			status := dperrors.UnwrapStatusCode(err3)
 			expected := http.StatusUnauthorized
 			Convey("The first valid status code is returned ", func() {
 

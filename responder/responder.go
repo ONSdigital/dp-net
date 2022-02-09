@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ONSdigital/log.go/v2/log"
 	dperrors "github.com/ONSdigital/dp-net/v2/errors"
+	"github.com/ONSdigital/log.go/v2/log"
 
 	"github.com/pkg/errors"
 )
@@ -22,12 +22,12 @@ func New() *Responder {
 
 // JSON responds to a HTTP request, expecting the response body
 // to be marshall-able into JSON
-func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int, resp interface{}){
+func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int, resp interface{}) {
 	b, err := json.Marshal(resp)
 	if err != nil {
 		respondError(ctx, w, http.StatusInternalServerError, &er{
-			err:        errors.Wrap(err, "failed to marshal response"),
-			message:    "Internal Server Error: Badly formed reponse attempt",
+			err:     errors.Wrap(err, "failed to marshal response"),
+			message: "Internal Server Error: Badly formed reponse attempt",
 			logData: log.Data{
 				"response": resp,
 			},
@@ -54,16 +54,16 @@ func (r *Responder) Error(ctx context.Context, w http.ResponseWriter, status int
 
 // respondError is the implementation of Error, seperated so it can be used internally
 // by the other respond functions without having to create a new Responder
-func respondError(ctx context.Context, w http.ResponseWriter, status int, err error){
+func respondError(ctx context.Context, w http.ResponseWriter, status int, err error) {
 	log.Info(ctx, "error responding to HTTP request", log.ERROR, &log.EventErrors{{
-			Message:    err.Error(),
-			StackTrace: dperrors.StackTrace(err),
-			Data:       dperrors.UnwrapLogData(err),
-		}},
+		Message:    err.Error(),
+		StackTrace: dperrors.StackTrace(err),
+		Data:       dperrors.UnwrapLogData(err),
+	}},
 	)
 
-	msg    := dperrors.ErrorMessage(err)
-	resp   := errorResponse{
+	msg := dperrors.ErrorMessage(err)
+	resp := errorResponse{
 		Errors: []string{msg},
 	}
 
@@ -95,12 +95,12 @@ func respondError(ctx context.Context, w http.ResponseWriter, status int, err er
 // Note you will have to pass a slice of []error rather than slice of []{some type that implements
 // error}. The underlying structs can be any type that implements error but the slice itself must be
 // defined as []error
-func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status int, errs []error){
+func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status int, errs []error) {
 	var errorLogs log.EventErrors
 	var errorMsgs []string
 
-	for _, err := range errs{
-		errorLogs = append(errorLogs,log.EventError{
+	for _, err := range errs {
+		errorLogs = append(errorLogs, log.EventError{
 			Message:    err.Error(),
 			StackTrace: dperrors.StackTrace(err),
 			Data:       dperrors.UnwrapLogData(err),
@@ -110,7 +110,7 @@ func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status in
 
 	log.Info(ctx, "error responding to HTTP request", log.ERROR, &errorLogs)
 
-	resp   := errorResponse{
+	resp := errorResponse{
 		Errors: errorMsgs,
 	}
 
@@ -139,7 +139,7 @@ func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status in
 
 // Bytes responds to a http request with the raw bytes of whatever's passed as
 // resp. Can be used to respond with a raw string, bytes, pre-encoded object etc
-func (r *Responder) Bytes(ctx context.Context, w http.ResponseWriter, status int, resp []byte){
+func (r *Responder) Bytes(ctx context.Context, w http.ResponseWriter, status int, resp []byte) {
 	w.WriteHeader(status)
 	if _, err := w.Write(resp); err != nil {
 		log.Error(ctx, "failed to write response", err, log.Data{
@@ -150,6 +150,6 @@ func (r *Responder) Bytes(ctx context.Context, w http.ResponseWriter, status int
 }
 
 // StatusCode responds with a raw status code
-func (r *Responder) StatusCode(w http.ResponseWriter, status int){
+func (r *Responder) StatusCode(w http.ResponseWriter, status int) {
 	w.WriteHeader(status)
 }

@@ -9,7 +9,6 @@ import (
 
 	"github.com/ONSdigital/dp-net/v2/responder"
 
-
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -18,8 +17,8 @@ type testResponse struct {
 }
 
 type testError struct {
-	err  error
-	msg  string
+	err error
+	msg string
 }
 
 func (e testError) Error() string {
@@ -108,7 +107,7 @@ func TestError(t *testing.T) {
 
 		Convey("Given an error that satisfies interface providing Response() function", func() {
 			err := testError{
-				err:  errors.New("test error"),
+				err: errors.New("test error"),
 				msg: "test response",
 			}
 
@@ -159,21 +158,21 @@ func TestErrors(t *testing.T) {
 		Convey("Given an slice errors that satisfy an interface providing a Response() function", func() {
 			testErrs := []testError{
 				{
-					err:  errors.New("test error 1"),
+					err: errors.New("test error 1"),
 					msg: "test response 1",
 				},
 				{
-					err:  errors.New("test error 2"),
+					err: errors.New("test error 2"),
 					msg: "test response 2",
 				},
 				{
-					err:  errors.New("test error 3"),
+					err: errors.New("test error 3"),
 					msg: "test response 3",
 				},
 			}
 
 			var errs []error
-			for _, err := range testErrs{
+			for _, err := range testErrs {
 				errs = append(errs, err)
 			}
 
