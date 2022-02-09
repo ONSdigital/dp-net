@@ -8,7 +8,7 @@ type er struct{
 }
 
 // Error satisfies the standard library Go error interface
-func (e er) Error() string{
+func (e *er) Error() string{
 	if e.err == nil{
 		return "nil"
 	}
@@ -16,7 +16,7 @@ func (e er) Error() string{
 }
 
 // Unwrap implements the standard library Go unwrapper interface
-func (e er) Unwrap() error{
+func (e *er) Unwrap() error{
 	return e.err
 }
 
@@ -25,12 +25,12 @@ func (e er) Unwrap() error{
 // given error. This is useful when you don't want sensitive information
 // or implementation details being exposed to the caller which could be
 // used to find exploits in our API
-func (e er) Message() string{
+func (e *er) Message() string{
 	return e.message
 }
 
 // LogData satisfies the dataLogger interface which is used to recover
 // log data from an error
-func (e er) LogData() map[string]interface{}{
+func (e *er) LogData() map[string]interface{}{
 	return e.logData
 }

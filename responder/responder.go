@@ -25,7 +25,7 @@ func New() *Responder {
 func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int, resp interface{}){
 	b, err := json.Marshal(resp)
 	if err != nil {
-		respondError(ctx, w, http.StatusInternalServerError, er{
+		respondError(ctx, w, http.StatusInternalServerError, &er{
 			err:        errors.Wrap(err, "failed to marshal response"),
 			message:    "Internal Server Error: Badly formed reponse attempt",
 			logData: log.Data{
