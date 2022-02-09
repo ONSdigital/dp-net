@@ -1,17 +1,15 @@
-package responder
+package errors_test
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/ONSdigital/log.go/v2/log"
+	dperrors "github.com/ONSdigital/dp-net/v2/errors"
 
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
-)
-
-const (
-	packagePath = "dp-net/responder"
 )
 
 type testError struct {
@@ -49,35 +47,35 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 		}
 
 		Convey("When logData(err) is called", func() {
-			ld := logData(err)
+			ld := dperrors.LogData(err)
 			So(ld, ShouldResemble, log.Data{"log": "data"})
 		})
 	})
 
 	Convey("Given an error chain with wrapped logData", t, func() {
 		err1 := &testError{
-			err: errors.New("original error"),
+			err:     errors.New("original error"),
 			logData: log.Data{
 				"log": "data",
 			},
 		}
 
 		err2 := &testError{
-			err: fmt.Errorf("err1: %w", err1),
+			err:     fmt.Errorf("err1: %w", err1),
 			logData: log.Data{
 				"additional": "data",
 			},
 		}
 
 		err3 := &testError{
-			err: fmt.Errorf("err2: %w", err2),
+			err:     fmt.Errorf("err2: %w", err2),
 			logData: log.Data{
 				"final": "data",
 			},
 		}
 
 		Convey("When unwrapLogData(err) is called", func() {
-			logData := unwrapLogData(err3)
+			logData  := dperrors.UnwrapLogData(err3)
 			expected := log.Data{
 				"final":      "data",
 				"additional": "data",
@@ -90,7 +88,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 
 	Convey("Given an error chain with intermittent wrapped logData", t, func() {
 		err1 := &testError{
-			err: errors.New("original error"),
+			err:     errors.New("original error"),
 			logData: log.Data{
 				"log": "data",
 			},
@@ -108,7 +106,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 		}
 
 		Convey("When unwrapLogData(err) is called", func() {
-			logData := unwrapLogData(err3)
+			logData := dperrors.UnwrapLogData(err3)
 			expected := log.Data{
 				"final": "data",
 				"log":   "data",
@@ -120,7 +118,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 
 	Convey("Given an error chain with wrapped logData with duplicate key values", t, func() {
 		err1 := &testError{
-			err: errors.New("original error"),
+			err:     errors.New("original error"),
 			logData: log.Data{
 				"log":        "data",
 				"duplicate":  "duplicate_data1",
@@ -129,7 +127,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 		}
 
 		err2 := &testError{
-			err: fmt.Errorf("err1: %w", err1),
+			err:     fmt.Errorf("err1: %w", err1),
 			logData: log.Data{
 				"additional": "data",
 				"duplicate":  "duplicate_data2",
@@ -138,7 +136,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 		}
 
 		err3 := &testError{
-			err: fmt.Errorf("err2: %w", err2),
+			err:     fmt.Errorf("err2: %w", err2),
 			logData: log.Data{
 				"final":      "data",
 				"duplicate":  "duplicate_data3",
@@ -147,7 +145,7 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 		}
 
 		Convey("When unwrapLogData(err) is called", func() {
-			logData := unwrapLogData(err3)
+			logData := dperrors.UnwrapLogData(err3)
 			expected := log.Data{
 				"final":      "data",
 				"additional": "data",
@@ -165,61 +163,76 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 	})
 }
 
-func TestStackTraceHappy(t *testing.T){
-	Convey("Given an error with embedded stack trace from pkg/errors", t, func() {
-		err := testCallStackFunc1()
-		Convey("When stackTrace(err) is called", func() {
-			st := stackTrace(err)
-			So(len(st), ShouldEqual, 19)
-			
-			So(st[0].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[0].Line, ShouldEqual, 216)
-			So(st[0].Function, ShouldEqual, "testCallStackFunc3")
+func TestUnwrapStatusCodeHappy(t *testing.T){
 
-			So(st[1].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[1].Line, ShouldEqual, 212)
-			So(st[1].Function, ShouldEqual, "testCallStackFunc2")
+	Convey("Given an error with embedded status code", t, func() {
+		err := &testError{
+			statusCode: http.StatusTeapot,
+		}
 
-			So(st[2].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[2].Line, ShouldEqual, 208)
-			So(st[2].Function, ShouldEqual, "testCallStackFunc1")
+		Convey("When StatusCode(err) is called", func() {
+			status := dperrors.StatusCode(err)
+			expected := http.StatusTeapot
+
+			So(status, ShouldEqual, expected)
 		})
 	})
 
-	Convey("Given an error with intermittently embedded stack traces from pkg/errors", t, func() {
-		err := testCallStackFunc4()
-		Convey("When stackTrace(err) is called", func() {
-			st := stackTrace(err)
-			So(len(st), ShouldEqual, 18)
-			
-			So(st[0].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[0].Line, ShouldEqual, 216)
-			So(st[0].Function, ShouldEqual, "testCallStackFunc3")
+	Convey("Given an error with no embedded status code", t, func() {
+		err := &testError{}
 
-			So(st[1].File, ShouldContainSubstring, packagePath + "/callback_test.go")
-			So(st[1].Line, ShouldEqual, 221)
-			So(st[1].Function, ShouldEqual, "testCallStackFunc4")
+		Convey("When StatusCode(err) is called", func() {
+			status := dperrors.StatusCode(err)
+			expected := http.StatusInternalServerError
 
+			So(status, ShouldEqual, expected)
 		})
 	})
-}
 
-func testCallStackFunc1() error{
-	return testCallStackFunc2()
-}
+	Convey("Given an error chain with embedded status code", t, func() {
+		err1 := &testError{
+			err:        errors.New("original error"),
+			statusCode: http.StatusTooManyRequests,
+		}
 
-func testCallStackFunc2() error{
-	return testCallStackFunc3()
-}
+		err2 := &testError{
+			err:     fmt.Errorf("err1: %w", err1),
+		}
 
-func testCallStackFunc3() error{
-	cause := errors.New("I am the cause")
-	return errors.Wrap(cause, "I am the context")
-}
+		err3 := &testError{
+			err:     fmt.Errorf("err2: %w", err2),
+		}
 
-func testCallStackFunc4() error{
-	if err := testCallStackFunc3(); err != nil{
-		return fmt.Errorf("I do not have embedded stack trace, but this cause does: %w", err)
-	}
-	return nil
+		Convey("When UnwrapStatusCode(err) is called", func() {
+			status  := dperrors.UnwrapStatusCode(err3)
+			expected := http.StatusTooManyRequests
+
+			So(status, ShouldEqual, expected)
+		})
+	})
+
+	Convey("Given an error chain with multiple embedded status codes", t, func() {
+		err1 := &testError{
+			err:        errors.New("original error"),
+			statusCode: http.StatusBadRequest,
+		}
+
+		err2 := &testError{
+			err:     fmt.Errorf("err1: %w", err1),
+			statusCode: http.StatusUnauthorized,
+		}
+
+		err3 := &testError{
+			err:     fmt.Errorf("err2: %w", err2),
+		}
+
+		Convey("When UnwrapStatusCode(err) is called", func() {
+			status  := dperrors.UnwrapStatusCode(err3)
+			expected := http.StatusUnauthorized
+			Convey("The first valid status code is returned ", func() {
+
+				So(status, ShouldEqual, expected)
+			})
+		})
+	})
 }

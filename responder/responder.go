@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/ONSdigital/log.go/v2/log"
+	dperrors "github.com/ONSdigital/dp-net/v2/errors"
+
 	"github.com/pkg/errors"
 )
 
@@ -23,8 +25,7 @@ func New() *Responder {
 func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int, resp interface{}){
 	b, err := json.Marshal(resp)
 	if err != nil {
-		respondError(ctx, w, Error{
-			statusCode: http.StatusInternalServerError,
+		respondError(ctx, w, http.StatusInternalServerError, er{
 			err:        errors.Wrap(err, "failed to marshal response"),
 			message:    "Internal Server Error: Badly formed reponse attempt",
 			logData: log.Data{
@@ -47,22 +48,21 @@ func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int,
 
 // Error responds with a single error, formatted to fit in ONS's desired error
 // response structure (essentially an array of errors)
-func (r *Responder) Error(ctx context.Context, w http.ResponseWriter, err error) {
-	respondError(ctx, w, err)
+func (r *Responder) Error(ctx context.Context, w http.ResponseWriter, status int, err error) {
+	respondError(ctx, w, status, err)
 }
 
 // respondError is the implementation of Error, seperated so it can be used internally
 // by the other respond functions without having to create a new Responder
-func respondError(ctx context.Context, w http.ResponseWriter, err error){
+func respondError(ctx context.Context, w http.ResponseWriter, status int, err error){
 	log.Info(ctx, "error responding to HTTP request", log.ERROR, &log.EventErrors{{
 			Message:    err.Error(),
-			StackTrace: stackTrace(err),
-			Data:       unwrapLogData(err),
+			StackTrace: dperrors.StackTrace(err),
+			Data:       dperrors.UnwrapLogData(err),
 		}},
 	)
 
-	status := unwrapStatusCode(err)
-	msg    := errorMessage(err)
+	msg    := dperrors.ErrorMessage(err)
 	resp   := errorResponse{
 		Errors: []string{msg},
 	}
@@ -91,18 +91,6 @@ func respondError(ctx context.Context, w http.ResponseWriter, err error){
 	log.Info(ctx, "returned error response", logData)
 }
 
-// ErrorWithStatus is the same as Error, except doesn't assert the error for a status
-// code and allows you to provide one directly. May be useful when you don't want to
-// create a new error type just to include a specific status code
-func (r *Responder) ErrorWithStatus(ctx context.Context, w http.ResponseWriter, status int, err error){
-	respondError(ctx, w, Error{
-		statusCode: status,
-		err:        errors.Unwrap(err),
-		message:    errorMessage(err),
-		logData:    unwrapLogData(err),
-	})
-}
-
 // Errors responds with a slice of errors formatted to ONS's desired error response structure.
 // Note you will have to pass a slice of []error rather than slice of []{some type that implements
 // error}. The underlying structs can be any type that implements error but the slice itself must be
@@ -114,10 +102,10 @@ func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status in
 	for _, err := range errs{
 		errorLogs = append(errorLogs,log.EventError{
 			Message:    err.Error(),
-			StackTrace: stackTrace(err),
-			Data:       unwrapLogData(err),
+			StackTrace: dperrors.StackTrace(err),
+			Data:       dperrors.UnwrapLogData(err),
 		})
-		errorMsgs = append(errorMsgs, errorMessage(err))
+		errorMsgs = append(errorMsgs, dperrors.ErrorMessage(err))
 	}
 
 	log.Info(ctx, "error responding to HTTP request", log.ERROR, &errorLogs)

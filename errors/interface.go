@@ -1,4 +1,4 @@
-package responder
+package errors
 
 import (
 	"github.com/pkg/errors"
@@ -14,4 +14,8 @@ type messager interface {
 
 type stacktracer interface {
 	StackTrace() errors.StackTrace
+}
+
+type coder interface {
+	Code() int
 }
