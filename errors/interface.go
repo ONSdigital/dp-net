@@ -19,3 +19,23 @@ type stacktracer interface {
 type coder interface {
 	Code() int
 }
+
+type errNotFound interface {
+	NotFound() bool
+}
+
+type errConflict interface {
+	Conflict() bool
+}
+
+type errUnavailable interface {
+	Unavailable() bool
+}
+
+type errUnauthorized interface {
+	Unauthorized() bool
+}
+
+type errTimeout interface {
+	Timeout() bool
+}
