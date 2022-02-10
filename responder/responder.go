@@ -59,8 +59,11 @@ func respondError(ctx context.Context, w http.ResponseWriter, status int, err er
 		Message:    err.Error(),
 		StackTrace: dperrors.StackTrace(err),
 		Data:       dperrors.UnwrapLogData(err),
-	}},
-	)
+	}})
+
+	if status == 0 {
+		status = http.StatusInternalServerError
+	}
 
 	msg := dperrors.ErrorMessage(err)
 	resp := errorResponse{
