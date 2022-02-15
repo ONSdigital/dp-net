@@ -3,6 +3,7 @@ package http
 //go:generate moq -out mock_client.go . Clienter
 
 import (
+	"fmt"
 	"io"
 	"math"
 	"math/rand"
@@ -74,6 +75,7 @@ func NewClient() Clienter {
 }
 
 func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) (Clienter, error) {
+	fmt.Println("bug check - inside the AWS signer")
 	newClient := *DefaultClient
 	awsRoundTripper, err := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport)
 	if err != nil {
@@ -94,6 +96,7 @@ func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 
 // Clienter roundtripper calls the httpclient roundtripper.
 func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
+	fmt.Println("bug check - inside RoundTrip")
 	return c.HTTPClient.Transport.RoundTrip(req)
 }
 
