@@ -96,7 +96,7 @@ func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 
 // Clienter roundtripper calls the httpclient roundtripper.
 func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
-	fmt.Println("bug check - inside RoundTrip")
+	fmt.Printf("bug check - inside RoundTrip: %s", req.Header.Get("Authorization"))
 	return c.HTTPClient.Transport.RoundTrip(req)
 }
 
