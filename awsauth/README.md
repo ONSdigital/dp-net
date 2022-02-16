@@ -22,6 +22,28 @@ Below is an example of how to setup the aws signer round tripper and attach to a
 	httpClient := dphttp.NewClientWithTransport(awsSignerRT)
     ```
 
+If you are looking to connect a local instance of application to managed AWS Elasticsearch,
+then you will need to create a tunnel onto the VPC that Elasticsearch is running on, and
+implement the following in your application:
+
+    ```go
+    import (
+        "github.com/ONSdigital/dp-net/v2/awsauth"
+        dphttp "github.com/ONSdigital/dp-net/v2/http"
+    )
+    ...
+    awsSignerRT, err := awsauth.NewAWSSignerRoundTripper("~/.aws/credentials", "default", "eu-west-1", "es",
+        awsauth.Options{TlsInsecureSkipVerify: true})
+	if err != nil {
+		...
+	}
+
+	httpClient := dphttp.NewClientWithTransport(awsSignerRT)
+    ```
+
+The file location and profile need to be set as the first two variables in method signature
+respectively; in the above example these are the default values expected across the industry.
+
 
 ## Signer
 
