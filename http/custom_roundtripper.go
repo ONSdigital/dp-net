@@ -3,11 +3,10 @@ package http
 import (
 	"bytes"
 	"fmt"
+	awsAuth "github.com/ONSdigital/dp-net/awsauth"
 	"io"
 	"net/http"
 	"time"
-
-	awsAuth "github.com/ONSdigital/dp-net/awsauth"
 )
 
 type AwsSignerRoundTripper struct {
@@ -16,6 +15,7 @@ type AwsSignerRoundTripper struct {
 }
 
 func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string, customTransport http.RoundTripper) (*AwsSignerRoundTripper, error) {
+	fmt.Println("inside aws signer..........................")
 	var roundTripper http.RoundTripper
 	if awsRegion == "" || awsService == "" {
 		return nil, fmt.Errorf("aws region and service should be valid options")
@@ -32,12 +32,13 @@ func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService str
 	}
 
 	return &AwsSignerRoundTripper{
-		signer:       awsSigner,
 		roundTripper: roundTripper,
+		signer:       awsSigner,
 	}, nil
 }
 
 func (srt *AwsSignerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	fmt.Println("inside round tripper..........................")
 	var body []byte
 	var err error
 	if req.Body != nil {

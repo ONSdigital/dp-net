@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	request "github.com/ONSdigital/dp-net/request"
+	"github.com/ONSdigital/dp-net/request"
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 )
@@ -68,8 +68,16 @@ type Clienter interface {
 
 // NewClient returns a copy of DefaultClient.
 func NewClient() Clienter {
-	newClient := *DefaultClient
-	return &newClient
+	newClient := &Client{
+		MaxRetries: 3,
+		RetryTime:  20 * time.Millisecond,
+
+		HTTPClient: &http.Client{
+			Timeout:   10 * time.Second,
+			Transport: DefaultTransport,
+		},
+	}
+	return newClient
 }
 
 // NewClientWithAwsSigner return a new client with aws signer profile.
@@ -94,6 +102,7 @@ func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 
 // Clienter roundtripper calls the httpclient roundtripper.
 func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("test", "001")
 	return c.HTTPClient.Transport.RoundTrip(req)
 }
 
