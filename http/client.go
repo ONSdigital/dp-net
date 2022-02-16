@@ -37,18 +37,6 @@ var DefaultTransport = &http.Transport{
 	IdleConnTimeout:     30 * time.Second,
 }
 
-// DefaultClient is a dp-net specific http client with sensible timeouts,
-// exponential backoff, and a contextual dialer.
-var DefaultClient = &Client{
-	MaxRetries: 3,
-	RetryTime:  20 * time.Millisecond,
-
-	HTTPClient: &http.Client{
-		Timeout:   10 * time.Second,
-		Transport: DefaultTransport,
-	},
-}
-
 // Clienter provides an interface for methods on an HTTP Client.
 type Clienter interface {
 	SetTimeout(timeout time.Duration)
@@ -69,16 +57,30 @@ type Clienter interface {
 
 // NewClient returns a copy of DefaultClient.
 func NewClient() Clienter {
-	newClient := *DefaultClient
-	return &newClient
+	return &Client{
+		MaxRetries: 3,
+		RetryTime:  20 * time.Millisecond,
+
+		HTTPClient: &http.Client{
+			Timeout:   10 * time.Second,
+			Transport: DefaultTransport,
+		},
+	}
 }
 
 // NewClientWithTransport returns a copy of default client, plus changes to the transport layer
 func NewClientWithTransport(transport http.RoundTripper) Clienter {
-	client := *DefaultClient
+	client := &Client{
+		MaxRetries: 3,
+		RetryTime:  20 * time.Millisecond,
 
-	client.HTTPClient.Transport = transport
-	return &client
+		HTTPClient: &http.Client{
+			Timeout:   10 * time.Second,
+			Transport: transport,
+		},
+	}
+
+	return client
 }
 
 // ClientWithTimeout facilitates creating a client and setting request timeout.
