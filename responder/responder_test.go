@@ -103,6 +103,19 @@ func TestError(t *testing.T) {
 				})
 
 			})
+
+			Convey("when Error() is called with status code 0", func() {
+				r.Error(ctx, w, 0, err)
+
+				Convey("the response writer should record status 500 and appropriate error response body", func() {
+					expectedCode := http.StatusInternalServerError
+					expectedBody := `{"errors":["test error"]}`
+
+					So(w.Code, ShouldEqual, expectedCode)
+					So(w.Body.String(), ShouldResemble, expectedBody)
+				})
+
+			})
 		})
 
 		Convey("Given an error that satisfies interface providing Response() function", func() {
