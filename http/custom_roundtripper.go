@@ -38,8 +38,6 @@ func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService str
 }
 
 func (srt *AwsSignerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	fmt.Printf("bug check - inside the AWS signer round tripper: %s", req.Header.Get("Authorization"))
-
 	var body []byte
 	var err error
 	if req.Body != nil {

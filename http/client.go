@@ -3,7 +3,6 @@ package http
 //go:generate moq -out mock_client.go . Clienter
 
 import (
-	"fmt"
 	"io"
 	"math"
 	"math/rand"
@@ -38,18 +37,6 @@ var DefaultTransport = &http.Transport{
 	IdleConnTimeout:     30 * time.Second,
 }
 
-// DefaultClient is a dp-net specific http client with sensible timeouts,
-// exponential backoff, and a contextual dialer.
-var DefaultClient = &Client{
-	MaxRetries: 3,
-	RetryTime:  20 * time.Millisecond,
-
-	HTTPClient: &http.Client{
-		Timeout:   10 * time.Second,
-		Transport: DefaultTransport,
-	},
-}
-
 // Clienter provides an interface for methods on an HTTP Client.
 type Clienter interface {
 	SetTimeout(timeout time.Duration)
@@ -70,19 +57,33 @@ type Clienter interface {
 
 // NewClient returns a copy of DefaultClient.
 func NewClient() Clienter {
-	newClient := *DefaultClient
-	return &newClient
+	return &Client{
+		MaxRetries: 3,
+		RetryTime:  20 * time.Millisecond,
+
+		HTTPClient: &http.Client{
+			Timeout:   10 * time.Second,
+			Transport: DefaultTransport,
+		},
+	}
 }
 
 func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) (Clienter, error) {
-	fmt.Println("bug check - inside the AWS signer")
-	newClient := *DefaultClient
+	newClient := &Client{
+		MaxRetries: 3,
+		RetryTime:  20 * time.Millisecond,
+
+		HTTPClient: &http.Client{
+			Timeout:   10 * time.Second,
+			Transport: DefaultTransport,
+		},
+	}
 	awsRoundTripper, err := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport)
 	if err != nil {
 		return nil, err
 	}
 	newClient.HTTPClient.Transport = awsRoundTripper
-	return &newClient, nil
+	return newClient, nil
 }
 
 // ClientWithTimeout facilitates creating a client and setting request timeout.
@@ -96,7 +97,6 @@ func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 
 // Clienter roundtripper calls the httpclient roundtripper.
 func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
-	fmt.Printf("bug check - inside RoundTrip: %s", req.Header.Get("Authorization"))
 	return c.HTTPClient.Transport.RoundTrip(req)
 }
 
