@@ -37,18 +37,6 @@ var DefaultTransport = &http.Transport{
 	IdleConnTimeout:     30 * time.Second,
 }
 
-// DefaultClient is a dp-net specific http client with sensible timeouts,
-// exponential backoff, and a contextual dialer.
-var DefaultClient = &Client{
-	MaxRetries: 3,
-	RetryTime:  20 * time.Millisecond,
-
-	HTTPClient: &http.Client{
-		Timeout:   10 * time.Second,
-		Transport: DefaultTransport,
-	},
-}
-
 // Clienter provides an interface for methods on an HTTP Client.
 type Clienter interface {
 	SetTimeout(timeout time.Duration)
@@ -68,6 +56,19 @@ type Clienter interface {
 
 // NewClient returns a copy of DefaultClient.
 func NewClient() Clienter {
+	return &Client{
+		MaxRetries: 3,
+		RetryTime:  20 * time.Millisecond,
+
+		HTTPClient: &http.Client{
+			Timeout:   10 * time.Second,
+			Transport: DefaultTransport,
+		},
+	}
+}
+
+// NewClientWithAwsSigner return a new client with aws signer profile.
+func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) (Clienter, error) {
 	newClient := &Client{
 		MaxRetries: 3,
 		RetryTime:  20 * time.Millisecond,
@@ -77,18 +78,12 @@ func NewClient() Clienter {
 			Transport: DefaultTransport,
 		},
 	}
-	return newClient
-}
-
-// NewClientWithAwsSigner return a new client with aws signer profile.
-func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) (Clienter, error) {
-	newClient := *DefaultClient
 	awsRoundTripper, err := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport)
 	if err != nil {
 		return nil, err
 	}
 	newClient.HTTPClient.Transport = awsRoundTripper
-	return &newClient, nil
+	return newClient, nil
 }
 
 // ClientWithTimeout facilitates creating a client and setting request timeout.
@@ -102,7 +97,6 @@ func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 
 // Clienter roundtripper calls the httpclient roundtripper.
 func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("test", "001")
 	return c.HTTPClient.Transport.RoundTrip(req)
 }
 
