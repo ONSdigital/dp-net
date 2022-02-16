@@ -2,10 +2,13 @@ package awsauth
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
+
+	dphttp "github.com/ONSdigital/dp-net/v2/http"
 )
 
 type AwsSignerRoundTripper struct {
@@ -13,9 +16,19 @@ type AwsSignerRoundTripper struct {
 	roundTripper http.RoundTripper
 }
 
-var defaultAWSTransport = http.DefaultTransport
+type Options struct {
+	// InsecureSkipVerify controls whether a client verifies the server's certificate
+	// chain and host name. If InsecureSkipVerify is true, crypto/tls accepts any
+	// certificate presented by the server and any host name in that certificate.
+	// In this mode, TLS is susceptible to machine-in-the-middle attacks unless custom
+	// verification is used. This should be used only for testing or in combination
+	// with VerifyConnection or VerifyPeerCertificate.
+	TlsInsecureSkipVerify bool
+}
 
-func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string) (*AwsSignerRoundTripper, error) {
+var defaultAWSTransport = dphttp.DefaultTransport
+
+func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string, options ...Options) (*AwsSignerRoundTripper, error) {
 
 	if awsRegion == "" || awsService == "" {
 		return nil, fmt.Errorf("aws region and service should be valid options")
@@ -24,6 +37,10 @@ func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService str
 	awsSigner, err := NewAwsSigner(awsFilename, awsProfile, awsRegion, awsService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create aws v4 signer: %w", err)
+	}
+
+	if len(options) > 0 && options[0].TlsInsecureSkipVerify {
+		defaultAWSTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	return &AwsSignerRoundTripper{
