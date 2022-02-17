@@ -32,6 +32,7 @@ implement the following in your application:
         dphttp "github.com/ONSdigital/dp-net/v2/http"
     )
     ...
+
     awsSignerRT, err := awsauth.NewAWSSignerRoundTripper("~/.aws/credentials", "default", "eu-west-1", "es",
         awsauth.Options{TlsInsecureSkipVerify: true})
 	if err != nil {
@@ -44,6 +45,7 @@ implement the following in your application:
 The file location and profile need to be set as the first two variables in method signature
 respectively; in the above example these are the default values expected across the industry.
 
+:warning: setting `TlsInsecureSkipVerify` to `true` should only be used for developer testing. If used in an application use a new environment variable to control whether this is on/off, e.g. `awsauth.Options{TlsInsecureSkipVerify: cfg.TlsInsecureSkipVerify}` :warning:
 
 ## Signer
 
