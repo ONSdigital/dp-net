@@ -374,6 +374,8 @@ func TestSetPathsWithNoRetries(t *testing.T) {
 }
 
 func TestNewClientWithTransport(t *testing.T) {
+	t.Parallel()
+
 	Convey("Given a custom http transport", t, func() {
 		customTransport := DefaultTransport
 		customTransport.IdleConnTimeout = 30 * time.Second

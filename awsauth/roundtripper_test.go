@@ -41,6 +41,8 @@ func TestNewAWSSignerRoundTripper_WhenAWSServiceIsEmpty_Returns(t *testing.T) {
 }
 
 func TestNewClientWithTransport(t *testing.T) {
+	t.Parallel()
+
 	Convey("Given a access and secret key are set in the environement", t, func() {
 		accessKeyID, secretAccessKey := setEnvironmentVars()
 
