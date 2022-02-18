@@ -68,22 +68,19 @@ func NewClient() Clienter {
 	}
 }
 
-func NewClientWithAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) (Clienter, error) {
-	newClient := &Client{
+// NewClientWithTransport returns a copy of default client, plus changes to the transport layer
+func NewClientWithTransport(transport http.RoundTripper) Clienter {
+	client := &Client{
 		MaxRetries: 3,
 		RetryTime:  20 * time.Millisecond,
 
 		HTTPClient: &http.Client{
 			Timeout:   10 * time.Second,
-			Transport: DefaultTransport,
+			Transport: transport,
 		},
 	}
-	awsRoundTripper, err := NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService, DefaultTransport)
-	if err != nil {
-		return nil, err
-	}
-	newClient.HTTPClient.Transport = awsRoundTripper
-	return newClient, nil
+
+	return client
 }
 
 // ClientWithTimeout facilitates creating a client and setting request timeout.

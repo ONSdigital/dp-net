@@ -16,6 +16,8 @@ const (
 
 	testAccessKey       = "TEST_ACCESS_KEY"
 	testSecretAccessKey = "TEST_SECRET_KEY"
+	testCredFile        = "testdata/.aws/credentials"
+	testProfile         = "default"
 )
 
 func TestCreateNewSigner(t *testing.T) {
@@ -99,6 +101,21 @@ func TestSignFunc(t *testing.T) {
 			})
 
 			removeTestEnvironmentVariables(accessKeyID, secretAccessKey)
+		})
+
+		Convey("When the signer.v4 is a valid aws file and profile", func() {
+			signer, err := NewAwsSigner(testCredFile, testProfile, "eu-west-1", "es")
+			So(err, ShouldBeNil)
+			So(signer, ShouldNotBeNil)
+			So(signer.v4, ShouldNotBeNil)
+
+			Convey("Then the request successfully signs and does not return an error", func() {
+
+				req := httptest.NewRequest("GET", "http://test-url", nil)
+
+				err = signer.Sign(req, nil, time.Now())
+				So(err, ShouldBeNil)
+			})
 		})
 	})
 }
