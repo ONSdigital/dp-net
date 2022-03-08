@@ -15,13 +15,13 @@ const (
 
 // GetRequestId gets the correlation id on the context
 func GetRequestId(ctx context.Context) string {
-	correlationId, _ := ctx.Value(RequestIdKey).(string)
-	return correlationId
+	correlationID, _ := ctx.Value(RequestIdKey).(string)
+	return correlationID
 }
 
 // WithRequestId sets the correlation id on the context
-func WithRequestId(ctx context.Context, correlationId string) context.Context {
-	return context.WithValue(ctx, RequestIdKey, correlationId)
+func WithRequestId(ctx context.Context, correlationID string) context.Context {
+	return context.WithValue(ctx, RequestIdKey, correlationID)
 }
 
 // AddRequestIdHeader add header for given correlation ID

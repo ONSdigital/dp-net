@@ -18,11 +18,11 @@ func TestAddRequestIdHeader(t *testing.T) {
 
 		Convey("When AddRequestIdHeader is called", func() {
 
-			reqId := "123"
-			AddRequestIdHeader(r, reqId)
+			reqID := "123"
+			AddRequestIdHeader(r, reqID)
 
 			Convey("Then the request has the correct header set", func() {
-				So(r.Header.Get(RequestHeaderKey), ShouldEqual, reqId)
+				So(r.Header.Get(RequestHeaderKey), ShouldEqual, reqID)
 			})
 		})
 	})
