@@ -55,6 +55,10 @@ type Clienter interface {
 	RoundTrip(req *http.Request) (*http.Response, error)
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 // NewClient returns a copy of DefaultClient.
 func NewClient() Clienter {
 	return &Client{
@@ -284,7 +288,6 @@ func (c *Client) backoff(
 // at the same time by many clients.
 func getSleepTime(attempt int, retryTime time.Duration) time.Duration {
 	n := (math.Pow(2, float64(attempt)))
-	rand.Seed(time.Now().Unix())
 	rnd := time.Duration(rand.Intn(4)+1) * time.Millisecond
 	return (time.Duration(n) * retryTime) - rnd
 }
