@@ -1,7 +1,10 @@
 package request
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 )
 
 // PatchOp - iota enum of possible patch operations
@@ -18,6 +21,15 @@ const (
 )
 
 var validOps = []string{"add", "remove", "replace", "move", "copy", "test"}
+
+var patchOpsMap = map[string]PatchOp{
+	"add":     OpAdd,
+	"remove":  OpRemove,
+	"replace": OpReplace,
+	"move":    OpMove,
+	"copy":    OpCopy,
+	"test":    OpTest,
+}
 
 // ErrInvalidOp is an error returned when a patch contains a wrong 'op'
 var ErrInvalidOp = fmt.Errorf("operation is missing or not valid. Please, provide one of the following: %v", validOps)
@@ -48,6 +60,34 @@ type Patch struct {
 	Value interface{} `json:"value"`
 }
 
+// GetPatches gets the patches from the request body and returns it in the form of []Patch.
+// An error will be returned if request body cannot be read, unmarshalling the requets body is unsuccessful,
+// no patches are provided in the request or any of the provided patches are invalid
+func GetPatches(requestBody io.ReadCloser) ([]Patch, error) {
+	patches := []Patch{}
+
+	bytes, err := ioutil.ReadAll(requestBody)
+	if err != nil {
+		return []Patch{}, fmt.Errorf("failed to read and get patch request body - error: %v", err)
+	}
+
+	err = json.Unmarshal(bytes, &patches)
+	if err != nil {
+		return []Patch{}, fmt.Errorf("failed to unmarshal patch request body - error: %v", err)
+	}
+
+	if len(patches) < 1 {
+		return []Patch{}, fmt.Errorf("no patches given in request body")
+	}
+
+	for _, patch := range patches {
+		if err := patch.Validate(patchOpsMap[patch.Op]); err != nil {
+			return []Patch{}, fmt.Errorf("failed to validate patch - error: %v", err)
+		}
+	}
+	return patches, nil
+}
+
 // Validate checks that the provided operation is correct and the expected members are provided
 func (p *Patch) Validate(supportedOps ...PatchOp) error {
 	missing := []string{}
@@ -74,7 +114,7 @@ func (p *Patch) Validate(supportedOps ...PatchOp) error {
 		return ErrInvalidOp
 	}
 
-	if p.isOpSupported(supportedOps) == false {
+	if !p.isOpSupported(supportedOps) {
 		return ErrUnsupportedOp(p.Op, supportedOps)
 	}
 

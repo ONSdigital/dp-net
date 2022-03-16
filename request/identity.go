@@ -7,9 +7,9 @@ import (
 
 // Header constants
 const (
-	FlorenceHeaderKey        = "X-Florence-Token"
 	AuthHeaderKey            = "Authorization"
 	DownloadServiceHeaderKey = "X-Download-Service-Token"
+	FlorenceHeaderKey        = "X-Florence-Token"
 	UserHeaderKey            = "User-Identity"
 )
 
@@ -114,7 +114,6 @@ func AddDeprecatedHeader(r *http.Request, token string) {
 
 // IsCallerPresent determines if an identity is present on the given context.
 func IsCallerPresent(ctx context.Context) bool {
-
 	callerIdentity := ctx.Value(CallerIdentityKey)
 	isPresent := callerIdentity != nil && callerIdentity != ""
 
@@ -123,13 +122,11 @@ func IsCallerPresent(ctx context.Context) bool {
 
 // Caller gets the caller identity from the context
 func Caller(ctx context.Context) string {
-
 	callerIdentity, _ := ctx.Value(CallerIdentityKey).(string)
 	return callerIdentity
 }
 
 // SetCaller sets the caller identity on the context
 func SetCaller(ctx context.Context, caller string) context.Context {
-
 	return context.WithValue(ctx, CallerIdentityKey, caller)
 }

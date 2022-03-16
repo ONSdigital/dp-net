@@ -12,6 +12,7 @@ const (
 	CollectionIDCookieKey = "collection"
 )
 
+// GetCollectionID gets the collection id from the request
 func GetCollectionID(req *http.Request) (string, error) {
 	var collectionID string
 
