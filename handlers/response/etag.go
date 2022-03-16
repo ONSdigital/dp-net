@@ -15,12 +15,13 @@ const (
 // A strong or weak eTag can be generated. Please note that ETags are surrounded by double quotes.
 //
 // Example: ETag = `"24decf55038de874bc6fa9cf0930adc219f15db1"`
-func GenerateETag(body []byte, weak bool) string {
+func GenerateETag(body []byte, weak bool) (etag string) {
 	hash := sha1.Sum(body)
-	etag := fmt.Sprintf(`"%x"`, hash)
 
 	if weak {
-		etag = "W/" + etag
+		etag = fmt.Sprintf(`W/"%x"`, hash)
+	} else {
+		etag = fmt.Sprintf(`"%x"`, hash)
 	}
 
 	return etag

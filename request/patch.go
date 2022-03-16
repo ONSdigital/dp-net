@@ -60,7 +60,9 @@ type Patch struct {
 	Value interface{} `json:"value"`
 }
 
-// GetPatches gets the patches from the request body and returns it in the form of []Patch
+// GetPatches gets the patches from the request body and returns it in the form of []Patch.
+// An error will be returned if request body cannot be read, unmarshalling the requets body is unsuccessful,
+// no patches are provided in the request or any of the provided patches are invalid
 func GetPatches(requestBody io.ReadCloser) ([]Patch, error) {
 	patches := []Patch{}
 
