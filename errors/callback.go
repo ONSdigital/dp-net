@@ -94,17 +94,36 @@ func StackTrace(err error) []log.EventStackTrace {
 }
 
 // ErrorMessage extracts a specified error response to be returned
-// to the caller if present, otherwise returns the default error
-// string
+// to the caller if present, otherwise returns an empty string
 func ErrorMessage(err error) string {
 	var rerr messager
 	if errors.As(err, &rerr) {
-		if resp := rerr.Message(); resp != "" {
-			return resp
-		}
+		return rerr.Message()
 	}
 
-	return err.Error()
+	return ""
+}
+
+// UnwrapErrorMessage is a callback function that allows you to extract
+// an error message from an error. If the error message returned is an empty
+// string, UnwrapErrorMessage will attempt to recursively unwrap the error
+// until a non-empty string is returned. If no message is returned it will
+// return the original error's error string as default.
+func UnwrapErrorMessage(err error) string {
+	originalErr := err
+
+	if msg := ErrorMessage(err); msg != "" {
+		return msg
+	}
+
+	for errors.Unwrap(err) != nil {
+		if msg := ErrorMessage(err); msg != "" {
+			return msg
+		}
+		err = errors.Unwrap(err)
+	}
+
+	return originalErr.Error()
 }
 
 // UnwrapStatusCode is a callback function that allows you to extract

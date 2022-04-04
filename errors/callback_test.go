@@ -15,6 +15,7 @@ import (
 type testError struct {
 	err        error
 	statusCode int
+	message    string
 	logData    map[string]interface{}
 }
 
@@ -35,6 +36,10 @@ func (e testError) Code() int {
 
 func (e testError) LogData() map[string]interface{} {
 	return e.logData
+}
+
+func (e testError) Message() string {
+	return e.message
 }
 
 func TestUnwrapLogDataHappy(t *testing.T) {
@@ -236,4 +241,82 @@ func TestUnwrapStatusCodeHappy(t *testing.T) {
 		})
 	})
 
+}
+
+func TestUnwrapErrorMessageHappy(t *testing.T) {
+
+	Convey("Given an error with embedded error message", t, func() {
+		err := &testError{
+			message: "I am an error message",
+		}
+
+		Convey("When ErrorMessage(err) is called", func() {
+			status := dperrors.ErrorMessage(err)
+			expected := "I am an error message"
+
+			So(status, ShouldEqual, expected)
+		})
+	})
+
+	Convey("Given an error chain with embedded error message", t, func() {
+		err1 := &testError{
+			err:     errors.New("original error"),
+			message: "I am embedded message",
+		}
+
+		err2 := &testError{
+			err: fmt.Errorf("err1: %w", err1),
+		}
+
+		err3 := &testError{
+			err: fmt.Errorf("err2: %w", err2),
+		}
+
+		Convey("When UnwrapErrorMessage(err) is called", func() {
+			status := dperrors.UnwrapErrorMessage(err3)
+			expected := "I am embedded message"
+
+			So(status, ShouldEqual, expected)
+		})
+	})
+
+	Convey("Given an error chain with multiple embedded status codes", t, func() {
+		err1 := &testError{
+			err:     errors.New("original error"),
+			message: "I am embedded message",
+		}
+
+		err2 := &testError{
+			err:     fmt.Errorf("err1: %w", err1),
+			message: "I am first embedded message",
+		}
+
+		err3 := &testError{
+			err: fmt.Errorf("err2: %w", err2),
+		}
+
+		Convey("When UnwrapErrorMessage(err) is called", func() {
+			status := dperrors.UnwrapErrorMessage(err3)
+			expected := "I am first embedded message"
+
+			Convey("The first valid error message is returned ", func() {
+				So(status, ShouldEqual, expected)
+			})
+		})
+	})
+
+	Convey("Given an error with no embedded error message", t, func() {
+		err := &testError{
+			err: errors.New("original error"),
+		}
+
+		Convey("When StatusCode(err) is called", func() {
+			status := dperrors.UnwrapErrorMessage(err)
+			expected := "original error"
+
+			Convey("The orinal error string is returned ", func() {
+				So(status, ShouldEqual, expected)
+			})
+		})
+	})
 }

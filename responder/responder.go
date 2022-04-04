@@ -65,7 +65,7 @@ func respondError(ctx context.Context, w http.ResponseWriter, status int, err er
 		status = http.StatusInternalServerError
 	}
 
-	msg := dperrors.ErrorMessage(err)
+	msg := dperrors.UnwrapErrorMessage(err)
 	resp := errorResponse{
 		Errors: []string{msg},
 	}
@@ -108,7 +108,7 @@ func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status in
 			StackTrace: dperrors.StackTrace(err),
 			Data:       dperrors.UnwrapLogData(err),
 		})
-		errorMsgs = append(errorMsgs, dperrors.ErrorMessage(err))
+		errorMsgs = append(errorMsgs, dperrors.UnwrapErrorMessage(err))
 	}
 
 	log.Info(ctx, "error responding to HTTP request", log.ERROR, &errorLogs)
