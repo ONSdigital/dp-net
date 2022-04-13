@@ -40,7 +40,7 @@ func ErrMissingMember(members []string) error {
 // ErrUnsupportedOp generates an error for unsupported ops
 func ErrUnsupportedOp(op string, supportedOps []PatchOp) error {
 	supported := getPatchOpsStringSlice(supportedOps)
-	return fmt.Errorf("op '%s' not supported. Supported op(s): %v", op, supported)
+	return fmt.Errorf("patch operation '%s' not supported. Supported op(s): %v", op, supported)
 }
 
 func (o PatchOp) String() string {
