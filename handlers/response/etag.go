@@ -15,6 +15,8 @@ const (
 // A strong or weak eTag can be generated. Please note that ETags are surrounded by double quotes.
 //
 // Example: ETag = `"24decf55038de874bc6fa9cf0930adc219f15db1"`
+//
+// The definition of ETag is explained in https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
 func GenerateETag(body []byte, weak bool) (etag string) {
 	hash := sha1.Sum(body)
 
