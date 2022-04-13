@@ -22,17 +22,15 @@ const (
 
 var validOps = []string{"add", "remove", "replace", "move", "copy", "test"}
 
-var patchOpsMap = map[string]PatchOp{
-	"add":     OpAdd,
-	"remove":  OpRemove,
-	"replace": OpReplace,
-	"move":    OpMove,
-	"copy":    OpCopy,
-	"test":    OpTest,
-}
+// ErrInvalidOp generates an error when a patch contains a wrong 'op'
+func ErrInvalidOp(supportedOps []PatchOp) error {
+	if len(supportedOps) < 1 {
+		return fmt.Errorf("patch operation is invalid as no patch operations are supported")
+	}
 
-// ErrInvalidOp is an error returned when a patch contains a wrong 'op'
-var ErrInvalidOp = fmt.Errorf("operation is missing or not valid. Please, provide one of the following: %v", validOps)
+	validSupportedOps := getPatchOpsStringSlice(supportedOps)
+	return fmt.Errorf("patch operation is missing or invalid. Please, provide one of the following: %v", validSupportedOps)
+}
 
 // ErrMissingMember generates an error for a missing member
 func ErrMissingMember(members []string) error {
@@ -41,15 +39,20 @@ func ErrMissingMember(members []string) error {
 
 // ErrUnsupportedOp generates an error for unsupported ops
 func ErrUnsupportedOp(op string, supportedOps []PatchOp) error {
-	supported := []string{}
-	for _, op := range supportedOps {
-		supported = append(supported, op.String())
-	}
+	supported := getPatchOpsStringSlice(supportedOps)
 	return fmt.Errorf("op '%s' not supported. Supported op(s): %v", op, supported)
 }
 
 func (o PatchOp) String() string {
 	return validOps[o]
+}
+
+func getPatchOpsStringSlice(ops []PatchOp) []string {
+	opsStringSlice := []string{}
+	for _, op := range ops {
+		opsStringSlice = append(opsStringSlice, op.String())
+	}
+	return opsStringSlice
 }
 
 // Patch models an HTTP patch operation request, according to RFC 6902
@@ -63,17 +66,25 @@ type Patch struct {
 // GetPatches gets the patches from the request body and returns it in the form of []Patch.
 // An error will be returned if request body cannot be read, unmarshalling the requets body is unsuccessful,
 // no patches are provided in the request or any of the provided patches are invalid
-func GetPatches(requestBody io.ReadCloser) ([]Patch, error) {
+func GetPatches(requestBody io.ReadCloser, supportedOps []PatchOp) ([]Patch, error) {
 	patches := []Patch{}
+
+	if len(supportedOps) < 1 {
+		return []Patch{}, fmt.Errorf("empty list of support patch operations given")
+	}
 
 	bytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
-		return []Patch{}, fmt.Errorf("failed to read and get patch request body - error: %v", err)
+		return []Patch{}, fmt.Errorf("failed to read and get patch request body")
+	}
+
+	if len(bytes) == 0 {
+		return []Patch{}, fmt.Errorf("empty request body given")
 	}
 
 	err = json.Unmarshal(bytes, &patches)
 	if err != nil {
-		return []Patch{}, fmt.Errorf("failed to unmarshal patch request body - error: %v", err)
+		return []Patch{}, fmt.Errorf("failed to unmarshal patch request body")
 	}
 
 	if len(patches) < 1 {
@@ -81,15 +92,15 @@ func GetPatches(requestBody io.ReadCloser) ([]Patch, error) {
 	}
 
 	for _, patch := range patches {
-		if err := patch.Validate(patchOpsMap[patch.Op]); err != nil {
-			return []Patch{}, fmt.Errorf("failed to validate patch - error: %v", err)
+		if err := patch.Validate(supportedOps); err != nil {
+			return []Patch{}, err
 		}
 	}
 	return patches, nil
 }
 
 // Validate checks that the provided operation is correct and the expected members are provided
-func (p *Patch) Validate(supportedOps ...PatchOp) error {
+func (p *Patch) Validate(supportedOps []PatchOp) error {
 	missing := []string{}
 	switch p.Op {
 	case OpAdd.String(), OpReplace.String(), OpTest.String():
@@ -111,7 +122,7 @@ func (p *Patch) Validate(supportedOps ...PatchOp) error {
 			missing = append(missing, "from")
 		}
 	default:
-		return ErrInvalidOp
+		return ErrInvalidOp(supportedOps)
 	}
 
 	if !p.isOpSupported(supportedOps) {
