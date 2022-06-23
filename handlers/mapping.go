@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	request "github.com/ONSdigital/dp-net/request"
-	v1request "github.com/ONSdigital/dp-net/request"
+	request "github.com/ONSdigital/dp-net/v2/request"
 )
 
 // Key - iota enum of possible sets of keys for middleware manipulation
@@ -12,7 +11,7 @@ type Key int
 type KeyMap struct {
 	Header  string
 	Cookie  string
-	Context v1request.ContextKey
+	Context request.ContextKey
 }
 
 // Possible values for sets of keys

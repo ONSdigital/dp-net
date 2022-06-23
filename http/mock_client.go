@@ -12,73 +12,58 @@ import (
 	"time"
 )
 
-var (
-	lockClienterMockDo                    sync.RWMutex
-	lockClienterMockGet                   sync.RWMutex
-	lockClienterMockGetMaxRetries         sync.RWMutex
-	lockClienterMockGetPathsWithNoRetries sync.RWMutex
-	lockClienterMockHead                  sync.RWMutex
-	lockClienterMockPost                  sync.RWMutex
-	lockClienterMockPostForm              sync.RWMutex
-	lockClienterMockPut                   sync.RWMutex
-	lockClienterMockRoundTrip             sync.RWMutex
-	lockClienterMockSetMaxRetries         sync.RWMutex
-	lockClienterMockSetPathsWithNoRetries sync.RWMutex
-	lockClienterMockSetTimeout            sync.RWMutex
-)
-
 // Ensure, that ClienterMock does implement Clienter.
 // If this is not the case, regenerate this file with moq.
 var _ Clienter = &ClienterMock{}
 
 // ClienterMock is a mock implementation of Clienter.
 //
-//     func TestSomethingThatUsesClienter(t *testing.T) {
+// 	func TestSomethingThatUsesClienter(t *testing.T) {
 //
-//         // make and configure a mocked Clienter
-//         mockedClienter := &ClienterMock{
-//             DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-// 	               panic("mock out the Do method")
-//             },
-//             GetFunc: func(ctx context.Context, url string) (*http.Response, error) {
-// 	               panic("mock out the Get method")
-//             },
-//             GetMaxRetriesFunc: func() int {
-// 	               panic("mock out the GetMaxRetries method")
-//             },
-//             GetPathsWithNoRetriesFunc: func() []string {
-// 	               panic("mock out the GetPathsWithNoRetries method")
-//             },
-//             HeadFunc: func(ctx context.Context, url string) (*http.Response, error) {
-// 	               panic("mock out the Head method")
-//             },
-//             PostFunc: func(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error) {
-// 	               panic("mock out the Post method")
-//             },
-//             PostFormFunc: func(ctx context.Context, uri string, data url.Values) (*http.Response, error) {
-// 	               panic("mock out the PostForm method")
-//             },
-//             PutFunc: func(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error) {
-// 	               panic("mock out the Put method")
-//             },
-//             RoundTripFunc: func(req *http.Request) (*http.Response, error) {
-// 	               panic("mock out the RoundTrip method")
-//             },
-//             SetMaxRetriesFunc: func(in1 int)  {
-// 	               panic("mock out the SetMaxRetries method")
-//             },
-//             SetPathsWithNoRetriesFunc: func(in1 []string)  {
-// 	               panic("mock out the SetPathsWithNoRetries method")
-//             },
-//             SetTimeoutFunc: func(timeout time.Duration)  {
-// 	               panic("mock out the SetTimeout method")
-//             },
-//         }
+// 		// make and configure a mocked Clienter
+// 		mockedClienter := &ClienterMock{
+// 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
+// 				panic("mock out the Do method")
+// 			},
+// 			GetFunc: func(ctx context.Context, url string) (*http.Response, error) {
+// 				panic("mock out the Get method")
+// 			},
+// 			GetMaxRetriesFunc: func() int {
+// 				panic("mock out the GetMaxRetries method")
+// 			},
+// 			GetPathsWithNoRetriesFunc: func() []string {
+// 				panic("mock out the GetPathsWithNoRetries method")
+// 			},
+// 			HeadFunc: func(ctx context.Context, url string) (*http.Response, error) {
+// 				panic("mock out the Head method")
+// 			},
+// 			PostFunc: func(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error) {
+// 				panic("mock out the Post method")
+// 			},
+// 			PostFormFunc: func(ctx context.Context, uri string, data url.Values) (*http.Response, error) {
+// 				panic("mock out the PostForm method")
+// 			},
+// 			PutFunc: func(ctx context.Context, urlMoqParam string, contentType string, body io.Reader) (*http.Response, error) {
+// 				panic("mock out the Put method")
+// 			},
+// 			RoundTripFunc: func(req *http.Request) (*http.Response, error) {
+// 				panic("mock out the RoundTrip method")
+// 			},
+// 			SetMaxRetriesFunc: func(n int)  {
+// 				panic("mock out the SetMaxRetries method")
+// 			},
+// 			SetPathsWithNoRetriesFunc: func(strings []string)  {
+// 				panic("mock out the SetPathsWithNoRetries method")
+// 			},
+// 			SetTimeoutFunc: func(timeout time.Duration)  {
+// 				panic("mock out the SetTimeout method")
+// 			},
+// 		}
 //
-//         // use mockedClienter in code that requires Clienter
-//         // and then make assertions.
+// 		// use mockedClienter in code that requires Clienter
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type ClienterMock struct {
 	// DoFunc mocks the Do method.
 	DoFunc func(ctx context.Context, req *http.Request) (*http.Response, error)
@@ -102,16 +87,16 @@ type ClienterMock struct {
 	PostFormFunc func(ctx context.Context, uri string, data url.Values) (*http.Response, error)
 
 	// PutFunc mocks the Put method.
-	PutFunc func(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error)
+	PutFunc func(ctx context.Context, urlMoqParam string, contentType string, body io.Reader) (*http.Response, error)
 
 	// RoundTripFunc mocks the RoundTrip method.
 	RoundTripFunc func(req *http.Request) (*http.Response, error)
 
 	// SetMaxRetriesFunc mocks the SetMaxRetries method.
-	SetMaxRetriesFunc func(in1 int)
+	SetMaxRetriesFunc func(n int)
 
 	// SetPathsWithNoRetriesFunc mocks the SetPathsWithNoRetries method.
-	SetPathsWithNoRetriesFunc func(in1 []string)
+	SetPathsWithNoRetriesFunc func(strings []string)
 
 	// SetTimeoutFunc mocks the SetTimeout method.
 	SetTimeoutFunc func(timeout time.Duration)
@@ -169,8 +154,8 @@ type ClienterMock struct {
 		Put []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// URL is the url argument value.
-			URL string
+			// UrlMoqParam is the urlMoqParam argument value.
+			UrlMoqParam string
 			// ContentType is the contentType argument value.
 			ContentType string
 			// Body is the body argument value.
@@ -183,13 +168,13 @@ type ClienterMock struct {
 		}
 		// SetMaxRetries holds details about calls to the SetMaxRetries method.
 		SetMaxRetries []struct {
-			// In1 is the in1 argument value.
-			In1 int
+			// N is the n argument value.
+			N int
 		}
 		// SetPathsWithNoRetries holds details about calls to the SetPathsWithNoRetries method.
 		SetPathsWithNoRetries []struct {
-			// In1 is the in1 argument value.
-			In1 []string
+			// Strings is the strings argument value.
+			Strings []string
 		}
 		// SetTimeout holds details about calls to the SetTimeout method.
 		SetTimeout []struct {
@@ -197,6 +182,18 @@ type ClienterMock struct {
 			Timeout time.Duration
 		}
 	}
+	lockDo                    sync.RWMutex
+	lockGet                   sync.RWMutex
+	lockGetMaxRetries         sync.RWMutex
+	lockGetPathsWithNoRetries sync.RWMutex
+	lockHead                  sync.RWMutex
+	lockPost                  sync.RWMutex
+	lockPostForm              sync.RWMutex
+	lockPut                   sync.RWMutex
+	lockRoundTrip             sync.RWMutex
+	lockSetMaxRetries         sync.RWMutex
+	lockSetPathsWithNoRetries sync.RWMutex
+	lockSetTimeout            sync.RWMutex
 }
 
 // Do calls DoFunc.
@@ -211,9 +208,9 @@ func (mock *ClienterMock) Do(ctx context.Context, req *http.Request) (*http.Resp
 		Ctx: ctx,
 		Req: req,
 	}
-	lockClienterMockDo.Lock()
+	mock.lockDo.Lock()
 	mock.calls.Do = append(mock.calls.Do, callInfo)
-	lockClienterMockDo.Unlock()
+	mock.lockDo.Unlock()
 	return mock.DoFunc(ctx, req)
 }
 
@@ -228,9 +225,9 @@ func (mock *ClienterMock) DoCalls() []struct {
 		Ctx context.Context
 		Req *http.Request
 	}
-	lockClienterMockDo.RLock()
+	mock.lockDo.RLock()
 	calls = mock.calls.Do
-	lockClienterMockDo.RUnlock()
+	mock.lockDo.RUnlock()
 	return calls
 }
 
@@ -246,9 +243,9 @@ func (mock *ClienterMock) Get(ctx context.Context, url string) (*http.Response, 
 		Ctx: ctx,
 		URL: url,
 	}
-	lockClienterMockGet.Lock()
+	mock.lockGet.Lock()
 	mock.calls.Get = append(mock.calls.Get, callInfo)
-	lockClienterMockGet.Unlock()
+	mock.lockGet.Unlock()
 	return mock.GetFunc(ctx, url)
 }
 
@@ -263,9 +260,9 @@ func (mock *ClienterMock) GetCalls() []struct {
 		Ctx context.Context
 		URL string
 	}
-	lockClienterMockGet.RLock()
+	mock.lockGet.RLock()
 	calls = mock.calls.Get
-	lockClienterMockGet.RUnlock()
+	mock.lockGet.RUnlock()
 	return calls
 }
 
@@ -276,9 +273,9 @@ func (mock *ClienterMock) GetMaxRetries() int {
 	}
 	callInfo := struct {
 	}{}
-	lockClienterMockGetMaxRetries.Lock()
+	mock.lockGetMaxRetries.Lock()
 	mock.calls.GetMaxRetries = append(mock.calls.GetMaxRetries, callInfo)
-	lockClienterMockGetMaxRetries.Unlock()
+	mock.lockGetMaxRetries.Unlock()
 	return mock.GetMaxRetriesFunc()
 }
 
@@ -289,9 +286,9 @@ func (mock *ClienterMock) GetMaxRetriesCalls() []struct {
 } {
 	var calls []struct {
 	}
-	lockClienterMockGetMaxRetries.RLock()
+	mock.lockGetMaxRetries.RLock()
 	calls = mock.calls.GetMaxRetries
-	lockClienterMockGetMaxRetries.RUnlock()
+	mock.lockGetMaxRetries.RUnlock()
 	return calls
 }
 
@@ -302,9 +299,9 @@ func (mock *ClienterMock) GetPathsWithNoRetries() []string {
 	}
 	callInfo := struct {
 	}{}
-	lockClienterMockGetPathsWithNoRetries.Lock()
+	mock.lockGetPathsWithNoRetries.Lock()
 	mock.calls.GetPathsWithNoRetries = append(mock.calls.GetPathsWithNoRetries, callInfo)
-	lockClienterMockGetPathsWithNoRetries.Unlock()
+	mock.lockGetPathsWithNoRetries.Unlock()
 	return mock.GetPathsWithNoRetriesFunc()
 }
 
@@ -315,9 +312,9 @@ func (mock *ClienterMock) GetPathsWithNoRetriesCalls() []struct {
 } {
 	var calls []struct {
 	}
-	lockClienterMockGetPathsWithNoRetries.RLock()
+	mock.lockGetPathsWithNoRetries.RLock()
 	calls = mock.calls.GetPathsWithNoRetries
-	lockClienterMockGetPathsWithNoRetries.RUnlock()
+	mock.lockGetPathsWithNoRetries.RUnlock()
 	return calls
 }
 
@@ -333,9 +330,9 @@ func (mock *ClienterMock) Head(ctx context.Context, url string) (*http.Response,
 		Ctx: ctx,
 		URL: url,
 	}
-	lockClienterMockHead.Lock()
+	mock.lockHead.Lock()
 	mock.calls.Head = append(mock.calls.Head, callInfo)
-	lockClienterMockHead.Unlock()
+	mock.lockHead.Unlock()
 	return mock.HeadFunc(ctx, url)
 }
 
@@ -350,9 +347,9 @@ func (mock *ClienterMock) HeadCalls() []struct {
 		Ctx context.Context
 		URL string
 	}
-	lockClienterMockHead.RLock()
+	mock.lockHead.RLock()
 	calls = mock.calls.Head
-	lockClienterMockHead.RUnlock()
+	mock.lockHead.RUnlock()
 	return calls
 }
 
@@ -372,9 +369,9 @@ func (mock *ClienterMock) Post(ctx context.Context, url string, contentType stri
 		ContentType: contentType,
 		Body:        body,
 	}
-	lockClienterMockPost.Lock()
+	mock.lockPost.Lock()
 	mock.calls.Post = append(mock.calls.Post, callInfo)
-	lockClienterMockPost.Unlock()
+	mock.lockPost.Unlock()
 	return mock.PostFunc(ctx, url, contentType, body)
 }
 
@@ -393,9 +390,9 @@ func (mock *ClienterMock) PostCalls() []struct {
 		ContentType string
 		Body        io.Reader
 	}
-	lockClienterMockPost.RLock()
+	mock.lockPost.RLock()
 	calls = mock.calls.Post
-	lockClienterMockPost.RUnlock()
+	mock.lockPost.RUnlock()
 	return calls
 }
 
@@ -413,9 +410,9 @@ func (mock *ClienterMock) PostForm(ctx context.Context, uri string, data url.Val
 		URI:  uri,
 		Data: data,
 	}
-	lockClienterMockPostForm.Lock()
+	mock.lockPostForm.Lock()
 	mock.calls.PostForm = append(mock.calls.PostForm, callInfo)
-	lockClienterMockPostForm.Unlock()
+	mock.lockPostForm.Unlock()
 	return mock.PostFormFunc(ctx, uri, data)
 }
 
@@ -432,32 +429,32 @@ func (mock *ClienterMock) PostFormCalls() []struct {
 		URI  string
 		Data url.Values
 	}
-	lockClienterMockPostForm.RLock()
+	mock.lockPostForm.RLock()
 	calls = mock.calls.PostForm
-	lockClienterMockPostForm.RUnlock()
+	mock.lockPostForm.RUnlock()
 	return calls
 }
 
 // Put calls PutFunc.
-func (mock *ClienterMock) Put(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error) {
+func (mock *ClienterMock) Put(ctx context.Context, urlMoqParam string, contentType string, body io.Reader) (*http.Response, error) {
 	if mock.PutFunc == nil {
 		panic("ClienterMock.PutFunc: method is nil but Clienter.Put was just called")
 	}
 	callInfo := struct {
 		Ctx         context.Context
-		URL         string
+		UrlMoqParam string
 		ContentType string
 		Body        io.Reader
 	}{
 		Ctx:         ctx,
-		URL:         url,
+		UrlMoqParam: urlMoqParam,
 		ContentType: contentType,
 		Body:        body,
 	}
-	lockClienterMockPut.Lock()
+	mock.lockPut.Lock()
 	mock.calls.Put = append(mock.calls.Put, callInfo)
-	lockClienterMockPut.Unlock()
-	return mock.PutFunc(ctx, url, contentType, body)
+	mock.lockPut.Unlock()
+	return mock.PutFunc(ctx, urlMoqParam, contentType, body)
 }
 
 // PutCalls gets all the calls that were made to Put.
@@ -465,19 +462,19 @@ func (mock *ClienterMock) Put(ctx context.Context, url string, contentType strin
 //     len(mockedClienter.PutCalls())
 func (mock *ClienterMock) PutCalls() []struct {
 	Ctx         context.Context
-	URL         string
+	UrlMoqParam string
 	ContentType string
 	Body        io.Reader
 } {
 	var calls []struct {
 		Ctx         context.Context
-		URL         string
+		UrlMoqParam string
 		ContentType string
 		Body        io.Reader
 	}
-	lockClienterMockPut.RLock()
+	mock.lockPut.RLock()
 	calls = mock.calls.Put
-	lockClienterMockPut.RUnlock()
+	mock.lockPut.RUnlock()
 	return calls
 }
 
@@ -491,9 +488,9 @@ func (mock *ClienterMock) RoundTrip(req *http.Request) (*http.Response, error) {
 	}{
 		Req: req,
 	}
-	lockClienterMockRoundTrip.Lock()
+	mock.lockRoundTrip.Lock()
 	mock.calls.RoundTrip = append(mock.calls.RoundTrip, callInfo)
-	lockClienterMockRoundTrip.Unlock()
+	mock.lockRoundTrip.Unlock()
 	return mock.RoundTripFunc(req)
 }
 
@@ -506,71 +503,71 @@ func (mock *ClienterMock) RoundTripCalls() []struct {
 	var calls []struct {
 		Req *http.Request
 	}
-	lockClienterMockRoundTrip.RLock()
+	mock.lockRoundTrip.RLock()
 	calls = mock.calls.RoundTrip
-	lockClienterMockRoundTrip.RUnlock()
+	mock.lockRoundTrip.RUnlock()
 	return calls
 }
 
 // SetMaxRetries calls SetMaxRetriesFunc.
-func (mock *ClienterMock) SetMaxRetries(in1 int) {
+func (mock *ClienterMock) SetMaxRetries(n int) {
 	if mock.SetMaxRetriesFunc == nil {
 		panic("ClienterMock.SetMaxRetriesFunc: method is nil but Clienter.SetMaxRetries was just called")
 	}
 	callInfo := struct {
-		In1 int
+		N int
 	}{
-		In1: in1,
+		N: n,
 	}
-	lockClienterMockSetMaxRetries.Lock()
+	mock.lockSetMaxRetries.Lock()
 	mock.calls.SetMaxRetries = append(mock.calls.SetMaxRetries, callInfo)
-	lockClienterMockSetMaxRetries.Unlock()
-	mock.SetMaxRetriesFunc(in1)
+	mock.lockSetMaxRetries.Unlock()
+	mock.SetMaxRetriesFunc(n)
 }
 
 // SetMaxRetriesCalls gets all the calls that were made to SetMaxRetries.
 // Check the length with:
 //     len(mockedClienter.SetMaxRetriesCalls())
 func (mock *ClienterMock) SetMaxRetriesCalls() []struct {
-	In1 int
+	N int
 } {
 	var calls []struct {
-		In1 int
+		N int
 	}
-	lockClienterMockSetMaxRetries.RLock()
+	mock.lockSetMaxRetries.RLock()
 	calls = mock.calls.SetMaxRetries
-	lockClienterMockSetMaxRetries.RUnlock()
+	mock.lockSetMaxRetries.RUnlock()
 	return calls
 }
 
 // SetPathsWithNoRetries calls SetPathsWithNoRetriesFunc.
-func (mock *ClienterMock) SetPathsWithNoRetries(in1 []string) {
+func (mock *ClienterMock) SetPathsWithNoRetries(strings []string) {
 	if mock.SetPathsWithNoRetriesFunc == nil {
 		panic("ClienterMock.SetPathsWithNoRetriesFunc: method is nil but Clienter.SetPathsWithNoRetries was just called")
 	}
 	callInfo := struct {
-		In1 []string
+		Strings []string
 	}{
-		In1: in1,
+		Strings: strings,
 	}
-	lockClienterMockSetPathsWithNoRetries.Lock()
+	mock.lockSetPathsWithNoRetries.Lock()
 	mock.calls.SetPathsWithNoRetries = append(mock.calls.SetPathsWithNoRetries, callInfo)
-	lockClienterMockSetPathsWithNoRetries.Unlock()
-	mock.SetPathsWithNoRetriesFunc(in1)
+	mock.lockSetPathsWithNoRetries.Unlock()
+	mock.SetPathsWithNoRetriesFunc(strings)
 }
 
 // SetPathsWithNoRetriesCalls gets all the calls that were made to SetPathsWithNoRetries.
 // Check the length with:
 //     len(mockedClienter.SetPathsWithNoRetriesCalls())
 func (mock *ClienterMock) SetPathsWithNoRetriesCalls() []struct {
-	In1 []string
+	Strings []string
 } {
 	var calls []struct {
-		In1 []string
+		Strings []string
 	}
-	lockClienterMockSetPathsWithNoRetries.RLock()
+	mock.lockSetPathsWithNoRetries.RLock()
 	calls = mock.calls.SetPathsWithNoRetries
-	lockClienterMockSetPathsWithNoRetries.RUnlock()
+	mock.lockSetPathsWithNoRetries.RUnlock()
 	return calls
 }
 
@@ -584,9 +581,9 @@ func (mock *ClienterMock) SetTimeout(timeout time.Duration) {
 	}{
 		Timeout: timeout,
 	}
-	lockClienterMockSetTimeout.Lock()
+	mock.lockSetTimeout.Lock()
 	mock.calls.SetTimeout = append(mock.calls.SetTimeout, callInfo)
-	lockClienterMockSetTimeout.Unlock()
+	mock.lockSetTimeout.Unlock()
 	mock.SetTimeoutFunc(timeout)
 }
 
@@ -599,8 +596,8 @@ func (mock *ClienterMock) SetTimeoutCalls() []struct {
 	var calls []struct {
 		Timeout time.Duration
 	}
-	lockClienterMockSetTimeout.RLock()
+	mock.lockSetTimeout.RLock()
 	calls = mock.calls.SetTimeout
-	lockClienterMockSetTimeout.RUnlock()
+	mock.lockSetTimeout.RUnlock()
 	return calls
 }
