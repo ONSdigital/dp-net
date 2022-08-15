@@ -52,6 +52,7 @@ type Clienter interface {
 	PostForm(ctx context.Context, uri string, data url.Values) (*http.Response, error)
 
 	Do(ctx context.Context, req *http.Request) (*http.Response, error)
+	RoundTrip(req *http.Request) (*http.Response, error)
 }
 
 // NewClient returns a copy of DefaultClient.
