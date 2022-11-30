@@ -46,7 +46,7 @@ func TestNew(t *testing.T) {
 			s := NewServer(":0", h)
 
 			So(s, ShouldNotBeNil)
-			So(s.Handler, ShouldEqual, h)
+			So(s.Handler, ShouldHaveSameTypeAs, http.TimeoutHandler(h, DefaultWriteTimeout-100*time.Millisecond, "connection timeout"))
 			So(s.Alice, ShouldBeNil)
 			So(s.Addr, ShouldEqual, ":0")
 			So(s.MaxHeaderBytes, ShouldEqual, 0)

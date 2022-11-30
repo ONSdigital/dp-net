@@ -13,8 +13,12 @@ import (
 	"github.com/justinas/alice"
 )
 
-const RequestIDHandlerKey string = "RequestID"
-const LogHandlerKey string = "Log"
+const (
+	RequestIDHandlerKey string = "RequestID"
+	LogHandlerKey       string = "Log"
+	DefaultReadTimeout         = 5 * time.Second
+	DefaultWriteTimeout        = 10 * time.Second
+)
 
 // Server is a http.Server with sensible defaults, which supports
 // configurable middleware and timeouts, and shuts down cleanly
@@ -42,10 +46,11 @@ func NewServer(bindAddr string, router http.Handler) *Server {
 		middleware:      middleware,
 		middlewareOrder: []string{RequestIDHandlerKey, LogHandlerKey},
 		Server: http.Server{
-			Handler:           router,
-			Addr:              bindAddr,
-			ReadTimeout:       5 * time.Second,
-			WriteTimeout:      10 * time.Second,
+			Addr:         bindAddr,
+			ReadTimeout:  DefaultReadTimeout,
+			WriteTimeout: DefaultWriteTimeout,
+			// Give the timeout handler some time to write the response before the writer is closed
+			Handler:           http.TimeoutHandler(router, DefaultWriteTimeout-100*time.Millisecond, "connection timeout"),
 			ReadHeaderTimeout: 0,
 			IdleTimeout:       0,
 			MaxHeaderBytes:    0,
