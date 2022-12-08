@@ -16,8 +16,11 @@ import (
 const (
 	RequestIDHandlerKey string = "RequestID"
 	LogHandlerKey       string = "Log"
-	DefaultReadTimeout         = 5 * time.Second
-	DefaultWriteTimeout        = 10 * time.Second
+)
+
+var (
+	DefaultReadTimeout  = 5 * time.Second
+	DefaultWriteTimeout = 10 * time.Second
 )
 
 // Server is a http.Server with sensible defaults, which supports

@@ -2,7 +2,12 @@ package http
 
 import (
 	"errors"
+	"fmt"
+	"io"
+	"net"
 	"net/http"
+	"os"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -210,4 +215,96 @@ func TestNew(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestServer_LongRunningOperation(t *testing.T) {
+	DefaultWriteTimeout = 1 * time.Second
+
+	Convey("given a free port on the localhost", t, func() {
+		p, err := GetFreePort()
+		if err != nil {
+			t.Fatalf("Cannot find a free port to perform test: %v", err)
+		}
+		a := "localhost:" + strconv.Itoa(p)
+
+		Convey("with a server whose handler runs for less than the server's WriteTimout", func() {
+			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				time.Sleep(DefaultWriteTimeout / 100)
+				_, _ = w.Write([]byte("Done"))
+			})
+			defer startServer(a, h)()
+
+			Convey("when a request is made to the server", func() {
+				resp, err := http.Get("http://" + a)
+
+				Convey("the request is completed successfully", func() {
+					So(err, ShouldEqual, nil)
+					So(resp.StatusCode, ShouldEqual, 200)
+
+					b, err := io.ReadAll(resp.Body)
+					So(err, ShouldEqual, nil)
+					So(string(b), ShouldEqual, "Done")
+				})
+			})
+		})
+
+		Convey("with a server whose handler runs for longer than the server's WriteTimout", func() {
+			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				time.Sleep(DefaultWriteTimeout + 100*time.Millisecond)
+				_, _ = w.Write([]byte("Done"))
+			})
+			defer startServer(a, h)()
+
+			Convey("when a request is made to the server", func() {
+				resp, err := http.Get("http://" + a)
+
+				Convey("the request is terminated with a 'connection timeout' response", func() {
+					So(err, ShouldEqual, nil)
+					So(resp.StatusCode, ShouldEqual, http.StatusServiceUnavailable)
+
+					b, err := io.ReadAll(resp.Body)
+					So(err, ShouldEqual, nil)
+					So(string(b), ShouldEqual, "connection timeout")
+				})
+			})
+		})
+	})
+}
+
+func TestGetFreePort(t *testing.T) {
+	Convey("When GetFreePort() is called n times, where n > 1", t, func() {
+		n := 10
+
+		Convey("A free, usable port should be returned every time", func() {
+			for i := 0; i < n; i++ {
+				port, err := GetFreePort()
+				So(err, ShouldBeNil)
+				So(port, ShouldNotEqual, 0)
+
+				l, e := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
+				So(e, ShouldBeNil)
+				So(l, ShouldNotBeNil)
+				_ = l.Close()
+			}
+		})
+	})
+}
+
+func startServer(address string, handler http.Handler) func() {
+	s := NewServer(address, handler)
+	s.HandleOSSignals = false
+
+	go func() {
+		if err := s.Server.ListenAndServe(); err != nil {
+			if !errors.Is(err, http.ErrServerClosed) {
+				os.Exit(1)
+			}
+		}
+	}()
+
+	return func() {
+		if err := s.Server.Shutdown(context.Background()); err != nil {
+			os.Exit(1)
+		}
+	}
 }
