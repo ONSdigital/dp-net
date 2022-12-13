@@ -6,7 +6,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 	"testing"
@@ -229,10 +228,15 @@ func TestServer_LongRunningOperation(t *testing.T) {
 
 		Convey("with a server whose handler runs for less than the server's WriteTimout", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				time.Sleep(DefaultWriteTimeout / 100)
 				_, _ = w.Write([]byte("Done"))
 			})
-			defer startServer(a, h)()
+			eChan, cleanup := startServer(a, h)
+			select {
+			case err = <-eChan:
+				So(err, ShouldBeNil)
+			case <-time.After(10 * time.Millisecond):
+				defer cleanup()
+			}
 
 			Convey("when a request is made to the server", func() {
 				resp, err := http.Get("http://" + a)
@@ -242,7 +246,7 @@ func TestServer_LongRunningOperation(t *testing.T) {
 					So(resp.StatusCode, ShouldEqual, 200)
 
 					b, err := io.ReadAll(resp.Body)
-					So(err, ShouldEqual, nil)
+					So(err, ShouldBeNil)
 					So(string(b), ShouldEqual, "Done")
 				})
 			})
@@ -253,13 +257,19 @@ func TestServer_LongRunningOperation(t *testing.T) {
 				time.Sleep(DefaultWriteTimeout + 100*time.Millisecond)
 				_, _ = w.Write([]byte("Done"))
 			})
-			defer startServer(a, h)()
+			eChan, cleanup := startServer(a, h)
+			select {
+			case err = <-eChan:
+				So(err, ShouldBeNil)
+			case <-time.After(10 * time.Millisecond):
+				defer cleanup()
+			}
 
 			Convey("when a request is made to the server", func() {
 				resp, err := http.Get("http://" + a)
 
 				Convey("the request is terminated with a 'connection timeout' response", func() {
-					So(err, ShouldEqual, nil)
+					So(err, ShouldBeNil)
 					So(resp.StatusCode, ShouldEqual, http.StatusServiceUnavailable)
 
 					b, err := io.ReadAll(resp.Body)
@@ -290,21 +300,21 @@ func TestGetFreePort(t *testing.T) {
 	})
 }
 
-func startServer(address string, handler http.Handler) func() {
+func startServer(address string, handler http.Handler) (chan error, func()) {
 	s := NewServer(address, handler)
 	s.HandleOSSignals = false
 
+	eChan := make(chan error)
 	go func() {
 		if err := s.Server.ListenAndServe(); err != nil {
-			if !errors.Is(err, http.ErrServerClosed) {
-				os.Exit(1)
-			}
+			eChan <- err
 		}
+		close(eChan)
 	}()
 
-	return func() {
+	return eChan, func() {
 		if err := s.Server.Shutdown(context.Background()); err != nil {
-			os.Exit(1)
+			So(err, ShouldBeNil)
 		}
 	}
 }
