@@ -8,7 +8,7 @@ import (
 
 	"context"
 
-	request "github.com/ONSdigital/dp-net/v2/request"
+	"github.com/ONSdigital/dp-net/v2/request"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/justinas/alice"
 )
@@ -16,11 +16,6 @@ import (
 const (
 	RequestIDHandlerKey string = "RequestID"
 	LogHandlerKey       string = "Log"
-)
-
-var (
-	DefaultReadTimeout  = 5 * time.Second
-	DefaultWriteTimeout = 10 * time.Second
 )
 
 // Server is a http.Server with sensible defaults, which supports
@@ -49,11 +44,10 @@ func NewServer(bindAddr string, router http.Handler) *Server {
 		middleware:      middleware,
 		middlewareOrder: []string{RequestIDHandlerKey, LogHandlerKey},
 		Server: http.Server{
-			Addr:         bindAddr,
-			ReadTimeout:  DefaultReadTimeout,
-			WriteTimeout: DefaultWriteTimeout,
-			// Give the timeout handler some time to write the response before the writer is closed
-			Handler:           http.TimeoutHandler(router, DefaultWriteTimeout-100*time.Millisecond, "connection timeout"),
+			Handler:           router,
+			Addr:              bindAddr,
+			ReadTimeout:       5 * time.Second,
+			WriteTimeout:      10 * time.Second,
 			ReadHeaderTimeout: 0,
 			IdleTimeout:       0,
 			MaxHeaderBytes:    0,
@@ -80,7 +74,7 @@ func (s *Server) prep() {
 // chain, and creates/starts a http.Server instance
 //
 // If CertFile/KeyFile are both set, the http.Server instance is started
-// using ListenAndServeTLS. Otherwise ListenAndServe is used.
+// using ListenAndServeTLS. Otherwise, ListenAndServe is used.
 //
 // Specifying one of CertFile/KeyFile without the other will panic.
 func (s *Server) ListenAndServe() error {
@@ -154,12 +148,20 @@ func (s *Server) listenAndServeAsync() {
 	}
 }
 
+func timeoutHandler(s *http.Server) *http.Server {
+	if s.WriteTimeout > 100*time.Millisecond {
+		s.Handler = http.TimeoutHandler(s.Handler, s.WriteTimeout-100*time.Millisecond, "connection timeout")
+	}
+
+	return s
+}
+
 var doListenAndServe = func(httpServer *http.Server) error {
-	return httpServer.ListenAndServe()
+	return timeoutHandler(httpServer).ListenAndServe()
 }
 
 var doListenAndServeTLS = func(httpServer *http.Server, certFile, keyFile string) error {
-	return httpServer.ListenAndServeTLS(certFile, keyFile)
+	return timeoutHandler(httpServer).ListenAndServeTLS(certFile, keyFile)
 }
 
 var doShutdown = func(ctx context.Context, httpServer *http.Server) error {

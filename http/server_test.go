@@ -50,7 +50,7 @@ func TestNew(t *testing.T) {
 			s := NewServer(":0", h)
 
 			So(s, ShouldNotBeNil)
-			So(s.Handler, ShouldHaveSameTypeAs, http.TimeoutHandler(h, DefaultWriteTimeout-100*time.Millisecond, "connection timeout"))
+			So(s.Handler, ShouldEqual, h)
 			So(s.Alice, ShouldBeNil)
 			So(s.Addr, ShouldEqual, ":0")
 			So(s.MaxHeaderBytes, ShouldEqual, 0)
@@ -217,8 +217,14 @@ func TestNew(t *testing.T) {
 }
 
 func TestServer_LongRunningOperation(t *testing.T) {
-	DefaultWriteTimeout = 1 * time.Second
+	doListenAndServe = func(httpServer *http.Server) error {
+		return timeoutHandler(httpServer).ListenAndServe()
+	}
+	doShutdown = func(ctx context.Context, httpServer *http.Server) error {
+		return httpServer.Shutdown(ctx)
+	}
 
+	writeTimeout := 1 * time.Second
 	Convey("given a free port on the localhost", t, func() {
 		p, err := GetFreePort()
 		if err != nil {
@@ -230,7 +236,7 @@ func TestServer_LongRunningOperation(t *testing.T) {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				_, _ = w.Write([]byte("Done"))
 			})
-			eChan, cleanup := startServer(a, h)
+			eChan, cleanup := startServer(a, h, writeTimeout)
 			select {
 			case err = <-eChan:
 				So(err, ShouldBeNil)
@@ -254,10 +260,10 @@ func TestServer_LongRunningOperation(t *testing.T) {
 
 		Convey("with a server whose handler runs for longer than the server's WriteTimout", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				time.Sleep(DefaultWriteTimeout + 100*time.Millisecond)
+				time.Sleep(writeTimeout + 100*time.Millisecond)
 				_, _ = w.Write([]byte("Done"))
 			})
-			eChan, cleanup := startServer(a, h)
+			eChan, cleanup := startServer(a, h, writeTimeout)
 			select {
 			case err = <-eChan:
 				So(err, ShouldBeNil)
@@ -300,20 +306,21 @@ func TestGetFreePort(t *testing.T) {
 	})
 }
 
-func startServer(address string, handler http.Handler) (chan error, func()) {
+func startServer(address string, handler http.Handler, writeTimeout time.Duration) (chan error, func()) {
 	s := NewServer(address, handler)
+	s.WriteTimeout = writeTimeout
 	s.HandleOSSignals = false
 
 	eChan := make(chan error)
 	go func() {
-		if err := s.Server.ListenAndServe(); err != nil {
+		if err := s.ListenAndServe(); err != nil {
 			eChan <- err
 		}
 		close(eChan)
 	}()
 
 	return eChan, func() {
-		if err := s.Server.Shutdown(context.Background()); err != nil {
+		if err := s.Shutdown(context.Background()); err != nil {
 			So(err, ShouldBeNil)
 		}
 	}

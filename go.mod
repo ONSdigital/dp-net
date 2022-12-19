@@ -2,6 +2,8 @@ module github.com/ONSdigital/dp-net/v2
 
 go 1.19
 
+retract v2.7.0
+
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.187.0
 	github.com/ONSdigital/log.go/v2 v2.2.0
