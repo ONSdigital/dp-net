@@ -26,6 +26,18 @@ func IdentityWithHTTPClient(cli *clientsidentity.Client) func(http.Handler) http
 	return identityWithHTTPClient(cli, GetFlorenceToken, getServiceAuthToken)
 }
 
+// IdentityService is a handler that controls the service authenticating of a request only,
+// florence token header or cookie will be ignored
+func IdentityService(cli *clientsidentity.Client) func(http.Handler) http.Handler {
+	return identityWithHTTPClient(cli, dontGetToken, getServiceAuthToken)
+}
+
+// IdentityFlorence is a handler that controls the florence (user) authenticating of a request only,
+// service token header or cookie will be ignored
+func IdentityFlorence(cli *clientsidentity.Client) func(http.Handler) http.Handler {
+	return identityWithHTTPClient(cli, GetFlorenceToken, dontGetToken)
+}
+
 func identityWithHTTPClient(cli *clientsidentity.Client, getFlorenceToken, getServiceToken getTokenFromReqFunc) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -71,6 +83,10 @@ func handleFailedRequest(ctx context.Context, w http.ResponseWriter, r *http.Req
 	log.Error(ctx, event, err, data)
 	dphttp.DrainBody(r)
 	w.WriteHeader(status)
+}
+
+func dontGetToken(ctx context.Context, req *http.Request) (string, error) {
+	return "", nil
 }
 
 func GetFlorenceToken(ctx context.Context, req *http.Request) (string, error) {
