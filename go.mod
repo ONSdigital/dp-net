@@ -5,6 +5,7 @@ go 1.19
 retract (
 	v2.7.0
 	v2.7.1 // rethink application of timeout to standard  http server
+	v2.7.2 // contains retraction
 )
 
 require (
