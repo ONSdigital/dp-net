@@ -2,7 +2,10 @@ module github.com/ONSdigital/dp-net/v2
 
 go 1.19
 
-retract v2.7.0
+retract (
+	v2.7.0
+	v2.7.1 // rethink application of timeout to standard  http server
+)
 
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.187.0
