@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	RequestIDHandlerKey string = "RequestID"
-	LogHandlerKey       string = "Log"
+	RequestIDHandlerKey string        = "RequestID"
+	LogHandlerKey       string        = "Log"
+	ResponseWriteGrace  time.Duration = 100 * time.Millisecond
 )
 
 // Server is a http.Server with sensible defaults, which supports
@@ -30,6 +31,7 @@ type Server struct {
 	KeyFile                string
 	DefaultShutdownTimeout time.Duration
 	HandleOSSignals        bool
+	RequestTimeout         time.Duration
 }
 
 // NewServer creates a new server
@@ -55,6 +57,13 @@ func NewServer(bindAddr string, router http.Handler) *Server {
 		HandleOSSignals:        true,
 		DefaultShutdownTimeout: 10 * time.Second,
 	}
+}
+
+// NewServerWithTimeout creates a new server with request timeout duration
+func NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration) *Server {
+	server := NewServer(bindAddr, router)
+	server.RequestTimeout = timeout
+	return server
 }
 
 func (s *Server) prep() {
@@ -110,10 +119,10 @@ func (s *Server) listenAndServe() error {
 
 	s.prep()
 	if len(s.CertFile) > 0 || len(s.KeyFile) > 0 {
-		return doListenAndServeTLS(&s.Server, s.CertFile, s.KeyFile)
+		return doListenAndServeTLS(s, s.CertFile, s.KeyFile)
 	}
 
-	return doListenAndServe(&s.Server)
+	return doListenAndServe(s)
 }
 
 func (s *Server) listenAndServeHandleOSSignals() error {
@@ -133,14 +142,14 @@ func (s *Server) listenAndServeAsync() {
 	s.prep()
 	if len(s.CertFile) > 0 || len(s.KeyFile) > 0 {
 		go func() {
-			if err := doListenAndServeTLS(&s.Server, s.CertFile, s.KeyFile); err != nil {
+			if err := doListenAndServeTLS(s, s.CertFile, s.KeyFile); err != nil {
 				log.Error(context.Background(), "http server returned error", err)
 				os.Exit(1)
 			}
 		}()
 	} else {
 		go func() {
-			if err := doListenAndServe(&s.Server); err != nil {
+			if err := doListenAndServe(s); err != nil {
 				log.Error(context.Background(), "http server returned error", err)
 				os.Exit(1)
 			}
@@ -148,19 +157,23 @@ func (s *Server) listenAndServeAsync() {
 	}
 }
 
-func timeoutHandler(s *http.Server) *http.Server {
-	if s.WriteTimeout > 100*time.Millisecond {
-		s.Handler = http.TimeoutHandler(s.Handler, s.WriteTimeout-100*time.Millisecond, "connection timeout")
+func timeoutHandler(s *Server) *http.Server {
+	if s.RequestTimeout > 0 {
+		// give some time for the response to be written
+		if s.WriteTimeout <= s.RequestTimeout {
+			s.WriteTimeout = s.RequestTimeout + ResponseWriteGrace
+		}
+		s.Handler = http.TimeoutHandler(s.Handler, s.RequestTimeout, "connection timeout")
 	}
 
-	return s
+	return &s.Server
 }
 
-var doListenAndServe = func(httpServer *http.Server) error {
+var doListenAndServe = func(httpServer *Server) error {
 	return timeoutHandler(httpServer).ListenAndServe()
 }
 
-var doListenAndServeTLS = func(httpServer *http.Server, certFile, keyFile string) error {
+var doListenAndServeTLS = func(httpServer *Server, certFile, keyFile string) error {
 	return timeoutHandler(httpServer).ListenAndServeTLS(certFile, keyFile)
 }
 

@@ -184,6 +184,24 @@ func TestClientDoesRetryAndContextTimeout(t *testing.T) {
 			})
 		})
 	})
+
+	Convey("Client with total timeout", t, func() {
+		// total timeout = 500msec, sleep handler = 1sec
+		httpClient := ClientWithTotalTimeout(nil, 500*time.Millisecond)
+		Convey("When Post() is called on a URL with a delay on the first response", func() {
+			delayByOneSecondOnNext := delayByOneSecondOn(expectedCallCount + 1)
+			expectedCallCount++
+
+			resp, err := httpClient.Post(context.Background(), ts.URL, httptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "context deadline exceeded")
+			So(resp, ShouldBeNil)
+
+			Convey("Then the server sees two POST calls", func() {
+				So(ts.GetCalls(0), ShouldEqual, expectedCallCount)
+			})
+		})
+	})
 }
 
 func TestClientNoRetries(t *testing.T) {

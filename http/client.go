@@ -17,6 +17,12 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
+// go:generate moq -out mock_client.go -pkg http . Clienter
+
+const (
+	DefaultRequestTimeout = 10 * time.Second
+)
+
 // Client is an extension of the net/http client with ability to add
 // timeouts, exponential backoff and context-based cancellation.
 type Client struct {
@@ -24,6 +30,7 @@ type Client struct {
 	RetryTime          time.Duration
 	PathsWithNoRetries map[string]bool
 	HTTPClient         *http.Client
+	TotalTimeout       time.Duration
 }
 
 // DefaultTransport is the default implementation of Transport and is
@@ -39,6 +46,9 @@ var DefaultTransport = &http.Transport{
 
 // Clienter provides an interface for methods on an HTTP Client.
 type Clienter interface {
+	// Sets the overall timeout (spans all retries)
+	SetTotalTimeout(timeout time.Duration)
+	// Sets HTTP request timeout (timeout 'per' try/request)
 	SetTimeout(timeout time.Duration)
 	SetMaxRetries(int)
 	GetMaxRetries() int
@@ -66,7 +76,7 @@ func NewClient() Clienter {
 		RetryTime:  20 * time.Millisecond,
 
 		HTTPClient: &http.Client{
-			Timeout:   10 * time.Second,
+			Timeout:   DefaultRequestTimeout,
 			Transport: DefaultTransport,
 		},
 	}
@@ -79,7 +89,7 @@ func NewClientWithTransport(transport http.RoundTripper) Clienter {
 		RetryTime:  20 * time.Millisecond,
 
 		HTTPClient: &http.Client{
-			Timeout:   10 * time.Second,
+			Timeout:   DefaultRequestTimeout,
 			Transport: transport,
 		},
 	}
@@ -87,12 +97,31 @@ func NewClientWithTransport(transport http.RoundTripper) Clienter {
 	return client
 }
 
-// ClientWithTimeout facilitates creating a client and setting request timeout.
+// ClientWithTimeout creates a client and sets per try/request timeout.
 func ClientWithTimeout(c Clienter, timeout time.Duration) Clienter {
 	if c == nil {
 		c = NewClient()
 	}
 	c.SetTimeout(timeout)
+	return c
+}
+
+// ClientWithTotalTimeout creates a client with overall timeout (spans all retries)
+func ClientWithTotalTimeout(c Clienter, timeout time.Duration) Clienter {
+	if c == nil {
+		c = NewClient()
+	}
+	c.SetTotalTimeout(timeout)
+	return c
+}
+
+// ClientWithTimeouts creates a client with both (per-request + total) timeout values
+func ClientWithTimeouts(c Clienter, perRequest time.Duration, total time.Duration) Clienter {
+	if c == nil {
+		c = NewClient()
+	}
+	c.SetTimeout(perRequest)
+	c.SetTotalTimeout(total)
 	return c
 }
 
@@ -111,7 +140,12 @@ func ClientWithListOfNonRetriablePaths(c Clienter, paths []string) Clienter {
 	return c
 }
 
-// SetTimeout sets HTTP request timeout.
+// SetTotalTimeout sets the overall timeout (spans all retries)
+func (c *Client) SetTotalTimeout(timeout time.Duration) {
+	c.TotalTimeout = timeout
+}
+
+// SetTimeout sets HTTP request timeout (timeout 'per' try/request)
 func (c *Client) SetTimeout(timeout time.Duration) {
 	c.HTTPClient.Timeout = timeout
 }
@@ -181,6 +215,17 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 
 	path := req.URL.Path
 
+	// A global timeout value is defined
+	if c.TotalTimeout > 0 {
+		// if there is a timeout set already, honor that
+		// will allow user to set a local/per-request override
+		_, ok := ctx.Deadline()
+		if !ok {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, c.TotalTimeout)
+			defer cancel()
+		}
+	}
 	resp, err := doer(ctx, c.HTTPClient, req)
 	if !c.PathsWithNoRetries[path] && c.GetMaxRetries() > 0 && wantRetry(err, resp) {
 		return c.backoff(ctx, doer, c.HTTPClient, req)

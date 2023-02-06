@@ -17,25 +17,25 @@ import (
 
 // listenAndServeTLSCalls keeps track of a listenAndServeTLS call
 type listenAndServeTLSCalls struct {
-	httpServer *http.Server
+	httpServer *Server
 	certFile   string
 	keyFile    string
 }
 
 // listenAndServeCalls keeps track of a listenAndServe call
 type listenAndServeCalls struct {
-	httpServer *http.Server
+	httpServer *Server
 }
 
 func TestNew(t *testing.T) {
 
 	Convey("Given mocked network calls", t, func() {
 
-		doListenAndServe = func(httpServer *http.Server) error {
+		doListenAndServe = func(httpServer *Server) error {
 			return errors.New("unexpected ListenAndServe call")
 		}
 
-		doListenAndServeTLS = func(httpServer *http.Server, certFile, keyFile string) error {
+		doListenAndServeTLS = func(httpServer *Server, certFile, keyFile string) error {
 			return errors.New("unexpected ListenAndServeTLS call")
 
 		}
@@ -129,7 +129,7 @@ func TestNew(t *testing.T) {
 			Convey("ListenAndServeTLS should set CertFile/KeyFile", func() {
 				wg := &sync.WaitGroup{}
 				calls := []listenAndServeTLSCalls{}
-				doListenAndServeTLS = func(httpServer *http.Server, certFile, keyFile string) error {
+				doListenAndServeTLS = func(httpServer *Server, certFile, keyFile string) error {
 					defer wg.Done()
 					calls = append(calls, listenAndServeTLSCalls{
 						httpServer: httpServer,
@@ -178,7 +178,7 @@ func TestNew(t *testing.T) {
 		Convey("Given a mocked ListenAndServe", func() {
 			wg := &sync.WaitGroup{}
 			calls := []listenAndServeCalls{}
-			doListenAndServe = func(httpServer *http.Server) error {
+			doListenAndServe = func(httpServer *Server) error {
 				defer wg.Done()
 				calls = append(calls, listenAndServeCalls{httpServer: httpServer})
 				return nil
@@ -217,7 +217,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestServer_LongRunningOperation(t *testing.T) {
-	doListenAndServe = func(httpServer *http.Server) error {
+	doListenAndServe = func(httpServer *Server) error {
 		return timeoutHandler(httpServer).ListenAndServe()
 	}
 	doShutdown = func(ctx context.Context, httpServer *http.Server) error {
@@ -236,7 +236,7 @@ func TestServer_LongRunningOperation(t *testing.T) {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				_, _ = w.Write([]byte("Done"))
 			})
-			eChan, cleanup := startServer(a, h, writeTimeout)
+			eChan, cleanup := startServer(a, h, writeTimeout, 0)
 			select {
 			case err = <-eChan:
 				So(err, ShouldBeNil)
@@ -258,12 +258,37 @@ func TestServer_LongRunningOperation(t *testing.T) {
 			})
 		})
 
-		Convey("with a server whose handler runs for longer than the server's WriteTimout", func() {
+		Convey("with a server whose handler runs for longer than the server's WriteTimout (no response timeout)", func() {
 			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				time.Sleep(writeTimeout + 100*time.Millisecond)
 				_, _ = w.Write([]byte("Done"))
 			})
-			eChan, cleanup := startServer(a, h, writeTimeout)
+			eChan, cleanup := startServer(a, h, writeTimeout, 0)
+			select {
+			case err = <-eChan:
+				So(err, ShouldBeNil)
+			case <-time.After(10 * time.Millisecond):
+				defer cleanup()
+			}
+
+			Convey("when a request is made to the server", func() {
+				resp, err := http.Get("http://" + a)
+
+				Convey("the request is terminated", func() {
+					So(err, ShouldNotBeNil)
+					So(resp, ShouldBeNil)
+				})
+			})
+		})
+
+		Convey("with a server whose handler runs for longer than the server's WriteTimout (with response timeout)", func() {
+			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				time.Sleep(writeTimeout + 100*time.Millisecond)
+				_, _ = w.Write([]byte("Done"))
+			})
+			// this will test that there will always be sufficient time
+			// to write to reponse
+			eChan, cleanup := startServer(a, h, writeTimeout, writeTimeout)
 			select {
 			case err = <-eChan:
 				So(err, ShouldBeNil)
@@ -306,9 +331,15 @@ func TestGetFreePort(t *testing.T) {
 	})
 }
 
-func startServer(address string, handler http.Handler, writeTimeout time.Duration) (chan error, func()) {
-	s := NewServer(address, handler)
+func startServer(address string, handler http.Handler, writeTimeout time.Duration, requestTimeout time.Duration) (chan error, func()) {
+	var s *Server
+	if requestTimeout > 0 {
+		s = NewServerWithTimeout(address, handler, requestTimeout)
+	} else {
+		s = NewServer(address, handler)
+	}
 	s.WriteTimeout = writeTimeout
+	s.RequestTimeout = requestTimeout
 	s.HandleOSSignals = false
 
 	eChan := make(chan error)
