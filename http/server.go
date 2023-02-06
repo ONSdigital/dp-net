@@ -32,6 +32,7 @@ type Server struct {
 	DefaultShutdownTimeout time.Duration
 	HandleOSSignals        bool
 	RequestTimeout         time.Duration
+	TimeoutMessage         string
 }
 
 // NewServer creates a new server
@@ -60,9 +61,11 @@ func NewServer(bindAddr string, router http.Handler) *Server {
 }
 
 // NewServerWithTimeout creates a new server with request timeout duration
-func NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration) *Server {
+// and a message that will be in the response body
+func NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration, timeoutMessage string) *Server {
 	server := NewServer(bindAddr, router)
 	server.RequestTimeout = timeout
+	server.TimeoutMessage = timeoutMessage
 	return server
 }
 
@@ -163,7 +166,11 @@ func timeoutHandler(s *Server) *http.Server {
 		if s.WriteTimeout <= s.RequestTimeout {
 			s.WriteTimeout = s.RequestTimeout + ResponseWriteGrace
 		}
-		s.Handler = http.TimeoutHandler(s.Handler, s.RequestTimeout, "connection timeout")
+		timeoutMsg := "connection timeout"
+		if s.TimeoutMessage != "" {
+			timeoutMsg = s.TimeoutMessage
+		}
+		s.Handler = http.TimeoutHandler(s.Handler, s.RequestTimeout, timeoutMsg)
 	}
 
 	return &s.Server

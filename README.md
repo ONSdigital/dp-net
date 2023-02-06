@@ -16,8 +16,15 @@ and the ability to perform exponential backoff when calling another HTTP server.
 
 #### How to use
 
-this client should have a familiar feel to it when it is used - with an example given
-below:
+This client should have a familiar feel to it when it is used.
+There are a few options available when you want to create a client
+- Simple client with no timeout value (shown below)
+- With timeout (both per request AND total timeout (spans all retries)) can be set
+  - ClientWithTimeout (sets per try timeout duration)
+  - ClientWithTotalTimeout (total client timeout)
+  - ClientWithTimeouts (allows you to set both the above timeouts)
+
+An example given below:
 
 ```go
 import http "github.com/ONSdigital/dp-net/v2/http"
@@ -86,6 +93,10 @@ This Server is intended to be used by all ONS digital publishing services that r
 
 #### Creation
 
+You have 2 options available (depending on if you want to specify a request timeout)
+ - NewServer(bindAddr string, router http.Handler)
+ - NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration, timeoutMessage string)
+ 
 Assuming you have created a router with your API handlers, you can create the http server like so:
 
 ```go
