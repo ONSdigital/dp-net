@@ -3,7 +3,6 @@ package responder
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	dperrors "github.com/ONSdigital/dp-net/v2/errors"
@@ -40,18 +39,23 @@ func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int,
 	w.WriteHeader(status)
 
 	if _, err = w.Write(b); err != nil {
-		responseDescription := "response"
+		var logData log.Data
 		bodyLength := len(b)
 		if bodyLength > 1000 {
-			responseDescription = fmt.Sprintf("response clipped to 1000 chars from: %d", bodyLength)
-			bodyLength = 1000
-		}
-		log.Error(ctx, "failed to write response", err, log.Data{
 			// Limit length of the response that is logged to a useful amount to stop giving
 			// logstash a bad day as the dp-population-types-api has been seen to log a line
 			// that is ~1.9 M Bytes long - which is way too much.
-			responseDescription: string(b[0:bodyLength]),
-		})
+			logData = log.Data{
+				"truncated_response":       string(b[:1000]),
+				"original_response_length": bodyLength,
+			}
+		} else {
+			logData = log.Data{
+				"response":        string(b),
+				"response_length": bodyLength,
+			}
+		}
+		log.Error(ctx, "failed to write response", err, logData)
 		return
 	}
 }
@@ -155,18 +159,23 @@ func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status in
 func (r *Responder) Bytes(ctx context.Context, w http.ResponseWriter, status int, resp []byte) {
 	w.WriteHeader(status)
 	if _, err := w.Write(resp); err != nil {
-		responseDescription := "response"
+		var logData log.Data
 		bodyLength := len(resp)
 		if bodyLength > 1000 {
-			responseDescription = fmt.Sprintf("response clipped to 1000 chars from: %d", bodyLength)
-			bodyLength = 1000
-		}
-		log.Error(ctx, "failed to write response", err, log.Data{
 			// Limit length of the response that is logged to a useful amount to stop giving
 			// logstash a bad day as the dp-population-types-api has been seen to log a line
 			// that is ~1.9 M Bytes long - which is way too much.
-			responseDescription: string(resp[0:bodyLength]),
-		})
+			logData = log.Data{
+				"truncated_response":       string(resp[:1000]),
+				"original_response_length": bodyLength,
+			}
+		} else {
+			logData = log.Data{
+				"response":        string(resp),
+				"response_length": bodyLength,
+			}
+		}
+		log.Error(ctx, "failed to write response", err, logData)
 		return
 	}
 }
