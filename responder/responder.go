@@ -3,6 +3,7 @@ package responder
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	dperrors "github.com/ONSdigital/dp-net/v2/errors"
@@ -39,15 +40,17 @@ func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int,
 	w.WriteHeader(status)
 
 	if _, err = w.Write(b); err != nil {
+		responseDescription := "response"
 		bodyLength := len(b)
 		if bodyLength > 1000 {
+			responseDescription = fmt.Sprintf("response clipped to 1000 chars from: %d", bodyLength)
 			bodyLength = 1000
 		}
 		log.Error(ctx, "failed to write response", err, log.Data{
 			// Limit length of the response that is logged to a useful amount to stop giving
 			// logstash a bad day as the dp-population-types-api has been seen to log a line
 			// that is ~1.9 M Bytes long - which is way too much.
-			"response": string(b[0:bodyLength]),
+			responseDescription: string(b[0:bodyLength]),
 		})
 		return
 	}
@@ -152,15 +155,17 @@ func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status in
 func (r *Responder) Bytes(ctx context.Context, w http.ResponseWriter, status int, resp []byte) {
 	w.WriteHeader(status)
 	if _, err := w.Write(resp); err != nil {
+		responseDescription := "response"
 		bodyLength := len(resp)
 		if bodyLength > 1000 {
+			responseDescription = fmt.Sprintf("response clipped to 1000 chars from: %d", bodyLength)
 			bodyLength = 1000
 		}
 		log.Error(ctx, "failed to write response", err, log.Data{
 			// Limit length of the response that is logged to a useful amount to stop giving
 			// logstash a bad day as the dp-population-types-api has been seen to log a line
 			// that is ~1.9 M Bytes long - which is way too much.
-			"response": string(resp[0:bodyLength]),
+			responseDescription: string(resp[0:bodyLength]),
 		})
 		return
 	}
