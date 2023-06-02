@@ -20,6 +20,8 @@ func New() *Responder {
 	return &Responder{}
 }
 
+const maxBodyLength = 1000 // used to limit max length of line to limit too much hittinh logstash
+
 // JSON responds to a HTTP request, expecting the response body
 // to be marshall-able into JSON
 func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int, resp interface{}) {
@@ -39,9 +41,23 @@ func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int,
 	w.WriteHeader(status)
 
 	if _, err = w.Write(b); err != nil {
-		log.Error(ctx, "failed to write response", err, log.Data{
-			"response": string(b),
-		})
+		var logData log.Data
+		bodyLength := len(b)
+		if bodyLength > maxBodyLength {
+			// Limit length of the response that is logged to a useful amount to stop giving
+			// logstash a bad day as the dp-population-types-api has been seen to log a line
+			// that is ~1.9 M Bytes long - which is way too much.
+			logData = log.Data{
+				"truncated_response":       string(b[:maxBodyLength]),
+				"original_response_length": bodyLength,
+			}
+		} else {
+			logData = log.Data{
+				"response":        string(b),
+				"response_length": bodyLength,
+			}
+		}
+		log.Error(ctx, "failed to write response", err, logData)
 		return
 	}
 }
@@ -145,9 +161,23 @@ func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status in
 func (r *Responder) Bytes(ctx context.Context, w http.ResponseWriter, status int, resp []byte) {
 	w.WriteHeader(status)
 	if _, err := w.Write(resp); err != nil {
-		log.Error(ctx, "failed to write response", err, log.Data{
-			"response": string(resp),
-		})
+		var logData log.Data
+		bodyLength := len(resp)
+		if bodyLength > maxBodyLength {
+			// Limit length of the response that is logged to a useful amount to stop giving
+			// logstash a bad day as the dp-population-types-api has been seen to log a line
+			// that is ~1.9 M Bytes long - which is way too much.
+			logData = log.Data{
+				"truncated_response":       string(resp[:maxBodyLength]),
+				"original_response_length": bodyLength,
+			}
+		} else {
+			logData = log.Data{
+				"response":        string(resp),
+				"response_length": bodyLength,
+			}
+		}
+		log.Error(ctx, "failed to write response", err, logData)
 		return
 	}
 }
