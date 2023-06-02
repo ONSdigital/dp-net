@@ -20,6 +20,8 @@ func New() *Responder {
 	return &Responder{}
 }
 
+const maxBodyLength = 1000 // used to limit max length of line to limit too much hittinh logstash
+
 // JSON responds to a HTTP request, expecting the response body
 // to be marshall-able into JSON
 func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int, resp interface{}) {
@@ -41,12 +43,12 @@ func (r *Responder) JSON(ctx context.Context, w http.ResponseWriter, status int,
 	if _, err = w.Write(b); err != nil {
 		var logData log.Data
 		bodyLength := len(b)
-		if bodyLength > 1000 {
+		if bodyLength > maxBodyLength {
 			// Limit length of the response that is logged to a useful amount to stop giving
 			// logstash a bad day as the dp-population-types-api has been seen to log a line
 			// that is ~1.9 M Bytes long - which is way too much.
 			logData = log.Data{
-				"truncated_response":       string(b[:1000]),
+				"truncated_response":       string(b[:maxBodyLength]),
 				"original_response_length": bodyLength,
 			}
 		} else {
@@ -161,12 +163,12 @@ func (r *Responder) Bytes(ctx context.Context, w http.ResponseWriter, status int
 	if _, err := w.Write(resp); err != nil {
 		var logData log.Data
 		bodyLength := len(resp)
-		if bodyLength > 1000 {
+		if bodyLength > maxBodyLength {
 			// Limit length of the response that is logged to a useful amount to stop giving
 			// logstash a bad day as the dp-population-types-api has been seen to log a line
 			// that is ~1.9 M Bytes long - which is way too much.
 			logData = log.Data{
-				"truncated_response":       string(resp[:1000]),
+				"truncated_response":       string(resp[:maxBodyLength]),
 				"original_response_length": bodyLength,
 			}
 		} else {
