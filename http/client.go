@@ -44,6 +44,19 @@ var DefaultTransport = &http.Transport{
 	IdleConnTimeout:     30 * time.Second,
 }
 
+// DefaultClient is a dp-net specific http client with sensible timeouts,
+// exponential backoff, and a contextual dialer.
+// NOTE: This is needed in dp-deployer's unit tests
+var DefaultClient = &Client{
+	MaxRetries: 3,
+	RetryTime:  20 * time.Millisecond,
+
+	HTTPClient: &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: DefaultTransport,
+	},
+}
+
 // Clienter provides an interface for methods on an HTTP Client.
 type Clienter interface {
 	// Sets the overall timeout (spans all retries)
