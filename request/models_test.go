@@ -17,7 +17,8 @@ func TestCopy(t *testing.T) {
 		p := Params{"name": "john", "surname": "smith"}
 
 		copiedParams := p.Copy()
-		So(copiedParams, ShouldNotEqual, p)
+		
+		So(&copiedParams, ShouldNotPointTo, &p)
 		So(copiedParams, ShouldResemble, p)
 
 		Convey("When the original params are changed", func() {
