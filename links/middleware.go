@@ -2,63 +2,58 @@ package links
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 )
 
 type Middleware struct {
-	handler         http.Handler
-	DefaultProtocol string
-	DefaultHost     string
-	DefaultPort     string
+	defaultURL *url.URL
+	handler    http.Handler
 }
 
-func NewMiddleWare(defaultURL string) (func(http.Handler) http.Handler, error) {
-	parsedURL, err := url.Parse(defaultURL)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing URL: %v", err)
-	}
-
-	defaultProtocol := parsedURL.Scheme
-	defaultHost := parsedURL.Hostname()
-	defaultPort := parsedURL.Port()
-
+func NewMiddleWare(defaultURL *url.URL) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return &Middleware{
-			DefaultProtocol: defaultProtocol,
-			DefaultHost:     defaultHost,
-			DefaultPort:     defaultPort,
-			handler:         h,
+			defaultURL: defaultURL,
 		}
-	}, nil
+	}
 }
 
-func (l *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	forwardedProto, _ := getForwardedHeaderElseDefault(r.Header, "X-Forwarded-Proto", l.DefaultProtocol)
-	forwardedHost, forwardedHostFound := getForwardedHeaderElseDefault(r.Header, "X-Forwarded-Host", l.DefaultHost)
-	forwardedPort := l.DefaultPort
-	if forwardedHostFound {
-		forwardedPort, _ = getForwardedHeaderElseDefault(r.Header, "X-Forwarded-Port", "")
+// HandlerFunc returns a handlerFunc that can be used for individual routes so that the middleware doesn't have to be used globally for all routes.
+func HandlerFunc(defaultURL *url.URL, handlerFunc http.HandlerFunc) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		u := getAPIURLFromHeaderOrDefault(&r.Header, defaultURL)
+		handlerFunc(w, r.WithContext(context.WithValue(r.Context(), ctxAPIURL, u)))
 	}
-	forwardedPathPrefix, _ := getForwardedHeaderElseDefault(r.Header, "X-Forwarded-Path-Prefix", "")
-
-	ctx := context.WithValue(r.Context(), ctxProtocol, forwardedProto)
-	ctx = context.WithValue(ctx, ctxHost, forwardedHost)
-	ctx = context.WithValue(ctx, ctxPort, forwardedPort)
-	ctx = context.WithValue(ctx, ctxPathPrefix, forwardedPathPrefix)
-
-	r2 := r.WithContext(ctx)
-
-	l.handler.ServeHTTP(w, r2)
 }
 
-func getForwardedHeaderElseDefault(header http.Header, key, defaultValue string) (value string, found bool) {
-	value = header.Get(key)
-	if value == "" {
-		fmt.Printf("\n%s value not found, using default: %s\n", key, defaultValue)
-		return defaultValue, false
+func (mw *Middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	u := getAPIURLFromHeaderOrDefault(&r.Header, mw.defaultURL)
+	mw.handler.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxAPIURL, u)))
+}
+
+func getAPIURLFromHeaderOrDefault(h *http.Header, defaultURL *url.URL) *url.URL {
+	host := h.Get("X-Forwarded-Host")
+	if host == "" {
+		return defaultURL
 	}
-	fmt.Printf("\n%s value found, using forwarded: %s\n", key, value)
-	return value, true
+
+	scheme := h.Get("X-Forwarded-Proto")
+	if scheme == "" {
+		scheme = "http"
+	}
+
+	port := h.Get("X-Forwarded-Port")
+	if port != "" {
+		host += ":" + port
+	}
+
+	path := h.Get("X-Forwarded-Path-Prefix")
+
+	url := &url.URL{
+		Scheme: scheme,
+		Host:   host,
+		Path:   "/",
+	}
+	return url.JoinPath(path)
 }
