@@ -1,19 +1,58 @@
 package links
 
 import (
-	"context"
+	"github.com/pkg/errors"
+	"net/http"
 	"net/url"
 )
 
-type contextKey string
+type Builder struct {
+	URL *url.URL
+}
 
-const (
-	ctxAPIURL = "apiurl"
-)
+func FromHeadersOrDefault(h *http.Header, defaultURL *url.URL) *Builder {
+	host := h.Get("X-Forwarded-Host")
+	if host == "" {
+		return &Builder{
+			URL: defaultURL,
+		}
+	}
 
-func URLBuild(ctx context.Context, oldURL url.URL) (string, error) {
-	apiURL := ctx.Value(ctxAPIURL).(url.URL)
+	scheme := h.Get("X-Forwarded-Proto")
+	if scheme == "" {
+		scheme = "http"
+	}
+
+	port := h.Get("X-Forwarded-Port")
+	if port != "" {
+		host += ":" + port
+	}
+
+	path := h.Get("X-Forwarded-Path-Prefix")
+
+	url := &url.URL{
+		Scheme: scheme,
+		Host:   host,
+		Path:   "/",
+	}
+
+	return &Builder{
+		URL: url.JoinPath(path),
+	}
+}
+
+func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
+	apiURL := *b.URL
 	apiURL.JoinPath(oldURL.Path)
 	apiURL.RawQuery = oldURL.RawQuery
-	return apiURL.String(), nil
+	return &apiURL
+}
+
+func (b *Builder) BuildLink(link string) (string, error) {
+	oldURL, err := url.Parse(link)
+	if err != nil {
+		return "", errors.Wrap(err, "unalble to parse link to URL")
+	}
+	newURL := b.BuildURL(oldURL)
+	return newURL.String(), nil
 }
