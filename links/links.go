@@ -42,10 +42,9 @@ func FromHeadersOrDefault(h *http.Header, defaultURL *url.URL) *Builder {
 }
 
 func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
-	apiURL := *b.URL
-	apiURL.JoinPath(oldURL.Path)
+	apiURL := b.URL.JoinPath(oldURL.Path)
 	apiURL.RawQuery = oldURL.RawQuery
-	return &apiURL
+	return apiURL
 }
 
 func (b *Builder) BuildLink(link string) (string, error) {

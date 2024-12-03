@@ -157,3 +157,43 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 //		})
 //	})
 //}
+
+func TestBuilder_BuildLink(t *testing.T) {
+
+	Convey("Given a list of test cases", t, func() {
+		tests := []struct {
+			builderURL string
+			oldLink    string
+			want       string
+		}{
+			{"http://localhost:8080/",
+				"/",
+				"http://localhost:8080/",
+			},
+			{"http://localhost:8080/v1",
+				"/datasets/123",
+				"http://localhost:8080/v1/datasets/123",
+			},
+			{"https://api.staging.ons.gov.uk/v1",
+				"http://localhost:20200/datasets/123",
+				"https://api.staging.ons.gov.uk/v1/datasets/123",
+			},
+		}
+
+		for _, tt := range tests {
+
+			bu, err := url.Parse(tt.builderURL)
+			So(err, ShouldBeNil)
+			builder := &Builder{URL: bu}
+
+			newurl, err := builder.BuildLink(tt.oldLink)
+			So(err, ShouldBeNil)
+			So(newurl, ShouldEqual, tt.want)
+
+			// Check that the function hasn't modified the bulder's internal URL
+			So(builder.URL.String(), ShouldEqual, tt.builderURL)
+		}
+
+	})
+
+}
