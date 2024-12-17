@@ -19,43 +19,96 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 			fwdPathPrefix string
 			want          string
 		}{
-			{"http://localhost:8080/",
+			// Without any forwarded headers
+			{
+				"http://localhost:8080/",
 				"",
 				"",
 				"",
 				"",
 				"http://localhost:8080/",
 			},
-			{"http://localhost:8080/",
-				"",
-				"moo.quack",
-				"",
-				"",
-				"http://moo.quack/",
-			},
-			{"http://localhost:8080/",
+			// With all forwarded headers
+			{
+				"http://localhost:8080/",
 				"https",
-				"api.blah",
-				"",
-				"",
-				"https://api.blah/",
+				"forwardedhost",
+				"9090",
+				"/prefix",
+				"https://forwardedhost:9090/prefix",
 			},
-			{"http://localhost:8080/",
-				"http",
-				"localhost",
-				"50505",
-				"",
-				"http://localhost:50505/",
-			},
-			{"http://localhost:8080/",
+			// With only forwarded proto
+			{
+				"http://localhost:8080/",
 				"https",
-				"api.blah",
 				"",
-				"v1",
-				"https://api.blah/v1",
+				"",
+				"",
+				"http://localhost:8080/",
 			},
-
-			// TODO: Add test cases.
+			// With only forwarded host
+			{
+				"http://localhost:8080/",
+				"",
+				"forwardedhost",
+				"",
+				"",
+				"http://forwardedhost/",
+			},
+			// With only forwarded port
+			{
+				"http://localhost:8080/",
+				"",
+				"",
+				"9090",
+				"",
+				"http://localhost:8080/",
+			},
+			// With only forwarded path prefix
+			{
+				"http://localhost:8080/",
+				"",
+				"",
+				"",
+				"/prefix",
+				"http://localhost:8080/",
+			},
+			// Without all headers except forwarded proto
+			{
+				"http://localhost:8080/",
+				"",
+				"forwardedhost",
+				"9090",
+				"/prefix",
+				"http://forwardedhost:9090/prefix",
+			},
+			// Without all headers except forwarded host
+			{
+				"http://localhost:8080/",
+				"https",
+				"",
+				"9090",
+				"/prefix",
+				"http://localhost:8080/",
+			},
+			// Without all headers except forwarded port
+			{
+				"http://localhost:8080/",
+				"https",
+				"forwardedhost",
+				"",
+				"/prefix",
+				"https://forwardedhost/prefix",
+			},
+			// Without all headers except forwarded path prefix
+			{
+				"http://localhost:8080/",
+				"https",
+				"forwardedhost",
+				"9090",
+				"",
+				"https://forwardedhost:9090/",
+			},
 		}
 
 		for _, tt := range tests {
@@ -88,76 +141,6 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 
 }
 
-//func TestURLBuild(t *testing.T) {
-//	Convey("Given a valid old URL and context with protocol, host, port, and path prefix", t, func() {
-//		oldURL := "https://api.beta.ons.gov.uk/v1/"
-//		ctx := context.WithValue(context.Background(), ctxProtocol, "https")
-//		ctx = context.WithValue(ctx, ctxHost, "dataset-api")
-//		ctx = context.WithValue(ctx, ctxPort, "8080")
-//		ctx = context.WithValue(ctx, ctxPathPrefix, "")
-//
-//		Convey("When URLBuild is called", func() {
-//			newURL, err := URLBuild(ctx, oldURL)
-//
-//			Convey("Then it should return the correctly updated URL", func() {
-//				So(err, ShouldBeNil)
-//				So(newURL, ShouldEqual, "https://dataset-api:8080/v1/")
-//			})
-//		})
-//	})
-//
-//	Convey("Given an invalid old URL", t, func() {
-//		oldURL := ":/invalid-url"
-//		ctx := context.WithValue(context.Background(), ctxProtocol, "https")
-//		ctx = context.WithValue(ctx, ctxHost, "dataset-api")
-//		ctx = context.WithValue(ctx, ctxPort, "8080")
-//		ctx = context.WithValue(ctx, ctxPathPrefix, "/v1")
-//
-//		Convey("When URLBuild is called", func() {
-//			newURL, err := URLBuild(ctx, oldURL)
-//
-//			Convey("Then it should return an error", func() {
-//				So(err, ShouldNotBeNil)
-//				So(newURL, ShouldBeEmpty)
-//			})
-//		})
-//	})
-//
-//	Convey("Given a context without port and path prefix", t, func() {
-//		oldURL := "https://api.beta.ons.gov.uk/v1/"
-//		ctx := context.WithValue(context.Background(), ctxProtocol, "https")
-//		ctx = context.WithValue(ctx, ctxHost, "dataset-api")
-//		ctx = context.WithValue(ctx, ctxPort, "")
-//		ctx = context.WithValue(ctx, ctxPathPrefix, "")
-//
-//		Convey("When URLBuild is called", func() {
-//			newURL, err := URLBuild(ctx, oldURL)
-//
-//			Convey("Then it should return the updated URL without port and path prefix", func() {
-//				So(err, ShouldBeNil)
-//				So(newURL, ShouldEqual, "https://dataset-api/v1/")
-//			})
-//		})
-//	})
-//
-//	Convey("Given a context with some missing or default values", t, func() {
-//		oldURL := "https://api.beta.ons.gov.uk/v1/"
-//		ctx := context.WithValue(context.Background(), ctxProtocol, "")
-//		ctx = context.WithValue(ctx, ctxHost, "")
-//		ctx = context.WithValue(ctx, ctxPort, "")
-//		ctx = context.WithValue(ctx, ctxPathPrefix, "")
-//
-//		Convey("When URLBuild is called", func() {
-//			newURL, err := URLBuild(ctx, oldURL)
-//
-//			Convey("Then it should return a URL with the old protocol and host, and no changes applied", func() {
-//				So(err, ShouldBeNil)
-//				So(newURL, ShouldEqual, "/v1/")
-//			})
-//		})
-//	})
-//}
-
 func TestBuilder_BuildLink(t *testing.T) {
 
 	Convey("Given a list of test cases", t, func() {
@@ -166,17 +149,47 @@ func TestBuilder_BuildLink(t *testing.T) {
 			oldLink    string
 			want       string
 		}{
-			{"http://localhost:8080/",
-				"/",
+			// Empty old link
+			{
+				"http://localhost:8080/",
+				"",
 				"http://localhost:8080/",
 			},
-			{"http://localhost:8080/v1",
-				"/datasets/123",
-				"http://localhost:8080/v1/datasets/123",
+			// Old link with no path
+			{
+				"http://localhost:8080/",
+				"http://localhost:8080/",
+				"http://localhost:8080/",
 			},
-			{"https://api.staging.ons.gov.uk/v1",
-				"http://localhost:20200/datasets/123",
-				"https://api.staging.ons.gov.uk/v1/datasets/123",
+			// Old link with different base url
+			{
+				"http://localhost:8080/",
+				"https://oldHost:1000/",
+				"http://localhost:8080/",
+			},
+			// Old link with path
+			{
+				"http://localhost:8080/",
+				"http://localhost:8080/some/path",
+				"http://localhost:8080/some/path",
+			},
+			// Old link with path and different base url
+			{
+				"http://localhost:8080/",
+				"http://oldHost:1000/some/path",
+				"http://localhost:8080/some/path",
+			},
+			// Old link without base url
+			{
+				"http://localhost:8080/",
+				"/some/path",
+				"http://localhost:8080/some/path",
+			},
+			// Old internal link to new external url
+			{
+				"https://some.api.host/v1",
+				"http://localhost:8080/some/path",
+				"https://some.api.host/v1/some/path",
 			},
 		}
 
@@ -190,7 +203,7 @@ func TestBuilder_BuildLink(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(newurl, ShouldEqual, tt.want)
 
-			// Check that the function hasn't modified the bulder's internal URL
+			// Check that the function hasn't modified the builder's internal URL
 			So(builder.URL.String(), ShouldEqual, tt.builderURL)
 		}
 

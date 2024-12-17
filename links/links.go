@@ -1,9 +1,10 @@
 package links
 
 import (
-	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
+
+	"github.com/pkg/errors"
 )
 
 type Builder struct {
@@ -50,7 +51,7 @@ func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
 func (b *Builder) BuildLink(link string) (string, error) {
 	oldURL, err := url.Parse(link)
 	if err != nil {
-		return "", errors.Wrap(err, "unalble to parse link to URL")
+		return "", errors.Wrap(err, "unable to parse link to URL")
 	}
 	newURL := b.BuildURL(oldURL)
 	return newURL.String(), nil
