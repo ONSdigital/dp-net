@@ -109,6 +109,60 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 				"",
 				"https://forwardedhost:9090/",
 			},
+			// With only forwarded proto and host
+			{
+				"http://localhost:8080/",
+				"https",
+				"forwardedhost",
+				"",
+				"",
+				"https://forwardedhost/",
+			},
+			// With only forwarded port and host
+			{
+				"http://localhost:8080/",
+				"",
+				"forwardedhost",
+				"9090",
+				"",
+				"http://forwardedhost:9090/",
+			},
+			// With only forwarded prefix and host
+			{
+				"http://localhost:8080/",
+				"",
+				"forwardedhost",
+				"",
+				"/prefix",
+				"http://forwardedhost/prefix",
+			},
+			// With only forwarded proto and port
+			{
+				"http://localhost:8080/",
+				"https",
+				"",
+				"9090",
+				"",
+				"http://localhost:8080/",
+			},
+			// With only forwarded proto and prefix
+			{
+				"http://localhost:8080/",
+				"https",
+				"",
+				"",
+				"/prefix",
+				"http://localhost:8080/",
+			},
+			// With only forwarded port and prefix
+			{
+				"http://localhost:8080/",
+				"",
+				"",
+				"9090",
+				"/prefix",
+				"http://localhost:8080/",
+			},
 		}
 
 		for _, tt := range tests {
@@ -185,11 +239,23 @@ func TestBuilder_BuildLink(t *testing.T) {
 				"/some/path",
 				"http://localhost:8080/some/path",
 			},
+			// Old link with query params
+			{
+				"http://localhost:8080/",
+				"http://localhost:8080/some/path?param1=value1&param2=value2",
+				"http://localhost:8080/some/path?param1=value1&param2=value2",
+			},
 			// Old internal link to new external url
 			{
 				"https://some.api.host/v1",
 				"http://localhost:8080/some/path",
 				"https://some.api.host/v1/some/path",
+			},
+			// Old internal link to new external url with query params
+			{
+				"https://some.api.host/v1",
+				"http://localhost:8080/some/path?param1=value1&param2=value2",
+				"https://some.api.host/v1/some/path?param1=value1&param2=value2",
 			},
 		}
 
