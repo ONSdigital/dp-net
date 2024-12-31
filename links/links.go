@@ -3,6 +3,7 @@ package links
 import (
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -43,7 +44,10 @@ func FromHeadersOrDefault(h *http.Header, defaultURL *url.URL) *Builder {
 }
 
 func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
-	apiURL := b.URL.JoinPath(oldURL.Path)
+	newPath := oldURL.Path
+	newPath = strings.TrimPrefix(newPath, "/v1")
+
+	apiURL := b.URL.JoinPath(newPath)
 	apiURL.RawQuery = oldURL.RawQuery
 	return apiURL
 }

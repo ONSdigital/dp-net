@@ -245,6 +245,18 @@ func TestBuilder_BuildLink(t *testing.T) {
 				"http://localhost:8080/some/path?param1=value1&param2=value2",
 				"http://localhost:8080/some/path?param1=value1&param2=value2",
 			},
+			// Old external link to new internal url
+			{
+				"http://localhost:8080/",
+				"https://some.api.host/v1/some/path",
+				"http://localhost:8080/some/path",
+			},
+			// Old external link to new external url
+			{
+				"https://some.api.host/v1",
+				"https://some.api.host/v1/some/path",
+				"https://some.api.host/v1/some/path",
+			},
 			// Old internal link to new external url
 			{
 				"https://some.api.host/v1",
