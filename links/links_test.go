@@ -287,4 +287,13 @@ func TestBuilder_BuildLink(t *testing.T) {
 
 	})
 
+	Convey("When an invalid old URL is provided", t, func() {
+		builder := &Builder{URL: &url.URL{Scheme: "http", Host: "localhost:8080"}}
+		invalidURL := ":invalid/url"
+		newurl, err := builder.BuildLink(invalidURL)
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldContainSubstring, "unable to parse link to URL")
+		So(newurl, ShouldBeEmpty)
+	})
+
 }
