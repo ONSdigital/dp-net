@@ -12,9 +12,12 @@ type Builder struct {
 	URL *url.URL
 }
 
-func FromHeadersOrDefault(h *http.Header, defaultURL *url.URL) *Builder {
+func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) *Builder {
 	host := h.Get("X-Forwarded-Host")
 	if host == "" {
+		if r.Host != "" {
+			defaultURL.Host = r.Host
+		}
 		return &Builder{
 			URL: defaultURL,
 		}

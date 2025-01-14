@@ -8,7 +8,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func Test_FromHeadersOrDefault(t *testing.T) {
+func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 
 	Convey("Given a list of test cases", t, func() {
 		tests := []struct {
@@ -184,7 +184,7 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 			}
 
 			du.JoinPath()
-			builder := FromHeadersOrDefault(&h, du)
+			builder := FromHeadersOrDefault(&h, &http.Request{}, du)
 			So(builder, ShouldNotBeNil)
 			So(builder.URL, ShouldNotBeNil)
 			So(builder.URL.String(), ShouldEqual, tt.want)
@@ -193,6 +193,61 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 
 	})
 
+}
+
+func Test_FromHeadersOrDefault_Without_Forwarded_Headers(t *testing.T) {
+
+	Convey("Given a list of test cases", t, func() {
+		tests := []struct {
+			incomingRequestHost string
+			defaultURL          string
+			want                string
+		}{
+			// Without incoming request host
+			{
+				"",
+				"http://localhost:8080/",
+				"http://localhost:8080/",
+			},
+			// With incoming request host and no port
+			{
+				"localhost",
+				"http://localhost:8080/",
+				"http://localhost/",
+			},
+			// With incoming request host and different port
+			{
+				"localhost:6789",
+				"http://localhost:8080/",
+				"http://localhost:6789/",
+			},
+			{
+				"10.30.100.123:4567",
+				"http://localhost:8080/",
+				"http://10.30.100.123:4567/",
+			},
+			// With incoming request host and default URL with path
+			{
+				"localhost",
+				"http://localhost:8080/some/path",
+				"http://localhost/some/path",
+			},
+		}
+
+		for _, tt := range tests {
+			du, err := url.Parse(tt.defaultURL)
+			So(err, ShouldBeNil)
+
+			incomingRequest := &http.Request{Host: tt.incomingRequestHost}
+
+			builder := FromHeadersOrDefault(&http.Header{}, incomingRequest, du)
+			So(builder, ShouldNotBeNil)
+			So(builder.URL, ShouldNotBeNil)
+			So(builder.URL.String(), ShouldEqual, tt.want)
+
+		}
+
+	})
 }
 
 func TestBuilder_BuildLink(t *testing.T) {
