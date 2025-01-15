@@ -53,7 +53,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"forwardedhost",
 				"",
 				"",
-				"http://forwardedhost/",
+				"https://forwardedhost/",
 			},
 			// With only forwarded port
 			{
@@ -71,7 +71,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"",
 				"",
 				"/prefix",
-				"http://localhost:8080/",
+				"http://localhost:8080/prefix",
 			},
 			// Without all headers except forwarded proto
 			{
@@ -80,7 +80,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"forwardedhost",
 				"9090",
 				"/prefix",
-				"http://forwardedhost:9090/prefix",
+				"https://forwardedhost:9090/prefix",
 			},
 			// Without all headers except forwarded host
 			{
@@ -89,7 +89,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"",
 				"9090",
 				"/prefix",
-				"http://localhost:8080/",
+				"http://localhost:8080/prefix",
 			},
 			// Without all headers except forwarded port
 			{
@@ -125,7 +125,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"forwardedhost",
 				"9090",
 				"",
-				"http://forwardedhost:9090/",
+				"https://forwardedhost:9090/",
 			},
 			// With only forwarded prefix and host
 			{
@@ -134,7 +134,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"forwardedhost",
 				"",
 				"/prefix",
-				"http://forwardedhost/prefix",
+				"https://forwardedhost/prefix",
 			},
 			// With only forwarded proto and port
 			{
@@ -152,7 +152,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"",
 				"",
 				"/prefix",
-				"http://localhost:8080/",
+				"http://localhost:8080/prefix",
 			},
 			// With only forwarded port and prefix
 			{
@@ -161,7 +161,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 				"",
 				"9090",
 				"/prefix",
-				"http://localhost:8080/",
+				"http://localhost:8080/prefix",
 			},
 		}
 

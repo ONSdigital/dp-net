@@ -13,11 +13,14 @@ type Builder struct {
 }
 
 func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) *Builder {
+	path := h.Get("X-Forwarded-Path-Prefix")
+
 	host := h.Get("X-Forwarded-Host")
 	if host == "" {
 		if r.Host != "" {
 			defaultURL.Host = r.Host
 		}
+		defaultURL = defaultURL.JoinPath(path)
 		return &Builder{
 			URL: defaultURL,
 		}
@@ -25,15 +28,13 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 
 	scheme := h.Get("X-Forwarded-Proto")
 	if scheme == "" {
-		scheme = "http"
+		scheme = "https"
 	}
 
 	port := h.Get("X-Forwarded-Port")
 	if port != "" {
 		host += ":" + port
 	}
-
-	path := h.Get("X-Forwarded-Path-Prefix")
 
 	url := &url.URL{
 		Scheme: scheme,
