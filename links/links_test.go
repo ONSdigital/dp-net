@@ -184,7 +184,11 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 			}
 
 			du.JoinPath()
-			builder := FromHeadersOrDefault(&h, &http.Request{}, du)
+			r := &http.Request{
+				Host: "",
+				URL:  &url.URL{Scheme: "http", Host: "example.com"},
+			}
+			builder := FromHeadersOrDefault(&h, r, du)
 			So(builder, ShouldNotBeNil)
 			So(builder.URL, ShouldNotBeNil)
 			So(builder.URL.String(), ShouldEqual, tt.want)
@@ -238,7 +242,10 @@ func Test_FromHeadersOrDefault_Without_Forwarded_Headers(t *testing.T) {
 			du, err := url.Parse(tt.defaultURL)
 			So(err, ShouldBeNil)
 
-			incomingRequest := &http.Request{Host: tt.incomingRequestHost}
+			incomingRequest := &http.Request{
+				Host: tt.incomingRequestHost,
+				URL:  &url.URL{Scheme: "http", Host: "example.com"},
+			}
 
 			builder := FromHeadersOrDefault(&http.Header{}, incomingRequest, du)
 			So(builder, ShouldNotBeNil)
