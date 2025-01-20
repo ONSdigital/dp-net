@@ -18,7 +18,6 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	log.Info(r.Context(), "building URL from headers", log.Data{
 		"headers":    h,
 		"defaultURL": defaultURL.String(),
-		"host":       r.Host,
 		"url":        r.URL.String(),
 	})
 	path := h.Get("X-Forwarded-Path-Prefix")

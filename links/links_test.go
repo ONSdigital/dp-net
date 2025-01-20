@@ -185,8 +185,7 @@ func Test_FromHeadersOrDefault_With_Forwarded_Headers(t *testing.T) {
 
 			du.JoinPath()
 			r := &http.Request{
-				Host: "",
-				URL:  &url.URL{Scheme: "http", Host: "example.com"},
+				URL: &url.URL{Scheme: "http", Host: "example.com"},
 			}
 			builder := FromHeadersOrDefault(&h, r, du)
 			So(builder, ShouldNotBeNil)
