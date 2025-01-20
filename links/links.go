@@ -26,6 +26,9 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	host := h.Get("X-Forwarded-Host")
 	if host == "" {
 		if r.Host != "" {
+			log.Info(r.Context(), "using request host instead of default host", log.Data{
+				"host": r.Host,
+			})
 			defaultURL.Host = r.Host
 		}
 		defaultURL = defaultURL.JoinPath(path)
