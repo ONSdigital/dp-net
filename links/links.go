@@ -1,10 +1,12 @@
 package links
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"strings"
 
+	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/pkg/errors"
 )
 
@@ -13,6 +15,12 @@ type Builder struct {
 }
 
 func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) *Builder {
+	log.Info(r.Context(), "building URL from headers", log.Data{
+		"headers":    h,
+		"defaultURL": defaultURL.String(),
+		"host":       r.Host,
+		"url":        r.URL.String(),
+	})
 	path := h.Get("X-Forwarded-Path-Prefix")
 
 	host := h.Get("X-Forwarded-Host")
@@ -21,6 +29,9 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 			defaultURL.Host = r.Host
 		}
 		defaultURL = defaultURL.JoinPath(path)
+		log.Info(r.Context(), "internal request, using default URL", log.Data{
+			"defaultURL": defaultURL.String(),
+		})
 		return &Builder{
 			URL: defaultURL,
 		}
@@ -42,6 +53,10 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 		Path:   "/",
 	}
 
+	loggingURL := url.JoinPath(path)
+	log.Info(r.Context(), "external request, using URL from headers", log.Data{
+		"url": loggingURL.String(),
+	})
 	return &Builder{
 		URL: url.JoinPath(path),
 	}
@@ -53,6 +68,11 @@ func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
 
 	apiURL := b.URL.JoinPath(newPath)
 	apiURL.RawQuery = oldURL.RawQuery
+	log.Info(context.TODO(), "built URL", log.Data{
+		"oldURL":  oldURL.String(),
+		"newURL":  apiURL.String(),
+		"builder": b.URL.String(),
+	})
 	return apiURL
 }
 
