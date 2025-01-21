@@ -20,33 +20,38 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 		"defaultURL": defaultURL.String(),
 		"url":        r.URL.String(),
 	})
+
 	path := h.Get("X-Forwarded-Path-Prefix")
 
 	host := h.Get("X-Forwarded-Host")
-	if host == "" {
-		if r.Host != "" {
-			log.Info(r.Context(), "using request host instead of default host", log.Data{
-				"host": r.Host,
-			})
-			defaultURL.Host = r.Host
-		}
+	if host == "" || r.Host == "" {
 		defaultURL = defaultURL.JoinPath(path)
-		log.Info(r.Context(), "internal request, using default URL", log.Data{
-			"defaultURL": defaultURL.String(),
+		log.Info(r.Context(), "X-Forwarded-Host or r.Host is empty, using default URL", log.Data{
+			"X-Forwarded-Host": host,
+			"r.Host":           r.Host,
 		})
 		return &Builder{
 			URL: defaultURL,
 		}
 	}
+	if !strings.HasPrefix(host, "api") {
+		log.Info(r.Context(), "X-Forwarded-Host is not an external host, using incoming request host", log.Data{
+			"X-Forwarded-Host": host,
+			"r.Host":           r.Host,
+		})
+		host = r.Host
+	}
 
 	scheme := h.Get("X-Forwarded-Proto")
 	if scheme == "" {
-		scheme = "https"
-	}
-
-	port := h.Get("X-Forwarded-Port")
-	if port != "" {
-		host += ":" + port
+		log.Info(r.Context(), "X-Forwarded-Proto is empty, using http or https based on host", log.Data{
+			"host": host,
+		})
+		if !strings.HasPrefix(host, "api") {
+			scheme = "http"
+		} else {
+			scheme = "https"
+		}
 	}
 
 	url := &url.URL{
