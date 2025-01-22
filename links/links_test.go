@@ -291,39 +291,3 @@ func TestBuilder_BuildLink(t *testing.T) {
 	})
 
 }
-func Test_FromHeadersOrDefault_HeaderRemoval(t *testing.T) {
-	Convey("Given a request with headers that should be removed", t, func() {
-		h := &http.Header{}
-		h.Add("Authorization", "Bearer token")
-		h.Add("X-Florence-Token", "florence-token")
-		h.Add("X-Forwarded-Proto", "https")
-		h.Add("X-Forwarded-Host", "api.external.host")
-		h.Add("X-Forwarded-Path-Prefix", "/prefix")
-
-		r := &http.Request{
-			URL:    &url.URL{},
-			Host:   "localhost:8080",
-			Header: *h,
-		}
-
-		defaultURL, err := url.Parse("http://localhost:8080/")
-		So(err, ShouldBeNil)
-
-		Convey("When the builder is created", func() {
-			builder := FromHeadersOrDefault(h, r, defaultURL)
-
-			Convey("Then the builder URL should be correct", func() {
-				So(builder, ShouldNotBeNil)
-				So(builder.URL, ShouldNotBeNil)
-				So(builder.URL.String(), ShouldEqual, "https://api.external.host/prefix")
-			})
-
-			Convey("And the headers should not contain Authorization and X-Florence-Token", func() {
-				So(h.Get("Authorization"), ShouldBeEmpty)
-				So(h.Get("X-Florence-Token"), ShouldBeEmpty)
-				So(r.Header.Get("Authorization"), ShouldBeEmpty)
-				So(r.Header.Get("X-Florence-Token"), ShouldBeEmpty)
-			})
-		})
-	})
-}

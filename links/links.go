@@ -15,17 +15,14 @@ type Builder struct {
 }
 
 func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) *Builder {
-	h.Del("Authorization")
-	h.Del("X-Florence-Token")
-
-	r.Header.Del("Authorization")
-	r.Header.Del("X-Florence-Token")
-
 	log.Info(r.Context(), "building URL from headers", log.Data{
-		"headers":        h,
-		"requestHeaders": r.Header,
-		"defaultURL":     defaultURL.String(),
-		"url":            r.URL.String(),
+		"defaultURL":              defaultURL.String(),
+		"url":                     r.URL.String(),
+		"X-Forwarded-Proto":       h.Get("X-Forwarded-Proto"),
+		"X-Forwarded-Host":        h.Get("X-Forwarded-Host"),
+		"X-Forwarded-Port":        h.Get("X-Forwarded-Port"),
+		"X-Forwarded-Path-Prefix": h.Get("X-Forwarded-Path-Prefix"),
+		"X-Forwarded-For":         h.Get("X-Forwarded-For"),
 	})
 
 	path := h.Get("X-Forwarded-Path-Prefix")
@@ -34,10 +31,13 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	if host == "" || r.Host == "" {
 		defaultURL = defaultURL.JoinPath(path)
 		log.Info(r.Context(), "X-Forwarded-Host or r.Host is empty, using default URL", log.Data{
-			"headers":        h,
-			"requestHeaders": r.Header,
-			"r.Host":         r.Host,
-			"r.remoteAddr":   r.RemoteAddr,
+			"r.Host":                  r.Host,
+			"r.remoteAddr":            r.RemoteAddr,
+			"X-Forwarded-Proto":       h.Get("X-Forwarded-Proto"),
+			"X-Forwarded-Host":        h.Get("X-Forwarded-Host"),
+			"X-Forwarded-Port":        h.Get("X-Forwarded-Port"),
+			"X-Forwarded-Path-Prefix": h.Get("X-Forwarded-Path-Prefix"),
+			"X-Forwarded-For":         h.Get("X-Forwarded-For"),
 		})
 		return &Builder{
 			URL: defaultURL,
@@ -45,10 +45,13 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	}
 	if !strings.HasPrefix(host, "api") {
 		log.Info(r.Context(), "X-Forwarded-Host is not an external host, using incoming request host", log.Data{
-			"headers":        h,
-			"requestHeaders": r.Header,
-			"r.Host":         r.Host,
-			"r.remoteAddr":   r.RemoteAddr,
+			"r.Host":                  r.Host,
+			"r.remoteAddr":            r.RemoteAddr,
+			"X-Forwarded-Proto":       h.Get("X-Forwarded-Proto"),
+			"X-Forwarded-Host":        h.Get("X-Forwarded-Host"),
+			"X-Forwarded-Port":        h.Get("X-Forwarded-Port"),
+			"X-Forwarded-Path-Prefix": h.Get("X-Forwarded-Path-Prefix"),
+			"X-Forwarded-For":         h.Get("X-Forwarded-For"),
 		})
 		host = r.Host
 	}
@@ -56,9 +59,12 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	scheme := h.Get("X-Forwarded-Proto")
 	if scheme == "" {
 		log.Info(r.Context(), "X-Forwarded-Proto is empty, using http or https based on host", log.Data{
-			"headers":        h,
-			"requestHeaders": r.Header,
-			"host":           host,
+			"host":                    host,
+			"X-Forwarded-Proto":       h.Get("X-Forwarded-Proto"),
+			"X-Forwarded-Host":        h.Get("X-Forwarded-Host"),
+			"X-Forwarded-Port":        h.Get("X-Forwarded-Port"),
+			"X-Forwarded-Path-Prefix": h.Get("X-Forwarded-Path-Prefix"),
+			"X-Forwarded-For":         h.Get("X-Forwarded-For"),
 		})
 		if !strings.HasPrefix(host, "api") {
 			scheme = "http"
