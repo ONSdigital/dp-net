@@ -3,6 +3,7 @@ module github.com/ONSdigital/dp-net/v2
 go 1.23
 
 retract (
+	v2.17.0 // breaks logs
 	v2.7.2 // contains retraction
 	v2.7.1 // TODO: rethink application of timeout to standard  http server
 	v2.7.0
