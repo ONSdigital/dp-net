@@ -15,10 +15,17 @@ type Builder struct {
 }
 
 func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) *Builder {
+	h.Del("Authorization")
+	h.Del("X-Florence-Token")
+
+	r.Header.Del("Authorization")
+	r.Header.Del("X-Florence-Token")
+
 	log.Info(r.Context(), "building URL from headers", log.Data{
-		"headers":    h,
-		"defaultURL": defaultURL.String(),
-		"url":        r.URL.String(),
+		"headers":        h,
+		"requestHeaders": r.Header,
+		"defaultURL":     defaultURL.String(),
+		"url":            r.URL.String(),
 	})
 
 	path := h.Get("X-Forwarded-Path-Prefix")
@@ -27,8 +34,10 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	if host == "" || r.Host == "" {
 		defaultURL = defaultURL.JoinPath(path)
 		log.Info(r.Context(), "X-Forwarded-Host or r.Host is empty, using default URL", log.Data{
-			"X-Forwarded-Host": host,
-			"r.Host":           r.Host,
+			"headers":        h,
+			"requestHeaders": r.Header,
+			"r.Host":         r.Host,
+			"r.remoteAddr":   r.RemoteAddr,
 		})
 		return &Builder{
 			URL: defaultURL,
@@ -36,8 +45,10 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	}
 	if !strings.HasPrefix(host, "api") {
 		log.Info(r.Context(), "X-Forwarded-Host is not an external host, using incoming request host", log.Data{
-			"X-Forwarded-Host": host,
-			"r.Host":           r.Host,
+			"headers":        h,
+			"requestHeaders": r.Header,
+			"r.Host":         r.Host,
+			"r.remoteAddr":   r.RemoteAddr,
 		})
 		host = r.Host
 	}
@@ -45,7 +56,9 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 	scheme := h.Get("X-Forwarded-Proto")
 	if scheme == "" {
 		log.Info(r.Context(), "X-Forwarded-Proto is empty, using http or https based on host", log.Data{
-			"host": host,
+			"headers":        h,
+			"requestHeaders": r.Header,
+			"host":           host,
 		})
 		if !strings.HasPrefix(host, "api") {
 			scheme = "http"
