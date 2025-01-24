@@ -297,3 +297,29 @@ func TestBuilder_BuildLink(t *testing.T) {
 	})
 
 }
+
+func Test_FromHeadersOrDefault_NonApiHost(t *testing.T) {
+	Convey("Given a non-api forwarded host", t, func() {
+		defaultURL, err := url.Parse("http://localhost:8080/")
+		So(err, ShouldBeNil)
+
+		h := &http.Header{}
+		h.Add("X-Forwarded-Host", "internalhost")
+		h.Add("X-Forwarded-Path-Prefix", "/prefix")
+
+		r := &http.Request{
+			URL:  &url.URL{},
+			Host: "differenthost:8080",
+		}
+
+		Convey("When the builder is created", func() {
+			builder := FromHeadersOrDefault(h, r, defaultURL)
+
+			Convey("Then the builder URL should be the default URL with the path prefix", func() {
+				So(builder, ShouldNotBeNil)
+				So(builder.URL, ShouldNotBeNil)
+				So(builder.URL.String(), ShouldEqual, "http://localhost:8080/prefix")
+			})
+		})
+	})
+}

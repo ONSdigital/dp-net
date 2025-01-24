@@ -39,11 +39,14 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 		}
 	}
 	if !strings.HasPrefix(host, "api") {
-		log.Info(r.Context(), "X-Forwarded-Host is not an external host, using incoming request host", log.Data{
+		log.Info(r.Context(), "X-Forwarded-Host is not an external host, returning defaultURL", log.Data{
 			"r.Host":       r.Host,
 			"r.remoteAddr": r.RemoteAddr,
 		})
-		host = r.Host
+		defaultURL = defaultURL.JoinPath(path)
+		return &Builder{
+			URL: defaultURL,
+		}
 	}
 
 	scheme := h.Get("X-Forwarded-Proto")
