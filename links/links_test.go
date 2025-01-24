@@ -251,6 +251,12 @@ func TestBuilder_BuildLink(t *testing.T) {
 				"https://some.api.host/v1/some/path",
 				"https://some.api.host/v1/some/path",
 			},
+			// Old external link to new external url (multiple /v1)
+			{
+				"https://some.api.host/v1",
+				"https://some.api.host/v1/v1/v1/some/path",
+				"https://some.api.host/v1/some/path",
+			},
 			// Old internal link to new external url
 			{
 				"https://some.api.host/v1",

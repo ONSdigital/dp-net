@@ -75,7 +75,7 @@ func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) 
 
 func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
 	newPath := oldURL.Path
-	newPath = strings.TrimPrefix(newPath, "/v1")
+	newPath = strings.ReplaceAll(newPath, "/v1", "")
 
 	apiURL := b.URL.JoinPath(newPath)
 	apiURL.RawQuery = oldURL.RawQuery
