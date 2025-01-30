@@ -12,7 +12,8 @@ type Builder struct {
 	URL *url.URL
 }
 
-func FromHeadersOrDefault(h *http.Header, r *http.Request, defaultURL *url.URL) *Builder {
+func FromHeadersOrDefault(r *http.Request, defaultURL *url.URL) *Builder {
+	h := r.Header
 	path := h.Get("X-Forwarded-Path-Prefix")
 
 	host := h.Get("X-Forwarded-Host")

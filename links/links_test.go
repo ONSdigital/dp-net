@@ -133,10 +133,11 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 
 			du.JoinPath()
 			r := &http.Request{
-				URL:  &url.URL{},
-				Host: "localhost:8080",
+				URL:    &url.URL{},
+				Host:   "localhost:8080",
+				Header: h,
 			}
-			builder := FromHeadersOrDefault(&h, r, du)
+			builder := FromHeadersOrDefault(r, du)
 			So(builder, ShouldNotBeNil)
 			So(builder.URL, ShouldNotBeNil)
 			So(builder.URL.String(), ShouldEqual, tt.want)
@@ -151,32 +152,11 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 			Host: "",
 		}
 
-		Convey("When the builder is created with forwarded headers", func() {
-			h := &http.Header{}
-			h.Add("X-Forwarded-Proto", "https")
-			h.Add("X-Forwarded-Host", "api.newhost")
-			h.Add("X-Forwarded-Path-Prefix", "v1")
-
-			defaultURL, err := url.Parse("http://localhost:8080/")
-			So(err, ShouldBeNil)
-
-			builder := FromHeadersOrDefault(h, r, defaultURL)
-
-			So(builder, ShouldNotBeNil)
-			So(builder.URL, ShouldNotBeNil)
-
-			Convey("Then the builder URL should be the default URL with the path prefix", func() {
-				So(builder.URL.String(), ShouldEqual, "http://localhost:8080/v1")
-			})
-		})
-
 		Convey("When the builder is created without forwarded headers", func() {
-			h := &http.Header{}
-
 			defaultURL, err := url.Parse("http://localhost:8080/")
 			So(err, ShouldBeNil)
 
-			builder := FromHeadersOrDefault(h, r, defaultURL)
+			builder := FromHeadersOrDefault(r, defaultURL)
 
 			So(builder, ShouldNotBeNil)
 			So(builder.URL, ShouldNotBeNil)
@@ -303,17 +283,18 @@ func Test_FromHeadersOrDefault_NonApiHost(t *testing.T) {
 		defaultURL, err := url.Parse("http://localhost:8080/")
 		So(err, ShouldBeNil)
 
-		h := &http.Header{}
+		h := http.Header{}
 		h.Add("X-Forwarded-Host", "internalhost")
 		h.Add("X-Forwarded-Path-Prefix", "/prefix")
 
 		r := &http.Request{
-			URL:  &url.URL{},
-			Host: "differenthost:8080",
+			URL:    &url.URL{},
+			Host:   "differenthost:8080",
+			Header: h,
 		}
 
 		Convey("When the builder is created", func() {
-			builder := FromHeadersOrDefault(h, r, defaultURL)
+			builder := FromHeadersOrDefault(r, defaultURL)
 
 			Convey("Then the builder URL should be the default URL with the path prefix", func() {
 				So(builder, ShouldNotBeNil)
