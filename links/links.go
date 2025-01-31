@@ -12,47 +12,35 @@ type Builder struct {
 	URL *url.URL
 }
 
-func FromHeadersOrDefault(r *http.Request, defaultURL *url.URL) *Builder {
-	h := r.Header
+func FromHeadersOrDefault(h *http.Header, defaultURL *url.URL) *Builder {
 	path := h.Get("X-Forwarded-Path-Prefix")
 
 	host := h.Get("X-Forwarded-Host")
-	if host == "" || r.Host == "" {
-		defaultURL = defaultURL.JoinPath(path)
+	if host == "" || !strings.HasPrefix(host, "api.") {
 		return &Builder{
-			URL: defaultURL,
-		}
-	}
-	if !strings.HasPrefix(host, "api") {
-		defaultURL = defaultURL.JoinPath(path)
-		return &Builder{
-			URL: defaultURL,
+			URL: defaultURL.JoinPath(path),
 		}
 	}
 
 	scheme := h.Get("X-Forwarded-Proto")
 	if scheme == "" {
-		if !strings.HasPrefix(host, "api") {
-			scheme = "http"
-		} else {
-			scheme = "https"
-		}
-	}
-
-	url := &url.URL{
-		Scheme: scheme,
-		Host:   host,
-		Path:   "/",
+		scheme = "https"
 	}
 
 	return &Builder{
-		URL: url.JoinPath(path),
+		URL: &url.URL{
+			Scheme: scheme,
+			Host:   host,
+			Path:   path,
+		},
 	}
 }
 
 func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
 	newPath := oldURL.Path
-	newPath = strings.ReplaceAll(newPath, "/v1", "")
+	for strings.HasPrefix(newPath, "/v1") {
+		newPath = strings.TrimPrefix(newPath, "/v1")
+	}
 
 	apiURL := b.URL.JoinPath(newPath)
 	apiURL.RawQuery = oldURL.RawQuery
@@ -64,6 +52,6 @@ func (b *Builder) BuildLink(link string) (string, error) {
 	if err != nil {
 		return "", errors.Wrap(err, "unable to parse link to URL")
 	}
-	newURL := b.BuildURL(oldURL)
-	return newURL.String(), nil
+
+	return b.BuildURL(oldURL).String(), nil
 }

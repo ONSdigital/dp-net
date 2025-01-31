@@ -20,99 +20,99 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 		}{
 			// Without any forwarded headers
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"",
 				"",
 				"",
-				"http://localhost:8080/",
+				"http://localhost:8080",
 			},
 			// With all forwarded headers
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"https",
 				"api.external.host",
-				"/prefix",
+				"prefix",
 				"https://api.external.host/prefix",
 			},
 			// With only forwarded proto
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"https",
 				"",
 				"",
-				"http://localhost:8080/",
+				"http://localhost:8080",
 			},
 			// With only forwarded host
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"",
 				"api.external.host",
 				"",
-				"https://api.external.host/",
+				"https://api.external.host",
 			},
 			// With only forwarded path prefix
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"",
 				"",
-				"/prefix",
+				"prefix",
 				"http://localhost:8080/prefix",
 			},
 			// Without all headers except forwarded proto
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"",
 				"api.external.host",
-				"/prefix",
+				"prefix",
 				"https://api.external.host/prefix",
 			},
 			// Without all headers except forwarded host
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"https",
 				"",
-				"/prefix",
+				"prefix",
 				"http://localhost:8080/prefix",
 			},
 			// Without all headers except forwarded path prefix
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"https",
 				"api.external.host",
 				"",
-				"https://api.external.host/",
+				"https://api.external.host",
 			},
 			// With only forwarded proto and host
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"https",
 				"api.external.host",
 				"",
-				"https://api.external.host/",
+				"https://api.external.host",
 			},
 			// With only forwarded prefix and host
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"",
 				"api.external.host",
-				"/prefix",
+				"prefix",
 				"https://api.external.host/prefix",
 			},
 			// With only forwarded proto and prefix
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"https",
 				"",
-				"/prefix",
+				"prefix",
 				"http://localhost:8080/prefix",
 			},
 			// With non-external forwarded host
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"",
 				"internalhost",
 				"",
-				"http://localhost:8080/",
+				"http://localhost:8080",
 			},
 		}
 
@@ -132,12 +132,8 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 			}
 
 			du.JoinPath()
-			r := &http.Request{
-				URL:    &url.URL{},
-				Host:   "localhost:8080",
-				Header: h,
-			}
-			builder := FromHeadersOrDefault(r, du)
+
+			builder := FromHeadersOrDefault(&h, du)
 			So(builder, ShouldNotBeNil)
 			So(builder.URL, ShouldNotBeNil)
 			So(builder.URL.String(), ShouldEqual, tt.want)
@@ -145,28 +141,6 @@ func Test_FromHeadersOrDefault(t *testing.T) {
 		}
 
 	})
-
-	Convey("Given an empty incoming request host", t, func() {
-		r := &http.Request{
-			URL:  &url.URL{},
-			Host: "",
-		}
-
-		Convey("When the builder is created without forwarded headers", func() {
-			defaultURL, err := url.Parse("http://localhost:8080/")
-			So(err, ShouldBeNil)
-
-			builder := FromHeadersOrDefault(r, defaultURL)
-
-			So(builder, ShouldNotBeNil)
-			So(builder.URL, ShouldNotBeNil)
-
-			Convey("Then the builder URL should be the default URL", func() {
-				So(builder.URL.String(), ShouldEqual, "http://localhost:8080/")
-			})
-		})
-	})
-
 }
 
 func TestBuilder_BuildLink(t *testing.T) {
@@ -179,49 +153,49 @@ func TestBuilder_BuildLink(t *testing.T) {
 		}{
 			// Empty old link
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"",
-				"http://localhost:8080/",
+				"http://localhost:8080",
 			},
 			// Old link with no path
 			{
-				"http://localhost:8080/",
-				"http://localhost:8080/",
-				"http://localhost:8080/",
+				"http://localhost:8080",
+				"http://localhost:8080",
+				"http://localhost:8080",
 			},
 			// Old link with different base url
 			{
-				"http://localhost:8080/",
-				"https://oldHost:1000/",
-				"http://localhost:8080/",
+				"http://localhost:8080",
+				"https://oldHost:1000",
+				"http://localhost:8080",
 			},
 			// Old link with path
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"http://localhost:8080/some/path",
 				"http://localhost:8080/some/path",
 			},
 			// Old link with path and different base url
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"http://oldHost:1000/some/path",
 				"http://localhost:8080/some/path",
 			},
 			// Old link without base url
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"/some/path",
 				"http://localhost:8080/some/path",
 			},
 			// Old link with query params
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"http://localhost:8080/some/path?param1=value1&param2=value2",
 				"http://localhost:8080/some/path?param1=value1&param2=value2",
 			},
 			// Old external link to new internal url
 			{
-				"http://localhost:8080/",
+				"http://localhost:8080",
 				"https://some.api.host/v1/some/path",
 				"http://localhost:8080/some/path",
 			},
@@ -280,21 +254,15 @@ func TestBuilder_BuildLink(t *testing.T) {
 
 func Test_FromHeadersOrDefault_NonApiHost(t *testing.T) {
 	Convey("Given a non-api forwarded host", t, func() {
-		defaultURL, err := url.Parse("http://localhost:8080/")
+		defaultURL, err := url.Parse("http://localhost:8080")
 		So(err, ShouldBeNil)
 
 		h := http.Header{}
 		h.Add("X-Forwarded-Host", "internalhost")
-		h.Add("X-Forwarded-Path-Prefix", "/prefix")
-
-		r := &http.Request{
-			URL:    &url.URL{},
-			Host:   "differenthost:8080",
-			Header: h,
-		}
+		h.Add("X-Forwarded-Path-Prefix", "prefix")
 
 		Convey("When the builder is created", func() {
-			builder := FromHeadersOrDefault(r, defaultURL)
+			builder := FromHeadersOrDefault(&h, defaultURL)
 
 			Convey("Then the builder URL should be the default URL with the path prefix", func() {
 				So(builder, ShouldNotBeNil)
