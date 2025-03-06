@@ -2,6 +2,7 @@ package awsauth
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -28,24 +29,27 @@ type Options struct {
 
 var defaultAWSTransport = dphttp.DefaultTransport
 
-func NewAWSSignerRoundTripper(awsFilename, awsProfile, awsRegion, awsService string, options ...Options) (*AwsSignerRoundTripper, error) {
-
+func NewAWSSignerRoundTripper(ctx context.Context, awsFilename, awsProfile, awsRegion, awsService string, options ...Options) (*AwsSignerRoundTripper, error) {
 	if awsRegion == "" || awsService == "" {
 		return nil, fmt.Errorf("aws region and service should be valid options")
 	}
 
-	awsSigner, err := NewAwsSigner(awsFilename, awsProfile, awsRegion, awsService)
+	// Create the AWS signer
+	awsSigner, err := NewAwsSigner(ctx, awsFilename, awsProfile, awsRegion, awsService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create aws v4 signer: %w", err)
 	}
 
+	// Create the transport and modify TLS settings if needed
+	transport := http.DefaultTransport.(*http.Transport).Clone() // Clone the default transport
 	if len(options) > 0 && options[0].TlsInsecureSkipVerify {
-		defaultAWSTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
+	// Return the custom round tripper
 	return &AwsSignerRoundTripper{
 		signer:       awsSigner,
-		roundTripper: defaultAWSTransport,
+		roundTripper: transport,
 	}, nil
 }
 

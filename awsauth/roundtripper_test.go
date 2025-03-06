@@ -3,7 +3,6 @@ package awsauth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -16,7 +15,7 @@ import (
 func TestNewAWSSignerRoundTripper(t *testing.T) {
 	t.Parallel()
 
-	awsSignerRT, err := NewAWSSignerRoundTripper("some_filename", "some_profile", "some_region", "some_service")
+	awsSignerRT, err := NewAWSSignerRoundTripper(ctx, "some_filename", "some_profile", "some_region", "some_service")
 
 	assert.Nil(t, err, "error should be nil")
 	assert.NotNilf(t, awsSignerRT, "aws signer roundtripper should  not return nil")
@@ -25,7 +24,7 @@ func TestNewAWSSignerRoundTripper(t *testing.T) {
 func TestNewAWSSignerRoundTripper_WhenAWSRegionIsEmpty_Returns(t *testing.T) {
 	t.Parallel()
 
-	awsSignerRT, err := NewAWSSignerRoundTripper("some_filename", "some_profile", "", "some_service")
+	awsSignerRT, err := NewAWSSignerRoundTripper(ctx, "some_filename", "some_profile", "", "some_service")
 
 	assert.NotNil(t, err, "error should not be nil")
 	assert.Nil(t, awsSignerRT, "aws signer roundtripper should return nil")
@@ -34,7 +33,7 @@ func TestNewAWSSignerRoundTripper_WhenAWSRegionIsEmpty_Returns(t *testing.T) {
 func TestNewAWSSignerRoundTripper_WhenAWSServiceIsEmpty_Returns(t *testing.T) {
 	t.Parallel()
 
-	awsSignerRT, err := NewAWSSignerRoundTripper("some_filename", "", "some_region", "")
+	awsSignerRT, err := NewAWSSignerRoundTripper(ctx, "some_filename", "", "some_region", "")
 
 	assert.NotNil(t, err, "error should not be nil")
 	assert.Nil(t, awsSignerRT, "aws signer roundtripper should return nil")
@@ -48,9 +47,9 @@ func TestNewClientWithTransport(t *testing.T) {
 
 		Convey("When a new client is created with aws signer round tripper", func() {
 
-			awsSignerRT, err := NewAWSSignerRoundTripper("", "", "eu-west-1", "es")
+			awsSignerRT, err := NewAWSSignerRoundTripper(ctx, "", "", "eu-west-1", "es")
 			if err != nil {
-				t.Errorf(fmt.Sprintf("unable to implement roundtripper for test, error: %v", err))
+				t.Errorf("unable to implement roundtripper for test, error: %v", err)
 			}
 
 			httpClient := dphttp.NewClientWithTransport(awsSignerRT)
