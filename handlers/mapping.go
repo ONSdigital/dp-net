@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	request "github.com/ONSdigital/dp-net/v2/request"
+	request "github.com/ONSdigital/dp-net/v3/request"
 )
 
 // Key - iota enum of possible sets of keys for middleware manipulation

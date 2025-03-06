@@ -8,7 +8,7 @@ import (
 
 	"context"
 
-	"github.com/ONSdigital/dp-net/v2/request"
+	"github.com/ONSdigital/dp-net/v3/request"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/justinas/alice"
 )

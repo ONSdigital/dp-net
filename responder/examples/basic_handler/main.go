@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ONSdigital/dp-net/v2/responder"
+	"github.com/ONSdigital/dp-net/v3/responder"
 	"github.com/ONSdigital/log.go/v2/log"
 
 	"github.com/pkg/errors"

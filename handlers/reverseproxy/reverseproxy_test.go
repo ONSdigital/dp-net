@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/ONSdigital/dp-net/v2/handlers/reverseproxy"
+	"github.com/ONSdigital/dp-net/v3/handlers/reverseproxy"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

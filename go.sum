@@ -4,6 +4,8 @@ github.com/ONSdigital/dp-healthcheck v1.6.3 h1:EekpiLjiXQtetNDmworUhZZMDvcG70b2c
 github.com/ONSdigital/dp-healthcheck v1.6.3/go.mod h1:qZXdjvZoSbMW/YLmzMZobnvbP5onaVwKhj2yDi6JXdY=
 github.com/ONSdigital/dp-mocking v0.10.1 h1:yEEglJ458kUztHlnGxhMiKhIr13gMYWYOBKFbCbp89M=
 github.com/ONSdigital/dp-mocking v0.10.1/go.mod h1:LVFMmSpUTgalQoWbFOXTNUXrA+W+H1Lzbv+yrhmtPEY=
+github.com/ONSdigital/dp-net/v2 v2.11.2 h1:S5WfcXHva1V8ZkVLS7ZhsvQjf3PPCkCM++NdGifV/uM=
+github.com/ONSdigital/dp-net/v2 v2.11.2/go.mod h1:yZ0lIzM4WfIr6Ujl1lpkCsPHay0n/VQfZJUZjlYB8MY=
 github.com/ONSdigital/log.go/v2 v2.4.3 h1:zTW5ZV3+ytqypS7opcDkjBP+k45I+XoTuP/IPlm5oUg=
 github.com/ONSdigital/log.go/v2 v2.4.3/go.mod h1:2TiXCcEsIlDBH9f+4D0NybZPecobd++dphJv2GqVDb0=
 github.com/aws/aws-sdk-go-v2 v1.36.3 h1:mJoei2CxPutQVxaATCzDUjcZEjVRdpsiiXi2o38yqWM=

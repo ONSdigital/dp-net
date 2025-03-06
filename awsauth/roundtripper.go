@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	dphttp "github.com/ONSdigital/dp-net/v2/http"
+	dphttp "github.com/ONSdigital/dp-net/v3/http"
 )
 
 type AwsSignerRoundTripper struct {

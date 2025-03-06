@@ -1,14 +1,6 @@
-module github.com/ONSdigital/dp-net/v2
+module github.com/ONSdigital/dp-net/v3
 
 go 1.24
-
-retract (
-	v2.17.0 // contains auth headers
-	v2.16.0 // contains auth headers
-	v2.7.2 // contains retraction
-	v2.7.1 // TODO: rethink application of timeout to standard  http server
-	v2.7.0
-)
 
 // to avoid the following vulnerabilities:
 //  - CVE-2025-22869 CWE-770: Allocation of Resources Without Limits or Throttling
@@ -30,6 +22,7 @@ require (
 
 require (
 	github.com/ONSdigital/dp-healthcheck v1.6.3 // indirect
+	github.com/ONSdigital/dp-net/v2 v2.11.2 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
@@ -47,7 +40,7 @@ require (
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
-	github.com/kr/pretty v0.2.0 // indirect
+	github.com/kr/text v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -56,6 +49,5 @@ require (
 	go.opentelemetry.io/otel/metric v1.31.0 // indirect
 	go.opentelemetry.io/otel/trace v1.31.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
