@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	dperrors "github.com/ONSdigital/dp-net/v2/errors"
+	dperrors "github.com/ONSdigital/dp-net/v3/errors"
 
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"

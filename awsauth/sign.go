@@ -1,67 +1,85 @@
 package awsauth
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"github.com/aws/aws-sdk-go/aws/session"
-	signerV4 "github.com/aws/aws-sdk-go/aws/signer/v4"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	signerV4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials/ec2rolecreds"
 )
 
 type Signer struct {
 	awsRegion  string
 	awsService string
 	v4         *signerV4.Signer
+	creds      aws.CredentialsProvider
 }
 
-func NewAwsSigner(awsFilename, awsProfile, awsRegion, awsService string) (signer *Signer, err error) {
+func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsService string) (signer *Signer, err error) {
 	if err = validateAwsSDKSigner(awsRegion, awsService); err != nil {
 		return
 	}
 
-	var sess *session.Session
-	sess, err = session.NewSession()
+	// Load AWS configuration
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion(awsRegion),
+		config.WithSharedConfigFiles([]string{awsFilename}), // Ensure awsFilename is correct
+		config.WithSharedConfigProfile(awsProfile),          // Ensure awsProfile exists in the config
+	)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	creds := credentials.NewChainCredentials(
-		[]credentials.Provider{
-			&credentials.EnvProvider{},
-			&credentials.SharedCredentialsProvider{
-				Filename: awsFilename,
-				Profile:  awsProfile,
-			},
-			&ec2rolecreds.EC2RoleProvider{
-				Client: ec2metadata.New(sess),
-			},
-		},
+	// Create credentials cache using a custom credentials provider
+	creds := aws.NewCredentialsCache(
+		aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
+			// First try retrieving credentials from the loaded config
+			if cfg.Credentials != nil {
+				creds, err := cfg.Credentials.Retrieve(ctx)
+				if err == nil {
+					return creds, nil
+				}
+			}
+
+			// Fallback to EC2 Role credentials if no valid credentials were found
+			ec2Provider := ec2rolecreds.New()
+			ec2Creds, err := ec2Provider.Retrieve(ctx)
+			if err == nil {
+				return ec2Creds, nil
+			}
+
+			// Return error if no valid credential provider found
+			return aws.Credentials{}, errors.New("no valid credential provider found")
+		}),
 	)
 
+	// Create the signer
 	signer = &Signer{
 		awsRegion:  awsRegion,
 		awsService: awsService,
-		v4:         signerV4.NewSigner(creds),
+		v4:         signerV4.NewSigner(),
+		creds:      creds,
 	}
 
-	return
+	return signer, nil
 }
 
-func (s *Signer) Sign(req *http.Request, bodyReader io.ReadSeeker, currentTime time.Time) (err error) {
+func (s *Signer) Sign(req *http.Request, bodyReader io.ReadSeeker, currentTime time.Time) error {
 	if s == nil || s.v4 == nil {
 		return errors.New("v4 signer missing. Cannot sign request")
 	}
 
-	if _, err = s.v4.Sign(req, bodyReader, s.awsService, s.awsRegion, time.Now()); err != nil {
-		return
+	credentials, err := s.creds.Retrieve(context.TODO())
+	if err != nil {
+		return err
 	}
 
-	return
+	return s.v4.SignHTTP(req.Context(), credentials, req, "", s.awsService, s.awsRegion, currentTime)
 }
 
 func validateAwsSDKSigner(awsRegion, awsService string) error {

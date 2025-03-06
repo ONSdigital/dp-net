@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	dperrors "github.com/ONSdigital/dp-net/v2/errors"
+	dperrors "github.com/ONSdigital/dp-net/v3/errors"
 	"github.com/ONSdigital/log.go/v2/log"
 
 	"github.com/pkg/errors"

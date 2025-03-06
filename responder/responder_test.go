@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ONSdigital/dp-net/v2/responder"
+	"github.com/ONSdigital/dp-net/v3/responder"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

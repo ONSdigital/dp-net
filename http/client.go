@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	request "github.com/ONSdigital/dp-net/v2/request"
+	request "github.com/ONSdigital/dp-net/v3/request"
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 )

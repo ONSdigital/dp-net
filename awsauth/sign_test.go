@@ -1,6 +1,7 @@
 package awsauth
 
 import (
+	"context"
 	"errors"
 	"net/http/httptest"
 	"os"
@@ -20,11 +21,13 @@ const (
 	testProfile         = "default"
 )
 
+var ctx = context.Background()
+
 func TestCreateNewSigner(t *testing.T) {
 	Convey("Given that we want to create the aws sdk signer", t, func() {
 		Convey("When the region is set to an empty string", func() {
 			Convey("Then an error is returned when retrieving aws sdk signer", func() {
-				signer, err := NewAwsSigner("", "", "", "es")
+				signer, err := NewAwsSigner(ctx, "", "", "", "es")
 				So(err, ShouldResemble, errors.New("no AWS region was provided. Cannot sign request"))
 				So(signer, ShouldBeNil)
 			})
@@ -32,7 +35,7 @@ func TestCreateNewSigner(t *testing.T) {
 
 		Convey("When the service is set to an empty string", func() {
 			Convey("Then an error is returned when retrieving aws sdk signer", func() {
-				signer, err := NewAwsSigner("", "", "eu-west-1", "")
+				signer, err := NewAwsSigner(ctx, "", "", "eu-west-1", "")
 				So(err, ShouldResemble, errors.New("no AWS service was provided. Cannot sign request"))
 				So(signer, ShouldBeNil)
 			})
@@ -42,7 +45,7 @@ func TestCreateNewSigner(t *testing.T) {
 			accessKeyID, secretAccessKey := setEnvironmentVars()
 
 			Convey("Then no error is returned when retrieving aws sdk signer", func() {
-				signer, err := NewAwsSigner("", "", "eu-west-1", "es")
+				signer, err := NewAwsSigner(ctx, "", "", "eu-west-1", "es")
 				So(err, ShouldBeNil)
 				So(signer, ShouldNotBeNil)
 
@@ -87,7 +90,7 @@ func TestSignFunc(t *testing.T) {
 			// Create valid v4 signer
 			accessKeyID, secretAccessKey := setEnvironmentVars()
 
-			signer, err := NewAwsSigner("", "", "eu-west-1", "es")
+			signer, err := NewAwsSigner(ctx, "", "", "eu-west-1", "es")
 			So(err, ShouldBeNil)
 			So(signer, ShouldNotBeNil)
 			So(signer.v4, ShouldNotBeNil)
@@ -104,7 +107,7 @@ func TestSignFunc(t *testing.T) {
 		})
 
 		Convey("When the signer.v4 is a valid aws file and profile", func() {
-			signer, err := NewAwsSigner(testCredFile, testProfile, "eu-west-1", "es")
+			signer, err := NewAwsSigner(ctx, testCredFile, testProfile, "eu-west-1", "es")
 			So(err, ShouldBeNil)
 			So(signer, ShouldNotBeNil)
 			So(signer.v4, ShouldNotBeNil)
