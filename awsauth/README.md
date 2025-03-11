@@ -90,7 +90,8 @@ The function adds multiple providers to the credentials chain that is used by
 the [AWS SDK V4 signer method `Sign`](https://docs.aws.amazon.com/sdk-for-go/api/aws/signer/v4/#Signer.Sign).
 
 ### Updates from v2 to v3:
-In v3, the context has been added as input to both the roundtripper and signer functions. When creating a signer, you can now pass a context.Context to the NewAwsSigner function to provide better request management, especially in environments where request-specific context (e.g., cancellation, deadlines) is required.
+
+In v3, the context has been added as input to both the roundtripper and signer functions. When creating a signer, you now pass a context.Context to the NewAwsSigner function to provide better request management, especially in environments where request-specific context (e.g., cancellation, deadlines) is required.
 
 1) **Environment Provider** will attempt to retrieve credentials from `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
    set on the environment.
@@ -157,22 +158,22 @@ To sign elasticsearch requests, one can use the signer like so:
 ```go
     ...
 
-var req *http.Request
-
-// TODO set request
-
-var bodyReader io.ReadSeeker
-
-if payload != <zero value of type> { // Check for a payload
-bodyReader = bytes.NewReader(<payload in []byte>)
-req, err = http.NewRequest(<method>, <path>, bodyReader)
-} else { // No payload (request body is empty)
-req, err = http.NewRequest(<method>, <path>, nil)
-}
-
-if err = signer.Sign(req, bodyReader, time.Now()); err != nil {
-... // handle error
-}
-
-...
+    var req *http.Request
+   
+    // TODO set request
+   
+    var bodyReader io.ReadSeeker
+   
+    if payload != <zero value of type> { // Check for a payload
+        bodyReader = bytes.NewReader(<payload in []byte>)
+        req, err = http.NewRequest(<method>, <path>, bodyReader)
+    } else { // No payload (request body is empty)
+        req, err = http.NewRequest(<method>, <path>, nil)
+    }
+   
+    if err = signer.Sign(req, bodyReader, time.Now()); err != nil {
+        ... // handle error
+    }
+   
+   ...
 ```

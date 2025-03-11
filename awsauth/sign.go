@@ -74,7 +74,7 @@ func (s *Signer) Sign(req *http.Request, bodyReader io.ReadSeeker, currentTime t
 		return errors.New("v4 signer missing. Cannot sign request")
 	}
 
-	credentials, err := s.creds.Retrieve(context.TODO())
+	credentials, err := s.creds.Retrieve(req.Context())
 	if err != nil {
 		return err
 	}
