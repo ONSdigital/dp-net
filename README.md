@@ -49,7 +49,7 @@ and this will be noticed by the client.
 
 You also do not have to use the default client if you don't like the configured
 timeouts or do not wish to use exponential backoff. The following example shows
-how to configure your own dp-net/v2/http client:
+how to configure your own dp-net/v3/http client:
 
 ```go
 import (
