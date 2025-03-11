@@ -27,7 +27,7 @@ There are a few options available when you want to create a client
 An example given below:
 
 ```go
-import http "github.com/ONSdigital/dp-net/v2/http"
+import http "github.com/ONSdigital/dp-net/v3/http"
 
 func httpHandlerFunc(w http.ResponseWriter, req *http.Request) {
     client := http.NewClient()
@@ -54,7 +54,7 @@ how to configure your own dp-net/v2/http client:
 ```go
 import (
     "net/http"
-    dphttp "github.com/ONSdigital/dp-net/v2/http"
+    dphttp "github.com/ONSdigital/dp-net/v3/http"
 )
 
 func main() {
@@ -100,7 +100,7 @@ You have 2 options available (depending on if you want to specify a request time
 Assuming you have created a router with your API handlers, you can create the http server like so:
 
 ```go
-import http "github.com/ONSdigital/dp-net/v2/http"
+import http "github.com/ONSdigital/dp-net/v3/http"
     ...
     httpServer := http.NewServer(bindAddr, router)
     httpServer.HandleOSSignals = false

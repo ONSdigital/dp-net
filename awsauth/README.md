@@ -10,8 +10,8 @@ Below is an example of how to setup the aws signer round tripper and attach to a
 
     ```go
     import (
-        "github.com/ONSdigital/dp-net/v2/awsauth"
-        dphttp "github.com/ONSdigital/dp-net/v2/http"
+        "github.com/ONSdigital/dp-net/v3/awsauth"
+        dphttp "github.com/ONSdigital/dp-net/v3/http"
     )
     ...
     awsSignerRT, err := awsauth.NewAWSSignerRoundTripper("", "", "eu-west-1", "es")
@@ -28,8 +28,8 @@ implement the following in your application:
 
     ```go
     import (
-        "github.com/ONSdigital/dp-net/v2/awsauth"
-        dphttp "github.com/ONSdigital/dp-net/v2/http"
+        "github.com/ONSdigital/dp-net/v3/awsauth"
+        dphttp "github.com/ONSdigital/dp-net/v3/http"
     )
     ...
 
@@ -57,7 +57,7 @@ The function adds multiple providers to the credentials chain that is used by th
     Requires `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` variables to be set/exported onto the environment.
 
     ```go
-    import awsauth "github.com/ONSdigital/dp-net/v2/awsauth"
+    import awsauth "github.com/ONSdigital/dp-net/v3/awsauth"
     ...
         signer, err := esauth.NewAwsSigner("", "", "eu-west-1", "es")
         if err != nil {
@@ -79,7 +79,7 @@ The function adds multiple providers to the credentials chain that is used by th
     ```
 
     ```go
-    import esauth "github.com/ONSdigital/dp-net/v2/awsauth"
+    import esauth "github.com/ONSdigital/dp-net/v3/awsauth"
     ...
         signer, err := esauth.NewAwsSigner("~/.aws/credentials", "development", "eu-west-1", "es")
         if err != nil {
@@ -93,7 +93,7 @@ The function adds multiple providers to the credentials chain that is used by th
     Requires Code is run on EC2 instance.
 
     ```go
-    import esauth "github.com/ONSdigital/dp-net/v2/awsauth"
+    import esauth "github.com/ONSdigital/dp-net/v3/awsauth"
     ...
         signer, err := esauth.NewAwsSigner("", "", "eu-west-1", "es")
         if err != nil {
