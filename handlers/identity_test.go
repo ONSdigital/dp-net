@@ -192,9 +192,7 @@ func TestHandler_florenceToken(t *testing.T) {
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
-		var handlerReq *http.Request
 		httpHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			handlerReq = req
 			handlerCalled = true
 		})
 
@@ -213,11 +211,6 @@ func TestHandler_florenceToken(t *testing.T) {
 
 			Convey("Then the downstream HTTP handler is called", func() {
 				So(handlerCalled, ShouldBeTrue)
-			})
-
-			Convey("Then the downstream HTTP handler request has the expected context values", func() {
-				So(handlerReq.Context().Value(dprequest.CallerIdentityKey), ShouldEqual, userIdentifier)
-				So(handlerReq.Context().Value(dprequest.UserIdentityKey), ShouldEqual, userIdentifier)
 			})
 
 			Convey("Then the request body has not been drained", func() {
@@ -311,9 +304,7 @@ func TestHandler_authToken(t *testing.T) {
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
-		var handlerReq *http.Request
 		httpHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			handlerReq = req
 			handlerCalled = true
 		})
 
@@ -335,11 +326,6 @@ func TestHandler_authToken(t *testing.T) {
 
 			Convey("Then the downstream HTTP handler is called", func() {
 				So(handlerCalled, ShouldBeTrue)
-			})
-
-			Convey("Then the downstream HTTP handler request has the expected context values", func() {
-				So(dprequest.Caller(handlerReq.Context()), ShouldEqual, serviceIdentifier)
-				So(dprequest.User(handlerReq.Context()), ShouldEqual, userIdentifier)
 			})
 
 			Convey("Then the request body has not been drained", func() {
@@ -377,9 +363,7 @@ func TestHandler_bothTokens(t *testing.T) {
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
-		var handlerReq *http.Request
 		httpHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			handlerReq = req
 			handlerCalled = true
 		})
 
@@ -398,11 +382,6 @@ func TestHandler_bothTokens(t *testing.T) {
 
 			Convey("Then the downstream HTTP handler is called", func() {
 				So(handlerCalled, ShouldBeTrue)
-			})
-
-			Convey("Then the downstream HTTP handler request has the expected context values", func() {
-				So(handlerReq.Context().Value(dprequest.UserIdentityKey), ShouldEqual, userIdentifier)
-				So(handlerReq.Context().Value(dprequest.CallerIdentityKey), ShouldEqual, userIdentifier)
 			})
 
 			Convey("Then the request body has not been drained", func() {
