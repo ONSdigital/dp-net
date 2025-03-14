@@ -26,14 +26,11 @@ func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsSe
 	}
 
 	// Load AWS configuration
-	cfg, err := config.LoadDefaultConfig(ctx,
+	cfg, _ := config.LoadDefaultConfig(ctx,
 		config.WithRegion(awsRegion),
 		config.WithSharedConfigFiles([]string{awsFilename}), // Ensure awsFilename is correct
 		config.WithSharedConfigProfile(awsProfile),          // Ensure awsProfile exists in the config
 	)
-	if err != nil {
-		return nil, err
-	}
 
 	// Create credentials cache using a custom credentials provider
 	creds := aws.NewCredentialsCache(

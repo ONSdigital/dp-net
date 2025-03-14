@@ -15,7 +15,7 @@ import (
 func TestNewAWSSignerRoundTripper(t *testing.T) {
 	t.Parallel()
 
-	awsSignerRT, err := NewAWSSignerRoundTripper(ctx, "testdata/.aws/credentials", "default", "some_region", "some_service")
+	awsSignerRT, err := NewAWSSignerRoundTripper(ctx, "some_filename", "some_profile", "some_region", "some_service")
 
 	assert.Nil(t, err, "error should be nil")
 	assert.NotNilf(t, awsSignerRT, "aws signer roundtripper should  not return nil")
