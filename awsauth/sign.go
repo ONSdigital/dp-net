@@ -32,6 +32,10 @@ func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsSe
 		config.WithSharedConfigProfile(awsProfile),          // Ensure awsProfile exists in the config
 	)
 
+	// Comment on ignoring the error:
+	// The error from config.LoadDefaultConfig is ignored because the function will fall back
+	// to other credential providers if the configuration is unavailable.
+
 	// Create credentials cache using a custom credentials provider
 	creds := aws.NewCredentialsCache(
 		aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
