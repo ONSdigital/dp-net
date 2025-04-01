@@ -3,6 +3,7 @@ package awsauth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -25,16 +26,27 @@ func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsSe
 		return
 	}
 
-	// Load AWS configuration
-	cfg, _ := config.LoadDefaultConfig(ctx,
-		config.WithRegion(awsRegion),
-		config.WithSharedConfigFiles([]string{awsFilename}), // Ensure awsFilename is correct
-		config.WithSharedConfigProfile(awsProfile),          // Ensure awsProfile exists in the config
-	)
+	// Initialize options for the AWS configuration
+	var configOpts []func(*config.LoadOptions) error
+	configOpts = append(configOpts, config.WithRegion(awsRegion)) // Always set the region
 
-	// Comment on ignoring the error:
-	// The error from config.LoadDefaultConfig is ignored because the function will fall back
-	// to other credential providers if the configuration is unavailable.
+	// Only add shared config file and profile if they are provided
+	if awsFilename != "" {
+		configOpts = append(configOpts, config.WithSharedConfigFiles([]string{awsFilename}))
+	}
+	if awsProfile != "" {
+		configOpts = append(configOpts, config.WithSharedConfigProfile(awsProfile))
+	}
+
+	// Load AWS configuration
+	cfg, err := config.LoadDefaultConfig(ctx, configOpts...)
+	if err != nil {
+		// Proceed by attempting to load the config without a custom file/profile (i.e., use defaults)
+		cfg, err = config.LoadDefaultConfig(ctx, config.WithRegion(awsRegion))
+		if err != nil {
+			return nil, fmt.Errorf("unable to load AWS config even with default credentials: %w", err)
+		}
+	}
 
 	// Create credentials cache using a custom credentials provider
 	creds := aws.NewCredentialsCache(
