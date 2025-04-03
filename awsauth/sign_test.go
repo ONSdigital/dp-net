@@ -1,7 +1,10 @@
 package awsauth
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"net/http/httptest"
 	"os"
@@ -118,6 +121,54 @@ func TestSignFunc(t *testing.T) {
 
 				err = signer.Sign(req, nil, time.Now())
 				So(err, ShouldBeNil)
+			})
+		})
+
+		Convey("When the signer signs a request with body content", func() {
+			accessKeyID, secretAccessKey := setEnvironmentVars()
+
+			signer, err := NewAwsSigner(ctx, "", "", "eu-west-1", "es")
+			So(err, ShouldBeNil)
+			So(signer, ShouldNotBeNil)
+			So(signer.v4, ShouldNotBeNil)
+
+			bodyContent := []byte("hello world")
+			req := httptest.NewRequest("POST", "http://test-url", bytes.NewReader(bodyContent))
+
+			err = signer.Sign(req, bytes.NewReader(bodyContent), time.Now())
+			So(err, ShouldBeNil)
+
+			Convey("Then the Authorization header is set", func() {
+				authHeader := req.Header.Get("Authorization")
+				So(authHeader, ShouldContainSubstring, "Credential="+accessKeyID)
+			})
+
+			removeTestEnvironmentVariables(accessKeyID, secretAccessKey)
+		})
+	})
+}
+
+func TestHashBody(t *testing.T) {
+	Convey("Given a body reader with known content", t, func() {
+		content := []byte("hello world")
+		reader := bytes.NewReader(content)
+
+		Convey("When hashBody is called", func() {
+			hash, err := hashBody(reader)
+
+			Convey("Then the hash matches the expected SHA-256", func() {
+				expected := sha256.Sum256(content)
+				expectedHex := hex.EncodeToString(expected[:])
+
+				So(err, ShouldBeNil)
+				So(hash, ShouldEqual, expectedHex)
+
+				// And the reader is reset to the beginning
+				b := make([]byte, 5)
+				n, err := reader.Read(b)
+				So(err, ShouldBeNil)
+				So(n, ShouldEqual, 5)
+				So(string(b), ShouldEqual, "hello")
 			})
 		})
 	})
