@@ -2,6 +2,8 @@ package awsauth
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -11,14 +13,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	signerV4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials/ec2rolecreds"
 )
 
 type Signer struct {
 	awsRegion  string
 	awsService string
 	v4         *signerV4.Signer
-	creds      aws.CredentialsProvider
+	creds      aws.Credentials
 }
 
 func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsService string) (signer *Signer, err error) {
@@ -48,28 +49,10 @@ func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsSe
 		}
 	}
 
-	// Create credentials cache using a custom credentials provider
-	creds := aws.NewCredentialsCache(
-		aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
-			// First try retrieving credentials from the loaded config
-			if cfg.Credentials != nil {
-				creds, err := cfg.Credentials.Retrieve(ctx)
-				if err == nil {
-					return creds, nil
-				}
-			}
-
-			// Fallback to EC2 Role credentials if no valid credentials were found
-			ec2Provider := ec2rolecreds.New()
-			ec2Creds, err := ec2Provider.Retrieve(ctx)
-			if err == nil {
-				return ec2Creds, nil
-			}
-
-			// Return error if no valid credential provider found
-			return aws.Credentials{}, errors.New("no valid credential provider found")
-		}),
-	)
+	creds, err := cfg.Credentials.Retrieve(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve credentials from aws config: %w", err)
+	}
 
 	// Create the signer
 	signer = &Signer{
@@ -87,12 +70,23 @@ func (s *Signer) Sign(req *http.Request, bodyReader io.ReadSeeker, currentTime t
 		return errors.New("v4 signer missing. Cannot sign request")
 	}
 
-	credentials, err := s.creds.Retrieve(req.Context())
+	var payloadHash string
+	var err error
+
+	if bodyReader != nil {
+		payloadHash, err = hashBody(bodyReader)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Sign
+	err = s.v4.SignHTTP(req.Context(), s.creds, req, payloadHash, s.awsService, s.awsRegion, currentTime)
 	if err != nil {
 		return err
 	}
 
-	return s.v4.SignHTTP(req.Context(), credentials, req, "", s.awsService, s.awsRegion, currentTime)
+	return nil
 }
 
 func validateAwsSDKSigner(awsRegion, awsService string) error {
@@ -105,4 +99,20 @@ func validateAwsSDKSigner(awsRegion, awsService string) error {
 	}
 
 	return nil
+}
+
+// hashBody computes the SHA-256 hash of a bodyReader and resets it
+func hashBody(body io.ReadSeeker) (string, error) {
+	hasher := sha256.New()
+	if _, err := io.Copy(hasher, body); err != nil {
+		return "", err
+	}
+	sum := hasher.Sum(nil)
+
+	// Reset the reader so the request can read from it again
+	if _, err := body.Seek(0, io.SeekStart); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(sum), nil
 }
