@@ -78,6 +78,9 @@ func (s *Signer) Sign(req *http.Request, bodyReader io.ReadSeeker, currentTime t
 		if err != nil {
 			return err
 		}
+
+		// Ensure body is set after hashing
+		req.Body = io.NopCloser(bodyReader)
 	}
 
 	// Sign
