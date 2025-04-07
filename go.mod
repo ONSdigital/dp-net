@@ -2,7 +2,10 @@ module github.com/ONSdigital/dp-net/v3
 
 go 1.24
 
-retract v3.0.0 // The 'awsauth' package is broken in version v3.0.0 and should not be used.
+retract (
+	v3.1.0 // The 'awsauth' package is broken in version v3.1.0 and should not be used.
+	v3.0.0 // The 'awsauth' package is broken in version v3.0.0 and should not be used.
+)
 
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.264.0
