@@ -9,7 +9,7 @@ retract (
 )
 
 require (
-	github.com/ONSdigital/dp-api-clients-go/v2 v2.265.0
+	github.com/ONSdigital/dp-api-clients-go/v2 v2.266.0
 	github.com/ONSdigital/log.go/v2 v2.4.4
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.13
