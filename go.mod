@@ -10,7 +10,7 @@ retract (
 
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.266.0
-	github.com/ONSdigital/log.go/v2 v2.4.4
+	github.com/ONSdigital/log.go/v2 v2.4.5
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.13
 	github.com/gorilla/mux v1.8.1
@@ -18,11 +18,11 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.38.0
+	golang.org/x/net v0.39.0
 )
 
 require (
-	github.com/ONSdigital/dp-healthcheck v1.6.3 // indirect
+	github.com/ONSdigital/dp-healthcheck v1.6.4 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.66 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect

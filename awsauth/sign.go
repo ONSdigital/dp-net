@@ -19,7 +19,7 @@ type Signer struct {
 	awsRegion  string
 	awsService string
 	v4         *signerV4.Signer
-	creds      aws.Credentials
+	creds      aws.CredentialsProvider
 }
 
 func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsService string) (signer *Signer, err error) {
@@ -49,17 +49,12 @@ func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsSe
 		}
 	}
 
-	creds, err := cfg.Credentials.Retrieve(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve credentials from aws config: %w", err)
-	}
-
 	// Create the signer
 	signer = &Signer{
 		awsRegion:  awsRegion,
 		awsService: awsService,
 		v4:         signerV4.NewSigner(),
-		creds:      creds,
+		creds:      cfg.Credentials,
 	}
 
 	return signer, nil
@@ -83,8 +78,14 @@ func (s *Signer) Sign(req *http.Request, bodyReader io.ReadSeeker, currentTime t
 		req.Body = io.NopCloser(bodyReader)
 	}
 
+	// Retrieve fresh credentials on every sign
+	creds, err := s.creds.Retrieve(req.Context())
+	if err != nil {
+		return err
+	}
+
 	// Sign
-	err = s.v4.SignHTTP(req.Context(), s.creds, req, payloadHash, s.awsService, s.awsRegion, currentTime)
+	err = s.v4.SignHTTP(req.Context(), creds, req, payloadHash, s.awsService, s.awsRegion, currentTime)
 	if err != nil {
 		return err
 	}
