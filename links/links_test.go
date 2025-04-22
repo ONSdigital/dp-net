@@ -249,3 +249,73 @@ func Test_BuildDownloadLink(t *testing.T) {
 		So(newurl, ShouldBeEmpty)
 	})
 }
+
+func Test_BuildDownloadNewLink(t *testing.T) {
+	Convey("Given a list of test cases", t, func() {
+		tests := []struct {
+			oldLink string
+			want    string
+		}{
+			// Empty old link
+			{
+				"",
+				"https://download.api.host/downloads-new",
+			},
+			// Old link with only /downloads-new
+			{
+				"https://download.api.host/downloads-new",
+				"https://download.api.host/downloads-new",
+			},
+			// Old link with /downloads-new and path
+			{
+				"https://download.api.host/downloads-new/some/path",
+				"https://download.api.host/downloads-new/some/path",
+			},
+			// Old link with no path
+			{
+				"http://localhost:23600",
+				"https://download.api.host/downloads-new",
+			},
+			// Old link with different base url
+			{
+				"https://localhost:23600",
+				"https://download.api.host/downloads-new",
+			},
+			// Old link with path
+			{
+				"http://localhost:23600/some/path",
+				"https://download.api.host/downloads-new/some/path",
+			},
+			// Old link without base url
+			{
+				"/some/path",
+				"https://download.api.host/downloads-new/some/path",
+			},
+			// Old link with query params
+			{
+				"http://localhost:23600/some/path?param1=value1&param2=value2",
+				"https://download.api.host/downloads-new/some/path?param1=value1&param2=value2",
+			},
+			// Old link with multiple /downloads-new
+			{
+				"https://download.api.host/downloads-new/downloads-new/downloads-new/some/path",
+				"https://download.api.host/downloads-new/some/path",
+			},
+		}
+
+		for _, tt := range tests {
+
+			newurl, err := BuildDownloadNewLink(tt.oldLink, defaultDownloadURL)
+			So(err, ShouldBeNil)
+			So(newurl, ShouldEqual, tt.want)
+		}
+	})
+
+	Convey("When an invalid old URL is provided", t, func() {
+		invalidURL := ":invalid/url"
+		newurl, err := BuildDownloadNewLink(invalidURL, defaultDownloadURL)
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldContainSubstring, "unable to parse link to URL")
+		So(newurl, ShouldBeEmpty)
+	})
+}
