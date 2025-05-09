@@ -157,3 +157,53 @@ func StatusCode(err error) int {
 
 	return 0
 }
+
+func NotFound(err error) bool {
+	var e errNotFound
+
+	if errors.As(err, &e) {
+		return e.NotFound()
+	}
+
+	return false
+}
+
+func Conflict(err error) bool {
+	var e errConflict
+
+	if errors.As(err, &e) {
+		return e.Conflict()
+	}
+
+	return false
+}
+
+func Unavailable(err error) bool {
+	var e errUnavailable
+
+	if errors.As(err, &e) {
+		return e.Unavailable()
+	}
+
+	return false
+}
+
+func Unauthorized(err error) bool {
+	var e errUnauthorized
+
+	if errors.As(err, &e) {
+		return e.Unauthorized()
+	}
+
+	return false
+}
+
+func Timeout(err error) bool {
+	var e errTimeout
+
+	if errors.As(err, &e) {
+		return e.Timeout()
+	}
+
+	return false
+}
