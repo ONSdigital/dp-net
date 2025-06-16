@@ -175,7 +175,7 @@ func (c *Client) SetMaxRetries(maxRetries int) {
 
 // GetPathsWithNoRetries gets a list of paths that will HTTP request will not retry on error.
 func (c *Client) GetPathsWithNoRetries() (paths []string) {
-	for path, _ := range c.PathsWithNoRetries {
+	for path := range c.PathsWithNoRetries {
 		paths = append(paths, path)
 	}
 	return paths
