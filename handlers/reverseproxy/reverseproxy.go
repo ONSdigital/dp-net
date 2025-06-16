@@ -24,7 +24,6 @@ func Create(proxyURL *url.URL, directorFunc func(*http.Request), modifyResponseF
 	}
 	proxy.Director = func(req *http.Request) {
 		director(req)
-		req.Host = proxyURL.Host
 		if directorFunc != nil {
 			directorFunc(req)
 		}
