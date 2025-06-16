@@ -36,6 +36,12 @@ func (j *OnsJSONEncoder) WriteResponseJSON(w http.ResponseWriter, value interfac
 		return err
 	}
 	w.WriteHeader(status)
-	w.Write(b)
+	_, err = w.Write(b)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
 	return nil
 }

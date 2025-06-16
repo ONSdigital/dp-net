@@ -52,11 +52,16 @@ func TestWriteJSONResponse(t *testing.T) {
 		rec = httptest.NewRecorder()
 
 		Convey("When the encoder is invoked", func() {
-			response.WriteJSON(rec, input, http.StatusOK)
+			err := response.WriteJSON(rec, input, http.StatusOK)
+
+			Convey("There is no error", func() {
+				So(err, ShouldBeNil)
+			})
 
 			Convey("Then the input value is written to the response body.", func() {
 				var actual parent
-				json.Unmarshal(rec.Body.Bytes(), &actual)
+				err := json.Unmarshal(rec.Body.Bytes(), &actual)
+				So(err, ShouldBeNil)
 				So(actual, ShouldResemble, input)
 			})
 
@@ -69,7 +74,7 @@ func TestWriteJSONResponse(t *testing.T) {
 			})
 
 			Convey("And the encoder is invoked the expected number of times.", func() {
-				So(mock.encodeCalls, ShouldEqual, 4)
+				So(mock.encodeCalls, ShouldEqual, 5)
 			})
 		})
 	})
@@ -89,7 +94,7 @@ func TestWriteJSONResponseWithInvalidData(t *testing.T) {
 		statusCode = http.StatusInternalServerError
 
 		Convey("When the encoder is invoked", func() {
-			response.WriteJSON(rec, invalidInput, http.StatusOK)
+			err := response.WriteJSON(rec, invalidInput, http.StatusOK)
 
 			Convey("And the response content type header is 'application/json'", func() {
 				So(rec.Header().Get(response.ContentTypeHeader), ShouldEqual, response.ContentTypeJSON)
@@ -101,6 +106,10 @@ func TestWriteJSONResponseWithInvalidData(t *testing.T) {
 
 			Convey("And the encoder is invoked the expected number of times.", func() {
 				So(mock.encodeCalls, ShouldEqual, 3)
+			})
+
+			Convey("And an error is returned", func() {
+				So(err, ShouldNotBeNil)
 			})
 		})
 	})
