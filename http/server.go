@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"context"
@@ -112,7 +113,9 @@ func (s *Server) ListenAndServeTLS(certFile, keyFile string) error {
 func (s *Server) Shutdown(ctx context.Context) error {
 
 	if ctx == nil {
-		ctx, _ = context.WithTimeout(context.Background(), s.DefaultShutdownTimeout)
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(context.Background(), s.DefaultShutdownTimeout)
+		defer cancel()
 	}
 
 	return doShutdown(ctx, &s.Server)
@@ -129,14 +132,14 @@ func (s *Server) listenAndServe() error {
 }
 
 func (s *Server) listenAndServeHandleOSSignals() error {
-
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, os.Kill)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	s.listenAndServeAsync()
 
 	<-stop
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	return s.Shutdown(ctx)
 }
 

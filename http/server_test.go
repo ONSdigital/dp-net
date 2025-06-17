@@ -107,10 +107,12 @@ func TestNew(t *testing.T) {
 				s := NewServer(":0", h)
 
 				s.middlewareOrder = []string{"foo"}
-
+				var err error
 				So(func() {
-					s.ListenAndServe()
+					err = s.ListenAndServe()
 				}, ShouldPanicWith, "middleware not found: foo")
+
+				So(err, ShouldBeNil)
 			})
 
 			Convey("ListenAndServeTLS with invalid middleware should panic", func() {
@@ -118,10 +120,12 @@ func TestNew(t *testing.T) {
 				s := NewServer(":0", h)
 
 				s.middlewareOrder = []string{"foo"}
-
+				var err error
 				So(func() {
-					s.ListenAndServeTLS("testdata/certFile", "testdata/keyFile")
+					err = s.ListenAndServeTLS("testdata/certFile", "testdata/keyFile")
 				}, ShouldPanicWith, "middleware not found: foo")
+
+				So(err, ShouldBeNil)
 			})
 		})
 
@@ -140,11 +144,11 @@ func TestNew(t *testing.T) {
 
 				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 				s := NewServer(":0", h)
-
+				var err error
 				// execute ListenAndServer and wait for it to finish
 				wg.Add(1)
 				go func() {
-					s.ListenAndServeTLS("testdata/certFile", "testdata/keyFile")
+					err = s.ListenAndServeTLS("testdata/certFile", "testdata/keyFile")
 				}()
 				wg.Wait()
 
@@ -154,24 +158,30 @@ func TestNew(t *testing.T) {
 				So(calls[0].httpServer, ShouldNotBeNil)
 				So(calls[0].certFile, ShouldEqual, "testdata/certFile")
 				So(calls[0].keyFile, ShouldEqual, "testdata/keyFile")
+
+				So(err, ShouldBeNil)
 			})
 
 			Convey("ListenAndServeTLS with only CertFile should panic", func() {
 				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 				s := NewServer(":0", h)
-
+				var err error
 				So(func() {
-					s.ListenAndServeTLS("certFile", "")
+					err = s.ListenAndServeTLS("certFile", "")
 				}, ShouldPanicWith, "either CertFile/KeyFile must be blank, or both provided")
+
+				So(err, ShouldBeNil)
 			})
 
 			Convey("ListenAndServeTLS with only KeyFile should panic", func() {
 				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 				s := NewServer(":0", h)
-
+				var err error
 				So(func() {
-					s.ListenAndServeTLS("", "keyFile")
+					err = s.ListenAndServeTLS("", "keyFile")
 				}, ShouldPanicWith, "either CertFile/KeyFile must be blank, or both provided")
+
+				So(err, ShouldBeNil)
 			})
 		})
 
@@ -189,28 +199,31 @@ func TestNew(t *testing.T) {
 
 			Convey("then ListenAndServe starts a working HTTP server", func() {
 				So(s.HandleOSSignals, ShouldBeTrue)
-
+				var err error
 				wg.Add(1)
 				go func() {
-					s.ListenAndServe()
+					err = s.ListenAndServe()
 				}()
 				wg.Wait()
 
 				So(calls, ShouldHaveLength, 1)
 				So(calls[0].httpServer, ShouldNotBeNil)
+
+				So(err, ShouldBeNil)
 			})
 
 			Convey("then if HandleOSSignals is disabled, ListenAndServe starts a working HTTP server", func() {
 				s.HandleOSSignals = false
-
+				var err error
 				wg.Add(1)
 				go func() {
-					s.ListenAndServe()
+					err = s.ListenAndServe()
 				}()
 				wg.Wait()
 
 				So(calls, ShouldHaveLength, 1)
 				So(calls[0].httpServer, ShouldNotBeNil)
+				So(err, ShouldBeNil)
 			})
 		})
 	})

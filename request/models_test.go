@@ -17,7 +17,7 @@ func TestCopy(t *testing.T) {
 		p := Params{"name": "john", "surname": "smith"}
 
 		copiedParams := p.Copy()
-		
+
 		So(&copiedParams, ShouldNotPointTo, &p)
 		So(copiedParams, ShouldResemble, p)
 

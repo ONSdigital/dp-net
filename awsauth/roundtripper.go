@@ -8,8 +8,6 @@ import (
 	"io"
 	"net/http"
 	"time"
-
-	dphttp "github.com/ONSdigital/dp-net/v3/http"
 )
 
 type AwsSignerRoundTripper struct {
@@ -26,8 +24,6 @@ type Options struct {
 	// with VerifyConnection or VerifyPeerCertificate.
 	TlsInsecureSkipVerify bool
 }
-
-var defaultAWSTransport = dphttp.DefaultTransport
 
 func NewAWSSignerRoundTripper(ctx context.Context, awsFilename, awsProfile, awsRegion, awsService string, options ...Options) (*AwsSignerRoundTripper, error) {
 	if awsRegion == "" || awsService == "" {

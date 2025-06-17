@@ -2,7 +2,6 @@ package http
 
 import (
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 
@@ -16,7 +15,7 @@ func DrainBody(r *http.Request) {
 		return
 	}
 
-	_, err := io.Copy(ioutil.Discard, r.Body)
+	_, err := io.Copy(io.Discard, r.Body)
 	if err != nil {
 		log.Error(r.Context(), "error draining request body", err)
 	}

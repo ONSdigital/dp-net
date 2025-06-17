@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -182,7 +181,7 @@ func TestHandler_florenceToken(t *testing.T) {
 			response := &dprequest.IdentityResponse{Identifier: userIdentifier}
 
 			body, _ := json.Marshal(response)
-			readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
+			readCloser := io.NopCloser(bytes.NewBuffer(body))
 
 			return &http.Response{
 				StatusCode: http.StatusOK,
@@ -234,7 +233,7 @@ func TestHandler_InvalidIdentityResponse(t *testing.T) {
 		httpClient := newMockHTTPClient()
 		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
 
-			readCloser := ioutil.NopCloser(bytes.NewBufferString("{ invalid JSON"))
+			readCloser := io.NopCloser(bytes.NewBufferString("{ invalid JSON"))
 
 			return &http.Response{
 				StatusCode: http.StatusOK,
@@ -294,7 +293,7 @@ func TestHandler_authToken(t *testing.T) {
 			response := &dprequest.IdentityResponse{Identifier: serviceIdentifier}
 
 			body, _ := json.Marshal(response)
-			readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
+			readCloser := io.NopCloser(bytes.NewBuffer(body))
 
 			return &http.Response{
 				StatusCode: http.StatusOK,
@@ -353,7 +352,7 @@ func TestHandler_bothTokens(t *testing.T) {
 			response := &dprequest.IdentityResponse{Identifier: userIdentifier}
 
 			body, _ := json.Marshal(response)
-			readCloser := ioutil.NopCloser(bytes.NewBuffer(body))
+			readCloser := io.NopCloser(bytes.NewBuffer(body))
 
 			return &http.Response{
 				StatusCode: http.StatusOK,
@@ -498,7 +497,7 @@ func TestGetFlorenceToken(t *testing.T) {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 		req.Header.Set(dprequest.FlorenceHeaderKey, expectedToken)
 
-		actual, err := GetFlorenceToken(nil, req)
+		actual, err := GetFlorenceToken(context.Background(), req)
 
 		So(actual, ShouldEqual, expectedToken)
 		So(err, ShouldBeNil)
@@ -508,7 +507,7 @@ func TestGetFlorenceToken(t *testing.T) {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 		req.AddCookie(&http.Cookie{Name: dprequest.FlorenceCookieKey, Value: expectedToken})
 
-		actual, err := GetFlorenceToken(nil, req)
+		actual, err := GetFlorenceToken(context.Background(), req)
 
 		So(actual, ShouldEqual, expectedToken)
 		So(err, ShouldBeNil)
@@ -517,14 +516,14 @@ func TestGetFlorenceToken(t *testing.T) {
 	Convey("should return empty token if no header or cookie is set", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 
-		actual, err := GetFlorenceToken(nil, req)
+		actual, err := GetFlorenceToken(context.Background(), req)
 
 		So(actual, ShouldBeEmpty)
 		So(err, ShouldBeNil)
 	})
 
 	Convey("should return empty token and error if get header returns an error that is not ErrHeaderNotFound", t, func() {
-		actual, err := GetFlorenceToken(nil, nil)
+		actual, err := GetFlorenceToken(context.Background(), nil)
 
 		So(actual, ShouldBeEmpty)
 		So(err, ShouldResemble, headers.ErrRequestNil)
@@ -538,7 +537,7 @@ func TestGetFlorenceTokenFromCookie(t *testing.T) {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 		req.AddCookie(&http.Cookie{Name: dprequest.FlorenceCookieKey, Value: expectedToken})
 
-		actual, err := getFlorenceTokenFromCookie(nil, req)
+		actual, err := getFlorenceTokenFromCookie(context.Background(), req)
 
 		So(actual, ShouldEqual, expectedToken)
 		So(err, ShouldBeNil)
@@ -547,7 +546,7 @@ func TestGetFlorenceTokenFromCookie(t *testing.T) {
 	Convey("should return empty token if token cookie not found", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 
-		actual, err := getFlorenceTokenFromCookie(nil, req)
+		actual, err := getFlorenceTokenFromCookie(context.Background(), req)
 
 		So(actual, ShouldBeEmpty)
 		So(err, ShouldBeNil)
@@ -556,7 +555,7 @@ func TestGetFlorenceTokenFromCookie(t *testing.T) {
 
 func TestGetServiceAuthToken(t *testing.T) {
 	Convey("should return error if not equal to headers.ErrHeaderNotFound", t, func() {
-		token, err := getServiceAuthToken(nil, nil)
+		token, err := getServiceAuthToken(context.Background(), nil)
 
 		So(token, ShouldBeEmpty)
 		So(err, ShouldResemble, headers.ErrRequestNil)
@@ -565,7 +564,7 @@ func TestGetServiceAuthToken(t *testing.T) {
 	Convey("should return empty token if error equals headers.ErrHeaderNotFound", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
 
-		token, err := getServiceAuthToken(nil, req)
+		token, err := getServiceAuthToken(context.Background(), req)
 
 		So(token, ShouldBeEmpty)
 		So(err, ShouldBeNil)
@@ -573,25 +572,19 @@ func TestGetServiceAuthToken(t *testing.T) {
 
 	Convey("should return token if header found", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
-		headers.SetServiceAuthToken(req, "666")
+		err := headers.SetServiceAuthToken(req, "666")
+		So(err, ShouldBeNil)
 
-		token, err := getServiceAuthToken(nil, req)
+		token, err := getServiceAuthToken(context.TODO(), req)
 
 		So(token, ShouldEqual, "666")
 		So(err, ShouldBeNil)
 	})
 }
 
-func getTokenFunc(token string, err error) getTokenFromReqFunc {
-	return func(ctx context.Context, r *http.Request) (string, error) {
-		return token, err
-	}
-}
-
 func newMockHTTPClient() *dphttp.ClienterMock {
 	return &dphttp.ClienterMock{
 		SetPathsWithNoRetriesFunc: func(paths []string) {
-			return
 		},
 		GetPathsWithNoRetriesFunc: func() []string {
 			return []string{"/healthcheck"}
