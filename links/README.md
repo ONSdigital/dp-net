@@ -26,23 +26,10 @@ NB. It may not always be desirable for links to be rewritten. Therefore a config
 
 If 'EnableURLRewriting' is switched on then the following things happen next:
 
-A pointer to the request header, and the value of the default API URL, specified above, are passed into the `links.FromHeadersOrDefault` function, which returns a link builder. E.g.
+A pointer to the request header, and the value of the default API URL (such as the one specified above) are passed into the `links.FromHeadersOrDefault` function, which returns a `links.Builder`. E.g.
 
 ```redirectLinkBuilder := links.FromHeadersOrDefault(&req.Header, api.apiUrl)```
 
-The Redirect API has a getRedirects handler, which creates a list of redirects. Each redirect the list contains its original self link at this stage. Each redirect is then passed into a function for rewriting it. The function for rewriting the self link looks like this:
+The self link value can then be rewritten by passing its original value into the BuildLink function of the `links.Builder` E.g.
 
-```code
-    func rewriteSelfLink(ctx context.Context, builder links.Builder, redirect models.Redirect) (models.Redirect, error) {
-        var err error
-        redirect.Links.Self.Href, err = builder.BuildLink(redirect.Links.Self.Href)
-        if err != nil {
-            log.Error(ctx, "could not build self link", err, log.Data{"link": redirect.Links.Self.Href})
-            return models.Redirect{}, err
-        }
-
-        return redirect, nil
-    }
-```
-
-So, as you can see, the self link value is given by redirect.Links.Self.Href and this gets rewritten by passing its original value into the BuildLink function of the links.Builder. The links.Builder is the one created earlier using links.FromHeadersOrDefault.
+```newSelf, err = redirectLinkBuilder.BuildLink(originalSelf)```
