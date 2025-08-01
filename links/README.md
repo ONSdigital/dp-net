@@ -32,4 +32,4 @@ A pointer to the request header, and the value of the default API URL (such as t
 
 The self link value can then be rewritten by passing its original value into the BuildLink function of the `links.Builder` E.g.
 
-```newSelf, err = redirectLinkBuilder.BuildLink(originalSelf)```
+```newSelf, err := redirectLinkBuilder.BuildLink(originalSelf)```
