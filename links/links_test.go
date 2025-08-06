@@ -221,6 +221,11 @@ func Test_BuildDownloadLink(t *testing.T) {
 				"/some/path",
 				"https://download.api.host/downloads/some/path",
 			},
+			// Old link without base url and / prefix
+			{
+				"some/path",
+				"https://download.api.host/downloads/some/path",
+			},
 			// Old link with query params
 			{
 				"http://localhost:23600/some/path?param1=value1&param2=value2",
@@ -234,7 +239,6 @@ func Test_BuildDownloadLink(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-
 			newurl, err := BuildDownloadLink(tt.oldLink, defaultDownloadURL)
 			So(err, ShouldBeNil)
 			So(newurl, ShouldEqual, tt.want)
@@ -291,6 +295,11 @@ func Test_BuildDownloadNewLink(t *testing.T) {
 				"/some/path",
 				"https://download.api.host/downloads-new/some/path",
 			},
+			// Old link without base url and / prefix
+			{
+				"some/path",
+				"https://download.api.host/downloads-new/some/path",
+			},
 			// Old link with query params
 			{
 				"http://localhost:23600/some/path?param1=value1&param2=value2",
@@ -304,7 +313,6 @@ func Test_BuildDownloadNewLink(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-
 			newurl, err := BuildDownloadNewLink(tt.oldLink, defaultDownloadURL)
 			So(err, ShouldBeNil)
 			So(newurl, ShouldEqual, tt.want)
@@ -317,5 +325,27 @@ func Test_BuildDownloadNewLink(t *testing.T) {
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldContainSubstring, "unable to parse link to URL")
 		So(newurl, ShouldBeEmpty)
+	})
+}
+
+func Test_RemovePrefixFromPath(t *testing.T) {
+	Convey("RemovePrefixFromPath removes all leading prefix instances from the path", t, func() {
+		tests := []struct {
+			path   string
+			prefix string
+			want   string
+		}{
+			{"", "/prefix", ""},
+			{"/prefix", "/prefix", ""},
+			{"/prefix/some/path", "/prefix", "/some/path"},
+			{"/prefix/prefix/prefix/some/path", "/prefix", "/some/path"},
+			{"/some/path", "/prefix", "/some/path"},
+			{"some/path", "/prefix", "some/path"},
+		}
+
+		for _, tt := range tests {
+			result := RemovePrefixFromPath(tt.path, tt.prefix)
+			So(result, ShouldEqual, tt.want)
+		}
 	})
 }

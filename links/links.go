@@ -33,9 +33,7 @@ func FromHeadersOrDefault(h *http.Header, defaultURL *url.URL) *Builder {
 
 func (b *Builder) BuildURL(oldURL *url.URL) *url.URL {
 	newPath := oldURL.Path
-	for strings.HasPrefix(newPath, "/v1") {
-		newPath = strings.TrimPrefix(newPath, "/v1")
-	}
+	newPath = RemovePrefixFromPath(newPath, "/v1")
 
 	apiURL := b.URL.JoinPath(newPath)
 	apiURL.RawQuery = oldURL.RawQuery
@@ -58,12 +56,9 @@ func BuildDownloadLink(link string, defaultURL *url.URL) (string, error) {
 	}
 
 	newPath := oldURL.Path
-	for strings.HasPrefix(newPath, "/downloads") {
-		newPath = strings.TrimPrefix(newPath, "/downloads")
-	}
-	newPath = "/downloads" + newPath
+	newPath = RemovePrefixFromPath(newPath, "/downloads")
 
-	apiURL := defaultURL.JoinPath(newPath)
+	apiURL := defaultURL.JoinPath("downloads", newPath)
 	apiURL.RawQuery = oldURL.RawQuery
 
 	return apiURL.String(), nil
@@ -76,13 +71,17 @@ func BuildDownloadNewLink(link string, defaultURL *url.URL) (string, error) {
 	}
 
 	newPath := oldURL.Path
-	for strings.HasPrefix(newPath, "/downloads-new") {
-		newPath = strings.TrimPrefix(newPath, "/downloads-new")
-	}
-	newPath = "/downloads-new" + newPath
+	newPath = RemovePrefixFromPath(newPath, "/downloads-new")
 
-	apiURL := defaultURL.JoinPath(newPath)
+	apiURL := defaultURL.JoinPath("downloads-new", newPath)
 	apiURL.RawQuery = oldURL.RawQuery
 
 	return apiURL.String(), nil
+}
+
+func RemovePrefixFromPath(path, prefix string) string {
+	for strings.HasPrefix(path, prefix) {
+		path = strings.TrimPrefix(path, prefix)
+	}
+	return path
 }
