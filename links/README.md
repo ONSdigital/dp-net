@@ -22,12 +22,12 @@ Links created this way, which will then be written differently in different envi
 
 A pointer to the request header, and the value of the default API URL (such as `"http://localhost:29900"`) are passed into the `links.FromHeadersOrDefault` function, which returns a `links.Builder`. E.g.
 
-```redirectLinkBuilder := links.FromHeadersOrDefault(&req.Header, "http://localhost:29900")```
+```linkBuilder := links.FromHeadersOrDefault(&req.Header, "http://localhost:29900")```
 
 If the request header contains values for the protocol and host then these will be used along with any path prefix provided. However, if these values are not present then the API URL value will be used instead, by default.
 
 In either case, the self link value can then be created by passing its relative path value into the BuildLink function of the `links.Builder` E.g.
 
-```redirectSelf, err := redirectLinkBuilder.BuildLink("/redirects/some_redirect_id_value")```
+```redirectSelf, err := linkBuilder.BuildLink("/v1/redirects/some_redirect_id_value")```
 
 NB. The functionality is often used for rewriting existing links as HATEAOS links.
