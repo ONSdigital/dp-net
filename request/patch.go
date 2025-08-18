@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 )
 
 // PatchOp - iota enum of possible patch operations
@@ -73,7 +72,7 @@ func GetPatches(requestBody io.ReadCloser, supportedOps []PatchOp) ([]Patch, err
 		return []Patch{}, fmt.Errorf("empty list of support patch operations given")
 	}
 
-	bytes, err := ioutil.ReadAll(requestBody)
+	bytes, err := io.ReadAll(requestBody)
 	if err != nil {
 		return []Patch{}, fmt.Errorf("failed to read and get patch request body")
 	}

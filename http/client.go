@@ -17,7 +17,7 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
-// go:generate moq -out mock_client.go -pkg http . Clienter
+//go:generate moq -out mock_client.go -pkg http . Clienter
 
 const (
 	DefaultRequestTimeout = 10 * time.Second
@@ -79,7 +79,6 @@ type Clienter interface {
 }
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
 }
 
 // NewClient returns a copy of DefaultClient.
@@ -175,7 +174,7 @@ func (c *Client) SetMaxRetries(maxRetries int) {
 
 // GetPathsWithNoRetries gets a list of paths that will HTTP request will not retry on error.
 func (c *Client) GetPathsWithNoRetries() (paths []string) {
-	for path, _ := range c.PathsWithNoRetries {
+	for path := range c.PathsWithNoRetries {
 		paths = append(paths, path)
 	}
 	return paths
@@ -314,7 +313,7 @@ func (c *Client) backoff(
 ) (resp *http.Response, err error) {
 
 	for retries := 1; retries <= c.GetMaxRetries(); retries++ {
-		pingChan := make(chan struct{}, 0)
+		pingChan := make(chan struct{})
 		go func() {
 			time.Sleep(getSleepTime(retries, c.RetryTime))
 			close(pingChan)
