@@ -64,6 +64,10 @@ func (s *readCloserSplitter) CloseSplit(id int) error {
 		return errors.New("reader already closed")
 	}
 	delete(s.splits, id)
+	// If this is the last split to be closed then close the upstream reader too
+	if len(s.splits) == 0 {
+		return s.ReadCloser.Close()
+	}
 	return nil
 }
 
