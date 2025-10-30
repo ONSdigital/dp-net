@@ -53,7 +53,7 @@ func TestReadCloserSplit_Read(t *testing.T) {
 
 func TestReadCloserSplit_Close(t *testing.T) {
 	Convey("Given there is an upstream ReadCloser with unread bytes split into 1 reader", t, func() {
-		upstreamRC := mockReadCloser()
+		upstreamRC := mockReadCloser(nil)
 		splitRCs := ReadCloserSplit(upstreamRC, 1)
 		rc1 := splitRCs[0]
 		Convey("When the reader is closed", func() {
@@ -68,7 +68,7 @@ func TestReadCloserSplit_Close(t *testing.T) {
 	})
 
 	Convey("Given there is an upstream ReadCloser with unread bytes split into 2 readers", t, func() {
-		upstreamRC := mockReadCloser()
+		upstreamRC := mockReadCloser(nil)
 		splitRCs := ReadCloserSplit(upstreamRC, 2)
 		rc1 := splitRCs[0]
 		rc2 := splitRCs[1]
@@ -97,74 +97,169 @@ func TestReadCloserSplit_Close(t *testing.T) {
 
 func TestReadCloserSplit(t *testing.T) {
 	Convey("Given there is an upstream ReadCloser with unread bytes", t, func() {
+		upstreamRC := mockReadCloser([]byte("some.data.to.test"))
 		Convey("And it is split into two readers", func() {
+			splitRCs := ReadCloserSplit(upstreamRC, 2)
+			rc1 := splitRCs[0]
+			rc2 := splitRCs[1]
 			Convey("When the first reader reads a number of bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
+				read1 := make([]byte, 5)
+				n, err := rc1.Read(read1)
+				So(err, ShouldBeNil)
+				Convey("Then it return the bytes correctly", func() {
+					So(n, ShouldEqual, 5)
+					So(read1, ShouldResemble, []byte("some."))
+					Convey("When the second reader reads the same number of bytes", func() {
+						read2 := make([]byte, 5)
+						n, err = rc2.Read(read2)
+						So(err, ShouldBeNil)
+						Convey("Then it return the bytes correctly", func() {
+							So(n, ShouldEqual, 5)
+							So(read1, ShouldResemble, []byte("some."))
+							Convey("And the upstream ReadCloser should have been read from only once", func() {
+								So(upstreamRC.Reads, ShouldHaveLength, 1)
+							})
+						})
+					})
+				})
 			})
-			Convey("When the second reader reads the same number of bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
-			})
-			Convey("And the upstream ReadCloser should have been read from only once", func() {})
+
 		})
 	})
 
 	Convey("Given there is an upstream ReadCloser with unread bytes", t, func() {
+		upstreamRC := mockReadCloser([]byte("some.data.to.test"))
 		Convey("And it is split into two readers", func() {
+			splitRCs := ReadCloserSplit(upstreamRC, 2)
+			rc1 := splitRCs[0]
+			rc2 := splitRCs[1]
 			Convey("When the first reader reads a number of bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
+				read1 := make([]byte, 5)
+				n, err := rc1.Read(read1)
+				Convey("Then it return the bytes correctly", func() {
+					So(err, ShouldBeNil)
+					So(n, ShouldEqual, 5)
+					So(read1, ShouldResemble, []byte("some."))
+					Convey("When the second reader reads a greater number of bytes", func() {
+						read2 := make([]byte, 8)
+						n, err = rc2.Read(read2)
+						Convey("Then it return the bytes correctly", func() {
+							So(err, ShouldBeNil)
+							So(n, ShouldEqual, 8)
+							So(read2, ShouldResemble, []byte("some.dat"))
+							Convey("When the first reader reads up to the same index as the second reader", func() {
+								read1b := make([]byte, 3)
+								n, err = rc1.Read(read1b)
+								Convey("Then it return the bytes correctly", func() {
+									So(err, ShouldBeNil)
+									So(n, ShouldEqual, 3)
+									So(read1b, ShouldResemble, []byte("dat"))
+									Convey("And the upstream ReadCloser should have been read from twice", func() {
+										So(upstreamRC.Reads, ShouldHaveLength, 2)
+									})
+								})
+							})
+
+						})
+					})
+
+				})
 			})
-			Convey("When the second reader reads a greater number of bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
-			})
-			Convey("When the first reader reads up to the same index as the second reader", func() {
-				Convey("Then it return the bytes correctly", func() {})
-			})
-			Convey("And the upstream ReadCloser should have been read from twice", func() {})
 		})
 	})
 
 	Convey("Given there is an upstream ReadCloser with unread bytes", t, func() {
+		upstreamRC := mockReadCloser([]byte("some.data.to.test"))
 		Convey("And it is split into two readers", func() {
+			splitRCs := ReadCloserSplit(upstreamRC, 2)
+			rc1 := splitRCs[0]
+			rc2 := splitRCs[1]
 			Convey("When the first reader reads a number of bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
+				read1 := make([]byte, 5)
+				n, err := rc1.Read(read1)
+				Convey("Then it return the bytes correctly", func() {
+					So(err, ShouldBeNil)
+					So(n, ShouldEqual, 5)
+					So(read1, ShouldResemble, []byte("some."))
+
+					Convey("When the second reader reads a greater number of bytes", func() {
+						read2 := make([]byte, 8)
+						n, err = rc2.Read(read2)
+						Convey("Then it return the bytes correctly", func() {
+							So(err, ShouldBeNil)
+							So(n, ShouldEqual, 8)
+							So(read2, ShouldResemble, []byte("some.dat"))
+
+							Convey("When the first reader reads beyond the index of the second reader", func() {
+								read1b := make([]byte, 6)
+								n, err = rc1.Read(read1b)
+								Convey("Then it return the bytes correctly", func() {
+									So(err, ShouldBeNil)
+									So(n, ShouldEqual, 6)
+									So(read1b, ShouldResemble, []byte("data.t"))
+
+									Convey("And the upstream ReadCloser should have been read from three times", func() {
+										So(upstreamRC.Reads, ShouldHaveLength, 3)
+									})
+								})
+							})
+						})
+					})
+				})
 			})
-			Convey("When the second reader reads a greater number of bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
-			})
-			Convey("When the first reader reads beyond the index of the second reader", func() {
-				Convey("Then it return the bytes correctly", func() {})
-			})
-			Convey("And the upstream ReadCloser should have been read from three times", func() {})
 		})
 	})
 
 	Convey("Given there is an upstream ReadCloser with unread bytes", t, func() {
+		upstreamRC := mockReadCloser([]byte("some.data.to.test"))
 		Convey("And it is split into two readers", func() {
-			Convey("When the first reader reads a number of bytes", func() {})
-			Convey("And the first reader is then closed", func() {})
-			Convey("When the second reader reads a greater number of bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
+			splitRCs := ReadCloserSplit(upstreamRC, 2)
+			rc1 := splitRCs[0]
+			rc2 := splitRCs[1]
+			Convey("When the first reader reads a number of bytes", func() {
+				read1 := make([]byte, 5)
+				n, err := rc1.Read(read1)
+				So(err, ShouldBeNil)
+
+				Convey("And the first reader is then closed", func() {
+					err = rc1.Close()
+					So(err, ShouldBeNil)
+					Convey("When the second reader reads a greater number of bytes", func() {
+						read2 := make([]byte, 8)
+						n, err = rc2.Read(read2)
+						Convey("Then it return the bytes correctly", func() {
+							So(err, ShouldBeNil)
+							So(n, ShouldEqual, 8)
+							So(read2, ShouldResemble, []byte("some.dat"))
+
+							Convey("And the upstream ReadCloser should have been read from twice", func() {
+								So(upstreamRC.Reads, ShouldHaveLength, 2)
+							})
+						})
+					})
+				})
+
 			})
-			Convey("And the upstream ReadCloser should have been read from twice", func() {})
+
 		})
 	})
 
 	Convey("Given there is an upstream ReadCloser which errors after 5 bytes are read", t, func() {
 		Convey("And it is split into three readers", func() {
 			Convey("When the first reader reads 5 bytes", func() {
-				Convey("Then it retuns the bytes correctly", func() {})
+				Convey("Then it returns the bytes correctly", func() {})
 			})
 			Convey("When the first reader reads one more byte", func() {
-				Convey("Then it retuns an error", func() {})
+				Convey("Then it returns an error", func() {})
 			})
 			Convey("When the second reader reads 5 bytes", func() {
 				Convey("Then it return the bytes correctly", func() {})
 			})
 			Convey("When the second reader reads one more byte", func() {
-				Convey("Then it retuns an error", func() {})
+				Convey("Then it returns an error", func() {})
 			})
 			Convey("When the third reader reads 6 bytes", func() {
-				Convey("Then it retuns an error", func() {})
+				Convey("Then it returns an error", func() {})
 			})
 		})
 	})
@@ -172,12 +267,15 @@ func TestReadCloserSplit(t *testing.T) {
 
 // Mock for io.ReadCloser
 type readCloserMock struct {
+	data       []byte
+	reader     io.Reader
 	CloseCount int
+	Reads      []int
 }
 
 func (rcm *readCloserMock) Read(p []byte) (n int, err error) {
-	//TODO implement me
-	panic("implement me")
+	rcm.Reads = append(rcm.Reads, len(p))
+	return rcm.reader.Read(p)
 }
 
 func (rcm *readCloserMock) Close() error {
@@ -187,10 +285,16 @@ func (rcm *readCloserMock) Close() error {
 
 var _ io.ReadCloser = &readCloserMock{}
 
-func mockReadCloser() *readCloserMock {
-	return &readCloserMock{}
+func mockReadCloser(data []byte) *readCloserMock {
+	return &readCloserMock{
+		data:   data,
+		reader: bytes.NewReader(data),
+		Reads:  make([]int, 0),
+	}
 }
 
 func (rcm *readCloserMock) reset() {
+	rcm.reader = bytes.NewReader(rcm.data)
 	rcm.CloseCount = 0
+	rcm.Reads = make([]int, 0)
 }

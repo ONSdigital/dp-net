@@ -46,6 +46,7 @@ func (s *readCloserSplitter) upstreamRead(toLength int64) error {
 	buf := make([]byte, toRead)
 	n, err := s.ReadCloser.Read(buf)
 	if n > 0 {
+		s.maxBytesRead = s.maxBytesRead + int64(n)
 		for _, split := range s.splits {
 			split.addUnreadBytes(buf[:n])
 		}
@@ -86,7 +87,8 @@ func (s *splitReadCloser) Read(p []byte) (n int, err error) {
 	s.splitter.upstreamRead(toLength)
 
 	n = s.getUnreadBytes(p)
-
+	s.bytesRead += int64(n)
+	
 	if s.upstreamError != nil {
 		return n, s.upstreamError
 	}
