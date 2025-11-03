@@ -243,24 +243,73 @@ func TestReadCloserSplit(t *testing.T) {
 
 		})
 	})
+}
+
+func TestReadCloserSplit_Errors(t *testing.T) {
 
 	Convey("Given there is an upstream ReadCloser which errors after 5 bytes are read", t, func() {
+		upstreamRC := mockReadCloser([]byte("some."))
 		Convey("And it is split into three readers", func() {
+			splitRCs := ReadCloserSplit(upstreamRC, 3)
+			rc1 := splitRCs[0]
+			rc2 := splitRCs[1]
+			rc3 := splitRCs[2]
 			Convey("When the first reader reads 5 bytes", func() {
-				Convey("Then it returns the bytes correctly", func() {})
+				read1 := make([]byte, 5)
+				n, err := rc1.Read(read1)
+				Convey("Then it returns the bytes correctly", func() {
+					So(err, ShouldBeNil)
+					So(n, ShouldEqual, 5)
+					So(read1, ShouldResemble, []byte("some."))
+					Convey("When the first reader reads one more byte", func() {
+						read1b := make([]byte, 1)
+						n, err := rc1.Read(read1b)
+						Convey("Then it returns an error", func() {
+							So(err, ShouldNotBeNil)
+							So(n, ShouldEqual, 0)
+							So(err, ShouldEqual, io.EOF)
+							Convey("When the second reader reads 5 bytes", func() {
+								read2 := make([]byte, 5)
+								n, err = rc2.Read(read2)
+								Convey("Then it return the bytes correctly", func() {
+									So(err, ShouldBeNil)
+									So(n, ShouldEqual, 5)
+									So(read2, ShouldResemble, []byte("some."))
+									Convey("When the second reader reads one more byte", func() {
+										read2b := make([]byte, 1)
+										n, err = rc2.Read(read2b)
+										Convey("Then it returns an error", func() {
+											So(err, ShouldNotBeNil)
+											So(n, ShouldEqual, 0)
+											So(err, ShouldEqual, io.EOF)
+											Convey("When the third reader reads 6 bytes", func() {
+												read3 := make([]byte, 6)
+												n, err = rc3.Read(read3)
+												Convey("Then it returns only the 5 unread bytes with no error", func() {
+													So(err, ShouldBeNil)
+													So(n, ShouldEqual, 5)
+													Convey("And the first 5 bytes of the buffer should contain the correct data", func() {})
+													So(read3[:5], ShouldResemble, []byte("some."))
+													Convey("When the second reader reads one more byte", func() {
+														read3b := make([]byte, 1)
+														n, err = rc3.Read(read3b)
+														Convey("Then it returns an error", func() {
+															So(err, ShouldNotBeNil)
+															So(n, ShouldEqual, 0)
+															So(err, ShouldEqual, io.EOF)
+														})
+													})
+												})
+											})
+										})
+									})
+								})
+							})
+						})
+					})
+				})
 			})
-			Convey("When the first reader reads one more byte", func() {
-				Convey("Then it returns an error", func() {})
-			})
-			Convey("When the second reader reads 5 bytes", func() {
-				Convey("Then it return the bytes correctly", func() {})
-			})
-			Convey("When the second reader reads one more byte", func() {
-				Convey("Then it returns an error", func() {})
-			})
-			Convey("When the third reader reads 6 bytes", func() {
-				Convey("Then it returns an error", func() {})
-			})
+
 		})
 	})
 }

@@ -38,9 +38,9 @@ func ReadCloserSplit(readCloser io.ReadCloser, splits int) []io.ReadCloser {
 	return closers
 }
 
-func (s *readCloserSplitter) upstreamRead(toLength int64) error {
+func (s *readCloserSplitter) upstreamRead(toLength int64) {
 	if toLength <= s.maxBytesRead {
-		return nil
+		return
 	}
 	toRead := toLength - s.maxBytesRead
 	buf := make([]byte, toRead)
@@ -55,9 +55,7 @@ func (s *readCloserSplitter) upstreamRead(toLength int64) error {
 		for _, split := range s.splits {
 			split.setUpstreamError(err)
 		}
-		return err
 	}
-	return nil
 }
 
 func (s *readCloserSplitter) CloseSplit(id int) error {
@@ -88,8 +86,8 @@ func (s *splitReadCloser) Read(p []byte) (n int, err error) {
 
 	n = s.getUnreadBytes(p)
 	s.bytesRead += int64(n)
-	
-	if s.upstreamError != nil {
+
+	if n == 0 && len(s.unreadBytes) == 0 && s.upstreamError != nil {
 		return n, s.upstreamError
 	}
 	return n, nil
