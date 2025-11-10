@@ -277,8 +277,8 @@ func (c *Client) Head(ctx context.Context, requestURL string) (*http.Response, e
 }
 
 // Post calls Do with a POST and the appropriate content-type and body.
-func (c *Client) Post(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest("POST", url, body)
+func (c *Client) Post(ctx context.Context, requestURL string, contentType string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest("POST", requestURL, body)
 	if err != nil {
 		return nil, err
 	}
@@ -288,8 +288,8 @@ func (c *Client) Post(ctx context.Context, url string, contentType string, body 
 }
 
 // Put calls Do with a PUT and the appropriate content-type and body.
-func (c *Client) Put(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest("PUT", url, body)
+func (c *Client) Put(ctx context.Context, requestURL string, contentType string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest("PUT", requestURL, body)
 	if err != nil {
 		return nil, err
 	}
