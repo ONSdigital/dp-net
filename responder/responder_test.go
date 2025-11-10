@@ -56,7 +56,6 @@ func TestJSON(t *testing.T) {
 					So(w.Code, ShouldEqual, expectedCode)
 					So(w.Body.String(), ShouldResemble, expectedBody)
 				})
-
 			})
 		})
 
@@ -81,7 +80,6 @@ func TestJSON(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
-
 	r := responder.New()
 
 	Convey("Given a valid context and response writer", t, func() {
@@ -101,7 +99,6 @@ func TestError(t *testing.T) {
 					So(w.Code, ShouldEqual, expectedCode)
 					So(w.Body.String(), ShouldResemble, expectedBody)
 				})
-
 			})
 
 			Convey("when Error() is called with status code 0", func() {
@@ -114,7 +111,6 @@ func TestError(t *testing.T) {
 					So(w.Code, ShouldEqual, expectedCode)
 					So(w.Body.String(), ShouldResemble, expectedBody)
 				})
-
 			})
 		})
 
@@ -140,7 +136,6 @@ func TestError(t *testing.T) {
 }
 
 func TestErrors(t *testing.T) {
-
 	r := responder.New()
 
 	Convey("Given a valid context and response writer", t, func() {
@@ -164,7 +159,6 @@ func TestErrors(t *testing.T) {
 					So(w.Code, ShouldEqual, expectedCode)
 					So(w.Body.String(), ShouldResemble, expectedBody)
 				})
-
 			})
 		})
 

@@ -11,7 +11,6 @@ import (
 )
 
 func TestGetCollectionID(t *testing.T) {
-
 	expectedToken := "foo"
 
 	Convey("should return collectionID from request header", t, func() {

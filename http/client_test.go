@@ -225,7 +225,6 @@ func TestClientNoRetries(t *testing.T) {
 }
 
 func TestClientHandlesUnsuccessfulRequests(t *testing.T) {
-
 	Convey("Given a client with no retries", t, func() {
 		httpClient := ClientWithTimeout(nil, 5*time.Second)
 		httpClient.SetMaxRetries(0)

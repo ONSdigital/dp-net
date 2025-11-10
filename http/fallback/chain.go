@@ -76,7 +76,6 @@ func (t *responseWriter) StatusCode() int {
 }
 
 func (alternative *Alternative) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	// Split the request's body reader so that it can be read by both handlers
 	readClosers := ReadCloserSplit(r.Body, 2)
 	bodyReadCloser1 := readClosers[0]

@@ -11,7 +11,6 @@ import (
 
 // DrainBody drains the body of the given of the given HTTP request.
 func DrainBody(r *http.Request) {
-
 	if r.Body == nil {
 		return
 	}

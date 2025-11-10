@@ -39,7 +39,6 @@ type IdentityResponse struct {
 func IsUserPresent(ctx context.Context) bool {
 	userIdentity := ctx.Value(UserIdentityKey)
 	return userIdentity != nil && userIdentity != ""
-
 }
 
 // IsFlorenceIdentityPresent determines if a florence identity is present on the given context

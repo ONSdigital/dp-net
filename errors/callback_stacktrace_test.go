@@ -26,15 +26,15 @@ func TestStackTraceHappy(t *testing.T) {
 			So(len(st), ShouldEqual, 19)
 
 			So(st[0].File, ShouldContainSubstring, packagePath+"/"+fileName)
-			So(st[0].Line, ShouldEqual, 69)
+			So(st[0].Line, ShouldEqual, 68)
 			So(st[0].Function, ShouldEqual, "testCallStackFunc3")
 
 			So(st[1].File, ShouldContainSubstring, packagePath+"/"+fileName)
-			So(st[1].Line, ShouldEqual, 65)
+			So(st[1].Line, ShouldEqual, 64)
 			So(st[1].Function, ShouldEqual, "testCallStackFunc2")
 
 			So(st[2].File, ShouldContainSubstring, packagePath+"/"+fileName)
-			So(st[2].Line, ShouldEqual, 61)
+			So(st[2].Line, ShouldEqual, 60)
 			So(st[2].Function, ShouldEqual, "testCallStackFunc1")
 		})
 	})
@@ -46,13 +46,12 @@ func TestStackTraceHappy(t *testing.T) {
 			So(len(st), ShouldEqual, 18)
 
 			So(st[0].File, ShouldContainSubstring, packagePath+"/"+fileName)
-			So(st[0].Line, ShouldEqual, 69)
+			So(st[0].Line, ShouldEqual, 68)
 			So(st[0].Function, ShouldEqual, "testCallStackFunc3")
 
 			So(st[1].File, ShouldContainSubstring, packagePath+"/"+fileName)
-			So(st[1].Line, ShouldEqual, 74)
+			So(st[1].Line, ShouldEqual, 73)
 			So(st[1].Function, ShouldEqual, "testCallStackFunc4")
-
 		})
 	})
 }

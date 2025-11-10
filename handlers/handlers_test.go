@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+
 	dprequest "github.com/ONSdigital/dp-net/v3/request"
 
 	"net/http"
@@ -212,8 +213,8 @@ func TestControllerHandler(t *testing.T) {
 
 		h := ControllerHandler(controllerHandlerFunc)
 		h.ServeHTTP(w, request)
-
 	})
+
 	Convey("given a controllerHandlerFunc with a collection ID or florence ID and locale in the subdomain", t, func() {
 		target := fmt.Sprintf("http://%s.localhost:8080", testLocale)
 		request := httptest.NewRequest("GET", target, nil)
@@ -257,6 +258,5 @@ func TestControllerHandler(t *testing.T) {
 
 		h := ControllerHandler(controllerHandlerFunc)
 		h.ServeHTTP(w, request)
-
 	})
 }

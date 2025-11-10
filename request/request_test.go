@@ -10,13 +10,10 @@ import (
 )
 
 func TestAddRequestIdHeader(t *testing.T) {
-
 	Convey("Given a request", t, func() {
-
 		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
 
 		Convey("When AddRequestIdHeader is called", func() {
-
 			reqID := "123"
 			AddRequestIdHeader(r, reqID)
 

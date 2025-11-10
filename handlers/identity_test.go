@@ -32,9 +32,7 @@ const (
 )
 
 func TestHandler_NoHeaders(t *testing.T) {
-
 	Convey("Given a http request with no headers", t, func() {
-
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		responseRecorder := httptest.NewRecorder()
 
@@ -49,7 +47,6 @@ func TestHandler_NoHeaders(t *testing.T) {
 		identityHandler := IdentityWithHTTPClient(idClient)(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the downstream HTTP handler is called", func() {
@@ -69,9 +66,7 @@ func TestHandler_NoHeaders(t *testing.T) {
 }
 
 func TestHandler_IdentityServiceError(t *testing.T) {
-
 	Convey("Given a request with a florence token, and mock client that returns an error", t, func() {
-
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		req.Header = map[string][]string{
 			dprequest.FlorenceHeaderKey: {florenceToken},
@@ -92,7 +87,6 @@ func TestHandler_IdentityServiceError(t *testing.T) {
 		identityHandler := IdentityWithHTTPClient(idClient)(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the identity service is called as expected", func() {
@@ -117,9 +111,7 @@ func TestHandler_IdentityServiceError(t *testing.T) {
 }
 
 func TestHandler_IdentityServiceErrorResponseCode(t *testing.T) {
-
 	Convey("Given a request with a florence token, and mock client that returns a non-200 response", t, func() {
-
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		req.Header = map[string][]string{
 			dprequest.FlorenceHeaderKey: {florenceToken},
@@ -142,7 +134,6 @@ func TestHandler_IdentityServiceErrorResponseCode(t *testing.T) {
 		identityHandler := IdentityWithHTTPClient(idClient)(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the identity service is called as expected", func() {
@@ -167,9 +158,7 @@ func TestHandler_IdentityServiceErrorResponseCode(t *testing.T) {
 }
 
 func TestHandler_florenceToken(t *testing.T) {
-
 	Convey("Given a request with a florence token, and mock client that returns 200", t, func() {
-
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		req.Header = map[string][]string{
 			dprequest.FlorenceHeaderKey: {florenceToken},
@@ -178,7 +167,6 @@ func TestHandler_florenceToken(t *testing.T) {
 
 		httpClient := newMockHTTPClient()
 		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
-
 			response := &dprequest.IdentityResponse{Identifier: userIdentifier}
 
 			body, _ := json.Marshal(response)
@@ -189,6 +177,7 @@ func TestHandler_florenceToken(t *testing.T) {
 				Body:       readCloser,
 			}, nil
 		}
+
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
@@ -199,7 +188,6 @@ func TestHandler_florenceToken(t *testing.T) {
 		identityHandler := IdentityWithHTTPClient(idClient)(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the identity service is called as expected", func() {
@@ -222,9 +210,7 @@ func TestHandler_florenceToken(t *testing.T) {
 }
 
 func TestHandler_InvalidIdentityResponse(t *testing.T) {
-
 	Convey("Given a request with a florence token, and mock client that returns invalid response JSON", t, func() {
-
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		req.Header = map[string][]string{
 			dprequest.FlorenceHeaderKey: {florenceToken},
@@ -241,6 +227,7 @@ func TestHandler_InvalidIdentityResponse(t *testing.T) {
 				Body:       readCloser,
 			}, nil
 		}
+
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
@@ -251,7 +238,6 @@ func TestHandler_InvalidIdentityResponse(t *testing.T) {
 		identityHandler := IdentityWithHTTPClient(idClient)(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the identity service is called as expected", func() {
@@ -278,9 +264,7 @@ func TestHandler_InvalidIdentityResponse(t *testing.T) {
 }
 
 func TestHandler_authToken(t *testing.T) {
-
 	Convey("Given a request with an auth token, and mock client that returns 200", t, func() {
-
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		req.Header = map[string][]string{
 			dprequest.AuthHeaderKey: {upstreamAuthToken},
@@ -290,7 +274,6 @@ func TestHandler_authToken(t *testing.T) {
 
 		httpClient := newMockHTTPClient()
 		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
-
 			response := &dprequest.IdentityResponse{Identifier: serviceIdentifier}
 
 			body, _ := json.Marshal(response)
@@ -301,6 +284,7 @@ func TestHandler_authToken(t *testing.T) {
 				Body:       readCloser,
 			}, nil
 		}
+
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
@@ -311,7 +295,6 @@ func TestHandler_authToken(t *testing.T) {
 		identityHandler := IdentityWithHTTPClient(idClient)(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the identity service is not called", func() {
@@ -321,7 +304,6 @@ func TestHandler_authToken(t *testing.T) {
 				So(len(zebedeeReq.Header[dprequest.UserHeaderKey]), ShouldEqual, 0)
 				So(len(zebedeeReq.Header[dprequest.AuthHeaderKey]), ShouldEqual, 1)
 				So(zebedeeReq.Header[dprequest.AuthHeaderKey][0], ShouldEqual, "Bearer "+upstreamAuthToken)
-
 			})
 
 			Convey("Then the downstream HTTP handler is called", func() {
@@ -337,9 +319,7 @@ func TestHandler_authToken(t *testing.T) {
 }
 
 func TestHandler_bothTokens(t *testing.T) {
-
 	Convey("Given a request with both a florence token and service token", t, func() {
-
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		req.Header = map[string][]string{
 			dprequest.FlorenceHeaderKey:    {florenceToken},
@@ -349,7 +329,6 @@ func TestHandler_bothTokens(t *testing.T) {
 
 		httpClient := newMockHTTPClient()
 		httpClient.DoFunc = func(ctx context.Context, req *http.Request) (*http.Response, error) {
-
 			response := &dprequest.IdentityResponse{Identifier: userIdentifier}
 
 			body, _ := json.Marshal(response)
@@ -360,6 +339,7 @@ func TestHandler_bothTokens(t *testing.T) {
 				Body:       readCloser,
 			}, nil
 		}
+
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
 		handlerCalled := false
@@ -370,7 +350,6 @@ func TestHandler_bothTokens(t *testing.T) {
 		identityHandler := IdentityWithHTTPClient(idClient)(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the identity service is called as expected", func() {
@@ -393,9 +372,7 @@ func TestHandler_bothTokens(t *testing.T) {
 }
 
 func TestHandler_GetTokenError(t *testing.T) {
-
 	Convey("Given getting the user auth token from the request returns an error", t, func() {
-
 		httpClient := newMockHTTPClient()
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
@@ -441,7 +418,6 @@ func TestHandler_GetTokenError(t *testing.T) {
 	})
 
 	Convey("Given getting the service auth token from the request returns an error", t, func() {
-
 		httpClient := newMockHTTPClient()
 		idClient := clientsidentity.NewWithHealthClient(healthcheck.NewClientWithClienter("", zebedeeURL, httpClient))
 
@@ -488,7 +464,6 @@ func TestHandler_GetTokenError(t *testing.T) {
 			})
 		})
 	})
-
 }
 
 func TestGetFlorenceToken(t *testing.T) {

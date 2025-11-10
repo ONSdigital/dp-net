@@ -10,15 +10,12 @@ import (
 )
 
 func TestDrainBody_WithRequestBody(t *testing.T) {
-
 	Convey("Given a request with a body", t, func() {
-
 		body := bytes.NewBufferString("some body content")
 		r, err := http.NewRequest("GET", "/some/url", body)
 		So(err, ShouldBeNil)
 
 		Convey("When the DrainBody function is called", func() {
-
 			DrainBody(r)
 
 			Convey("Then all bytes have been read from the body", func() {
@@ -30,16 +27,13 @@ func TestDrainBody_WithRequestBody(t *testing.T) {
 }
 
 func TestDrainBody_WithEmptyRequestBody(t *testing.T) {
-
 	Convey("Given a request with an empty body", t, func() {
-
 		body := bytes.NewBuffer(make([]byte, 0))
 
 		r, err := http.NewRequest("GET", "/some/url", body)
 		So(err, ShouldBeNil)
 
 		Convey("When the DrainBody function is called", func() {
-
 			DrainBody(r)
 
 			Convey("Then the expected io.EOF is returned when reading the body", func() {
@@ -51,14 +45,11 @@ func TestDrainBody_WithEmptyRequestBody(t *testing.T) {
 }
 
 func TestDrainBody_WithoutRequestBody(t *testing.T) {
-
 	Convey("Given a request without a nil body", t, func() {
-
 		r, err := http.NewRequest("GET", "/some/url", nil)
 		So(err, ShouldBeNil)
 
 		Convey("When the DrainBody function is called, there is no panic", func() {
-
 			DrainBody(r)
 		})
 	})

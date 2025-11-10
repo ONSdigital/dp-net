@@ -43,7 +43,6 @@ func (e testError) Message() string {
 }
 
 func TestUnwrapLogDataHappy(t *testing.T) {
-
 	Convey("Given an error with embedded logData", t, func() {
 		err := &testError{
 			logData: log.Data{
@@ -169,7 +168,6 @@ func TestUnwrapLogDataHappy(t *testing.T) {
 }
 
 func TestUnwrapStatusCodeHappy(t *testing.T) {
-
 	Convey("Given an error with embedded status code", t, func() {
 		err := &testError{
 			statusCode: http.StatusTeapot,
@@ -224,7 +222,6 @@ func TestUnwrapStatusCodeHappy(t *testing.T) {
 			status := dperrors.UnwrapStatusCode(err3)
 			expected := http.StatusUnauthorized
 			Convey("The first valid status code is returned ", func() {
-
 				So(status, ShouldEqual, expected)
 			})
 		})
@@ -240,11 +237,9 @@ func TestUnwrapStatusCodeHappy(t *testing.T) {
 			So(status, ShouldEqual, expected)
 		})
 	})
-
 }
 
 func TestUnwrapErrorMessageHappy(t *testing.T) {
-
 	Convey("Given an error with embedded error message", t, func() {
 		err := &testError{
 			message: "I am an error message",

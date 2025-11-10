@@ -18,7 +18,6 @@ const (
 )
 
 func TestCheckIdentityNoHeaders(t *testing.T) {
-
 	Convey("Given a http request without auth", t, func() {
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		responseRecorder := httptest.NewRecorder()
@@ -31,7 +30,6 @@ func TestCheckIdentityNoHeaders(t *testing.T) {
 		identityHandler := CheckIdentity(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the downstream HTTP handler is not called", func() {
@@ -51,7 +49,6 @@ func TestCheckIdentityNoHeaders(t *testing.T) {
 }
 
 func TestCheckIdentity(t *testing.T) {
-
 	Convey("Given a request with caller identity in context", t, func() {
 		req := httptest.NewRequest("GET", url, bytes.NewBufferString("some body content"))
 		req = req.WithContext(context.WithValue(req.Context(), dprequest.CallerIdentityKey, testUserIdentifier))
@@ -66,7 +63,6 @@ func TestCheckIdentity(t *testing.T) {
 		identityHandler := CheckIdentity(httpHandler)
 
 		Convey("When ServeHTTP is called", func() {
-
 			identityHandler.ServeHTTP(responseRecorder, req)
 
 			Convey("Then the downstream HTTP handler is called", func() {

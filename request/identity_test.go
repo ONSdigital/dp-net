@@ -11,13 +11,10 @@ import (
 var dummyHandler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 
 func TestSetUser(t *testing.T) {
-
 	Convey("Given a context", t, func() {
-
 		ctx := context.Background()
 
 		Convey("When SetUser is called", func() {
-
 			user := "someone@ons.gov.uk"
 			ctx = SetUser(ctx, user)
 
@@ -30,13 +27,10 @@ func TestSetUser(t *testing.T) {
 }
 
 func TestUser(t *testing.T) {
-
 	Convey("Given a context with a user identity", t, func() {
-
 		ctx := context.WithValue(context.Background(), UserIdentityKey, "Frederico")
 
 		Convey("When User is called with the context", func() {
-
 			user := User(ctx)
 
 			Convey("Then the response had the user identity", func() {
@@ -47,13 +41,10 @@ func TestUser(t *testing.T) {
 }
 
 func TestUser_noUserIdentity(t *testing.T) {
-
 	Convey("Given a context with no user identity", t, func() {
-
 		ctx := context.Background()
 
 		Convey("When User is called with the context", func() {
-
 			user := User(ctx)
 
 			Convey("Then the response is empty", func() {
@@ -64,13 +55,10 @@ func TestUser_noUserIdentity(t *testing.T) {
 }
 
 func TestUser_emptyUserIdentity(t *testing.T) {
-
 	Convey("Given a context with an empty user identity", t, func() {
-
 		ctx := context.WithValue(context.Background(), UserIdentityKey, "")
 
 		Convey("When User is called with the context", func() {
-
 			user := User(ctx)
 
 			Convey("Then the response is empty", func() {
@@ -81,13 +69,10 @@ func TestUser_emptyUserIdentity(t *testing.T) {
 }
 
 func TestAddUserHeader(t *testing.T) {
-
 	Convey("Given a request", t, func() {
-
 		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
 
 		Convey("When AddUserHeader is called", func() {
-
 			user := "someone@ons.gov.uk"
 			AddUserHeader(r, user)
 
@@ -99,13 +84,10 @@ func TestAddUserHeader(t *testing.T) {
 }
 
 func TestAddServiceTokenHeader(t *testing.T) {
-
 	Convey("Given a request", t, func() {
-
 		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
 
 		Convey("When AddServiceTokenHeader is called", func() {
-
 			serviceToken := "123"
 			AddServiceTokenHeader(r, serviceToken)
 
@@ -117,11 +99,8 @@ func TestAddServiceTokenHeader(t *testing.T) {
 }
 
 func TestAddAuthHeaders(t *testing.T) {
-
 	Convey("Given a fresh request", t, func() {
-
 		Convey("When AddAuthHeaders is called with no auth", func() {
-
 			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
 			ctx := context.Background()
 			AddAuthHeaders(ctx, r, "")
@@ -131,8 +110,8 @@ func TestAddAuthHeaders(t *testing.T) {
 				So(r.Header.Get(UserHeaderKey), ShouldBeBlank)
 			})
 		})
-		Convey("When AddAuthHeaders is called with a service token", func() {
 
+		Convey("When AddAuthHeaders is called with a service token", func() {
 			serviceToken := "123"
 
 			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
@@ -146,7 +125,6 @@ func TestAddAuthHeaders(t *testing.T) {
 		})
 
 		Convey("When AddAuthHeaders is called with a service token and context has user ID", func() {
-
 			serviceToken := "123"
 			userID := "user@test"
 
@@ -161,7 +139,6 @@ func TestAddAuthHeaders(t *testing.T) {
 		})
 
 		Convey("When AddAuthHeaders is called with context that has user ID", func() {
-
 			userID := "user@test"
 
 			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)

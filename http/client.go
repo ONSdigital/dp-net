@@ -192,7 +192,6 @@ func (c *Client) SetPathsWithNoRetries(paths []string) {
 
 // Do calls ctxhttp.Do with the addition of retries with exponential backoff
 func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, error) {
-
 	// TODO: Remove this once user token (Florence token) is propegated throughout apps
 	// Used for audit purposes
 	if request.IsUserPresent(ctx) {
@@ -312,7 +311,6 @@ func (c *Client) backoff(
 	client *http.Client,
 	req *http.Request,
 ) (resp *http.Response, err error) {
-
 	for retries := 1; retries <= c.GetMaxRetries(); retries++ {
 		pingChan := make(chan struct{}, 0)
 		go func() {

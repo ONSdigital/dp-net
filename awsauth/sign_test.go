@@ -99,7 +99,6 @@ func TestSignFunc(t *testing.T) {
 			So(signer.v4, ShouldNotBeNil)
 
 			Convey("Then the request successfully signs and does not return an error", func() {
-
 				req := httptest.NewRequest("GET", "http://test-url", nil)
 
 				err = signer.Sign(req, nil, time.Now())
@@ -116,7 +115,6 @@ func TestSignFunc(t *testing.T) {
 			So(signer.v4, ShouldNotBeNil)
 
 			Convey("Then the request successfully signs and does not return an error", func() {
-
 				req := httptest.NewRequest("GET", "http://test-url", nil)
 
 				err = signer.Sign(req, nil, time.Now())

@@ -8,7 +8,6 @@ import (
 )
 
 func TestGetLangFromSubDomain(t *testing.T) {
-
 	Convey("Given a request when GetLangFromSubDomain is called and subdomain cy. is used", t, func() {
 		req, _ := http.NewRequest("GET", "http://cy.localhost:21800/jobs", nil)
 		languageToUse := GetLangFromSubDomain(req)
@@ -17,6 +16,7 @@ func TestGetLangFromSubDomain(t *testing.T) {
 			So(languageToUse, ShouldEqual, LangCY)
 		})
 	})
+
 	Convey("Given a request when GetLangFromSubDomain is called and no subdomain is used", t, func() {
 		req, _ := http.NewRequest("GET", "http://localhost:21800/jobs", nil)
 		languageToUse := GetLangFromSubDomain(req)
@@ -28,7 +28,6 @@ func TestGetLangFromSubDomain(t *testing.T) {
 }
 
 func TestGetLangFromCookieOrDefault(t *testing.T) {
-
 	Convey("Given a cookie with lang set to 'cy' when GetLangFromCookieOrDefault is called", t, func() {
 		cookie := http.Cookie{Name: "lang", Value: LangCY}
 		languageToUse := GetLangFromCookieOrDefault(&cookie)
@@ -37,6 +36,7 @@ func TestGetLangFromCookieOrDefault(t *testing.T) {
 			So(languageToUse, ShouldEqual, LangCY)
 		})
 	})
+
 	Convey("Given a cookie with lang set to 'cy' when GetLangFromCookieOrDefault is called", t, func() {
 		cookie := http.Cookie{Name: "lang", Value: LangEN}
 		languageToUse := GetLangFromCookieOrDefault(&cookie)
@@ -48,7 +48,6 @@ func TestGetLangFromCookieOrDefault(t *testing.T) {
 }
 
 func TestSetLocaleCode(t *testing.T) {
-
 	Convey("Given a request on cy domain", t, func() {
 		req, _ := http.NewRequest("GET", "http://cy.localhost:21800/jobs", nil)
 		Convey(" And given a cookie containing 'en' lang", func() {
@@ -58,8 +57,8 @@ func TestSetLocaleCode(t *testing.T) {
 			Convey("Then lang returns a string 'en'", func() {
 				So(req.Header.Get("LocaleCode"), ShouldEqual, LangEN)
 			})
-
 		})
+
 		Convey("and given a cookie containing 'cy' lang", func() {
 			cookie := http.Cookie{Name: "lang", Value: LangCY}
 			req.AddCookie(&cookie)
@@ -79,8 +78,8 @@ func TestSetLocaleCode(t *testing.T) {
 			Convey("Then lang returns a string 'en'", func() {
 				So(req.Header.Get("LocaleCode"), ShouldEqual, LangEN)
 			})
-
 		})
+
 		Convey("and given a cookie containing 'cy' lang", func() {
 			cookie := http.Cookie{Name: "lang", Value: LangCY}
 			req.AddCookie(&cookie)
@@ -122,11 +121,9 @@ func TestSetLocaleCode(t *testing.T) {
 			})
 		})
 	})
-
 }
 
 func TestGetLocaleCode(t *testing.T) {
-
 	Convey("given a request on cy domain", t, func() {
 		req, _ := http.NewRequest("GET", "http://cy.localhost:21800/jobs", nil)
 		Convey(" and given a cookie containing 'en' lang", func() {
@@ -136,7 +133,6 @@ func TestGetLocaleCode(t *testing.T) {
 			Convey("then lang returns a string 'en'", func() {
 				So(localeCode, ShouldEqual, LangEN)
 			})
-
 		})
 		Convey("and given a cookie containing 'cy' lang", func() {
 			cookie := http.Cookie{Name: "lang", Value: LangCY}
@@ -157,7 +153,6 @@ func TestGetLocaleCode(t *testing.T) {
 			Convey("then lang returns a string 'en'", func() {
 				So(localeCode, ShouldEqual, LangEN)
 			})
-
 		})
 		Convey("and given a cookie containing 'cy' lang", func() {
 			cookie := http.Cookie{Name: "lang", Value: LangCY}

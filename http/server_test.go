@@ -28,21 +28,17 @@ type listenAndServeCalls struct {
 }
 
 func TestNew(t *testing.T) {
-
 	Convey("Given mocked network calls", t, func() {
-
 		doListenAndServe = func(httpServer *Server) error {
 			return errors.New("unexpected ListenAndServe call")
 		}
 
 		doListenAndServeTLS = func(httpServer *Server, certFile, keyFile string) error {
 			return errors.New("unexpected ListenAndServeTLS call")
-
 		}
 
 		doShutdown = func(ctx context.Context, httpServer *http.Server) error {
 			return errors.New("unexpected Shutdown call")
-
 		}
 
 		Convey("New should return a new server with sensible defaults", func() {

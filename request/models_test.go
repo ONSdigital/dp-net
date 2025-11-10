@@ -12,12 +12,11 @@ import (
 )
 
 func TestCopy(t *testing.T) {
-
 	Convey("Given 'Params' are copied", t, func() {
 		p := Params{"name": "john", "surname": "smith"}
 
 		copiedParams := p.Copy()
-		
+
 		So(&copiedParams, ShouldNotPointTo, &p)
 		So(copiedParams, ShouldResemble, p)
 

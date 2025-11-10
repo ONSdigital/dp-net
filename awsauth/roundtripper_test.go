@@ -46,7 +46,6 @@ func TestNewClientWithTransport(t *testing.T) {
 		accessKeyID, secretAccessKey := setEnvironmentVars()
 
 		Convey("When a new client is created with aws signer round tripper", func() {
-
 			awsSignerRT, err := NewAWSSignerRoundTripper(ctx, "", "", "eu-west-1", "es")
 			if err != nil {
 				t.Errorf("unable to implement roundtripper for test, error: %v", err)

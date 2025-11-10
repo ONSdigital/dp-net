@@ -92,7 +92,6 @@ func TestReadCloserSplit_Close(t *testing.T) {
 			})
 		})
 	})
-
 }
 
 func TestReadCloserSplit(t *testing.T) {
@@ -123,7 +122,6 @@ func TestReadCloserSplit(t *testing.T) {
 					})
 				})
 			})
-
 		})
 	})
 
@@ -159,10 +157,8 @@ func TestReadCloserSplit(t *testing.T) {
 									})
 								})
 							})
-
 						})
 					})
-
 				})
 			})
 		})
@@ -238,15 +234,12 @@ func TestReadCloserSplit(t *testing.T) {
 						})
 					})
 				})
-
 			})
-
 		})
 	})
 }
 
 func TestReadCloserSplit_Errors(t *testing.T) {
-
 	Convey("Given there is an upstream ReadCloser which errors after 5 bytes are read", t, func() {
 		upstreamRC := mockReadCloser([]byte("some."))
 		Convey("And it is split into three readers", func() {
@@ -309,7 +302,6 @@ func TestReadCloserSplit_Errors(t *testing.T) {
 					})
 				})
 			})
-
 		})
 	})
 }
