@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -118,7 +117,7 @@ func convertErrorToOutput(w io.Writer, contentType string, err error) {
 }
 
 func GetBody(body io.ReadCloser) []byte {
-	b, err := ioutil.ReadAll(body)
+	b, err := io.ReadAll(body)
 	if err != nil {
 		panic(err)
 	}
