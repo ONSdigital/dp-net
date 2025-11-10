@@ -129,7 +129,7 @@ func ClientWithTotalTimeout(c Clienter, timeout time.Duration) Clienter {
 }
 
 // ClientWithTimeouts creates a client with both (per-request + total) timeout values
-func ClientWithTimeouts(c Clienter, perRequest time.Duration, total time.Duration) Clienter {
+func ClientWithTimeouts(c Clienter, perRequest, total time.Duration) Clienter {
 	if c == nil {
 		c = NewClient()
 	}
@@ -277,7 +277,7 @@ func (c *Client) Head(ctx context.Context, requestURL string) (*http.Response, e
 }
 
 // Post calls Do with a POST and the appropriate content-type and body.
-func (c *Client) Post(ctx context.Context, requestURL string, contentType string, body io.Reader) (*http.Response, error) {
+func (c *Client) Post(ctx context.Context, requestURL, contentType string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest("POST", requestURL, body)
 	if err != nil {
 		return nil, err
@@ -288,7 +288,7 @@ func (c *Client) Post(ctx context.Context, requestURL string, contentType string
 }
 
 // Put calls Do with a PUT and the appropriate content-type and body.
-func (c *Client) Put(ctx context.Context, requestURL string, contentType string, body io.Reader) (*http.Response, error) {
+func (c *Client) Put(ctx context.Context, requestURL, contentType string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest("PUT", requestURL, body)
 	if err != nil {
 		return nil, err
