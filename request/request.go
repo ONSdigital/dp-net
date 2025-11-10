@@ -26,7 +26,7 @@ func WithRequestId(ctx context.Context, correlationID string) context.Context {
 
 // AddRequestIdHeader add header for given correlation ID
 func AddRequestIdHeader(r *http.Request, token string) {
-	if len(token) > 0 {
+	if token != "" {
 		r.Header.Add(RequestHeaderKey, token)
 	}
 }
@@ -52,7 +52,7 @@ func HandlerRequestID(size int) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			requestID := req.Header.Get(RequestHeaderKey)
 
-			if len(requestID) == 0 {
+			if requestID == "" {
 				requestID = NewRequestID(size)
 				AddRequestIdHeader(req, requestID)
 			}

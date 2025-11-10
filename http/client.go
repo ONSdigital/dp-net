@@ -196,7 +196,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, err
 	// Used for audit purposes
 	if request.IsUserPresent(ctx) {
 		// only add this header if not already set
-		if len(req.Header.Get(request.UserHeaderKey)) == 0 {
+		if req.Header.Get(request.UserHeaderKey) == "" {
 			request.AddUserHeader(req, request.User(ctx))
 		}
 	}

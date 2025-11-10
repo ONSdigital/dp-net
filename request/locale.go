@@ -30,7 +30,7 @@ func GetLocaleCode(r *http.Request) string {
 	locale := GetLangFromSubDomain(r)
 
 	// Language is overridden by cookie 'lang' here if present.
-	if c, err := r.Cookie(LocaleCookieKey); err == nil && len(c.Value) > 0 {
+	if c, err := r.Cookie(LocaleCookieKey); err == nil && c.Value != "" {
 		locale = GetLangFromCookieOrDefault(c)
 	}
 	return locale

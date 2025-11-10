@@ -54,14 +54,14 @@ func AddUserHeader(r *http.Request, user string) {
 
 // AddServiceTokenHeader sets the given service token on the given request
 func AddServiceTokenHeader(r *http.Request, serviceToken string) {
-	if len(serviceToken) > 0 {
+	if serviceToken != "" {
 		r.Header.Add(AuthHeaderKey, BearerPrefix+serviceToken)
 	}
 }
 
 // AddDownloadServiceTokenHeader sets the given download service token on the given request
 func AddDownloadServiceTokenHeader(r *http.Request, serviceToken string) {
-	if len(serviceToken) > 0 {
+	if serviceToken != "" {
 		r.Header.Add(DownloadServiceHeaderKey, serviceToken)
 	}
 }
@@ -91,7 +91,7 @@ func SetFlorenceHeader(ctx context.Context, r *http.Request) {
 
 // AddFlorenceHeader sets the given user access token (florence token) token on the given request
 func AddFlorenceHeader(r *http.Request, userAccessToken string) {
-	if len(userAccessToken) > 0 {
+	if userAccessToken != "" {
 		r.Header.Add(FlorenceHeaderKey, userAccessToken)
 	}
 }
@@ -106,7 +106,7 @@ func AddAuthHeaders(ctx context.Context, r *http.Request, serviceToken string) {
 
 // AddDeprecatedHeader sets the deprecated header on the given request
 func AddDeprecatedHeader(r *http.Request, token string) {
-	if len(token) > 0 {
+	if token != "" {
 		r.Header.Add(DeprecatedAuthHeader, token)
 	}
 }

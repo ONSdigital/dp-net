@@ -99,7 +99,7 @@ func (s *Server) ListenAndServe() error {
 
 // ListenAndServeTLS sets KeyFile and CertFile, then calls ListenAndServe
 func (s *Server) ListenAndServeTLS(certFile, keyFile string) error {
-	if len(certFile) == 0 || len(keyFile) == 0 {
+	if certFile == "" || keyFile == "" {
 		panic("either CertFile/KeyFile must be blank, or both provided")
 	}
 	s.KeyFile = keyFile
@@ -119,7 +119,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 func (s *Server) listenAndServe() error {
 	s.prep()
-	if len(s.CertFile) > 0 || len(s.KeyFile) > 0 {
+	if s.CertFile != "" || s.KeyFile != "" {
 		return doListenAndServeTLS(s, s.CertFile, s.KeyFile)
 	}
 
@@ -139,7 +139,7 @@ func (s *Server) listenAndServeHandleOSSignals() error {
 
 func (s *Server) listenAndServeAsync() {
 	s.prep()
-	if len(s.CertFile) > 0 || len(s.KeyFile) > 0 {
+	if s.CertFile != "" || s.KeyFile != "" {
 		go func() {
 			if err := doListenAndServeTLS(s, s.CertFile, s.KeyFile); err != nil {
 				log.Error(context.Background(), "http server returned error", err)
