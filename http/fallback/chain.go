@@ -4,44 +4,43 @@ import (
 	"net/http"
 )
 
-type try struct {
+// AlternativeBuilder is a struct that helps to build a fallback handler by the use of a narrative structure
+// for example using the following:
+//
+//	fallback.Try(handler1).WhenStatus(http.StatusNotFound).Then(handler2)
+type AlternativeBuilder struct {
 	tryHandler http.Handler
+	whenStatus *int
 }
 
-// TODO Not sure about this interface for creating new handlers as it might not be idiomatic in Go.
-// Might replace with something like `NewAlternativeHandler(h1,h2,condition)` instead.
-
-// Try wraps a `http.Handler`
-func Try(h http.Handler) *try {
-	return &try{tryHandler: h}
+// Try takes a `http.Handler` and returns an incomplete AlternativeBuilder
+func Try(h http.Handler) *AlternativeBuilder {
+	return &AlternativeBuilder{tryHandler: h}
 }
 
-type when struct {
-	tryHandler http.Handler
-	whenStatus int
+// WhenStatus extends an AlternativeBuilder and includes a condition on the http status
+func (ab *AlternativeBuilder) WhenStatus(status int) *AlternativeBuilder {
+	ab.whenStatus = &status
+	return ab
 }
 
-func (t *try) WhenStatus(status int) *when {
-	return &when{
-		tryHandler: t.tryHandler,
-		whenStatus: status,
-	}
-}
-
-type Alternative struct {
-	TryHandler   http.Handler
-	WhenStatusIs int
-	ThenHandler  http.Handler
-}
-
-func (w *when) Then(handler http.Handler) *Alternative {
+// Then takes an AlternativeBuilder and returns a complete Alternative with the fallback handler provided
+func (ab *AlternativeBuilder) Then(handler http.Handler) *Alternative {
 	return &Alternative{
-		TryHandler:   w.tryHandler,
-		WhenStatusIs: w.whenStatus,
+		TryHandler:   ab.tryHandler,
+		WhenStatusIs: ab.whenStatus,
 		ThenHandler:  handler,
 	}
 }
 
+// Alternative implements a [http.Handler] which wraps another http.Handler and tries serving it first. Depending on the
+// status returned by the first handler it will either return the response to the caller immediately or it will pass a
+// copy of the request to the second handler instead, retuning that handlers response in that case.
+type Alternative struct {
+	TryHandler   http.Handler
+	WhenStatusIs *int
+	ThenHandler  http.Handler
+}
 type responseWriter struct {
 	header     http.Header
 	statusCode int
@@ -90,7 +89,7 @@ func (alternative *Alternative) ServeHTTP(w http.ResponseWriter, r *http.Request
 	r1.Body = bodyReadCloser1
 	alternative.TryHandler.ServeHTTP(&w1, r1)
 
-	if w1.statusCode != alternative.WhenStatusIs {
+	if alternative.WhenStatusIs == nil || w1.statusCode != *alternative.WhenStatusIs {
 		for k, vs := range w1.header {
 			w.Header()[k] = vs
 		}
@@ -104,9 +103,9 @@ func (alternative *Alternative) ServeHTTP(w http.ResponseWriter, r *http.Request
 	alternative.ThenHandler.ServeHTTP(w, r2)
 }
 
-func (alternative *Alternative) WhenStatus(status int) *when {
-	return &when{
+func (alternative *Alternative) WhenStatus(status int) *AlternativeBuilder {
+	return &AlternativeBuilder{
 		tryHandler: alternative,
-		whenStatus: status,
+		whenStatus: &status,
 	}
 }
