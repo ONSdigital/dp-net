@@ -14,4 +14,4 @@ build:
 
 .PHONY: lint
 lint:
-	exit
+	golangci-lint run ./...
