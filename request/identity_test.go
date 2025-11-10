@@ -10,16 +10,19 @@ import (
 
 var dummyHandler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
 
+const (
+	testUser = "someone@ons.gov.uk"
+)
+
 func TestSetUser(t *testing.T) {
 	Convey("Given a context", t, func() {
 		ctx := context.Background()
 
 		Convey("When SetUser is called", func() {
-			user := "someone@ons.gov.uk"
-			ctx = SetUser(ctx, user)
+			ctx = SetUser(ctx, testUser)
 
 			Convey("Then the context had the caller identity", func() {
-				So(ctx.Value(UserIdentityKey), ShouldEqual, user)
+				So(ctx.Value(UserIdentityKey), ShouldEqual, testUser)
 				So(IsUserPresent(ctx), ShouldBeTrue)
 			})
 		})
@@ -73,11 +76,10 @@ func TestAddUserHeader(t *testing.T) {
 		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 
 		Convey("When AddUserHeader is called", func() {
-			user := "someone@ons.gov.uk"
-			AddUserHeader(r, user)
+			AddUserHeader(r, testUser)
 
 			Convey("Then the request has the user header set", func() {
-				So(r.Header.Get(UserHeaderKey), ShouldEqual, user)
+				So(r.Header.Get(UserHeaderKey), ShouldEqual, testUser)
 			})
 		})
 	})
