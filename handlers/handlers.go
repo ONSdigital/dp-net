@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/ONSdigital/dp-net/v3/request"
 	"github.com/ONSdigital/log.go/v2/log"
-	"net/http"
 )
 
 // ControllerHandlerFunc is a function type that accepts arguments required for logical flow in handlers Implementation of function should set headers as needed
