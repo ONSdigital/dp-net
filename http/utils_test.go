@@ -46,7 +46,7 @@ func TestDrainBody_WithEmptyRequestBody(t *testing.T) {
 
 func TestDrainBody_WithoutRequestBody(t *testing.T) {
 	Convey("Given a request without a nil body", t, func() {
-		r, err := http.NewRequest("GET", "/some/url", nil)
+		r, err := http.NewRequest("GET", "/some/url", http.NoBody)
 		So(err, ShouldBeNil)
 
 		Convey("When the DrainBody function is called, there is no panic", func() {

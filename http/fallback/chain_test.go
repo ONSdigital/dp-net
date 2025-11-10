@@ -24,7 +24,7 @@ func TestAlternativeBuilderAndAlternativeServeHTTP(t *testing.T) {
 
 		Convey("When the primary handler returns the trigger status", func() {
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("GET", "/", nil)
+			req := httptest.NewRequest("GET", "/", http.NoBody)
 			alt.ServeHTTP(w, req)
 
 			Convey("Then the fallback handler is called", func() {
@@ -38,7 +38,7 @@ func TestAlternativeBuilderAndAlternativeServeHTTP(t *testing.T) {
 			primaryOK := generateHandlerWithStatus(http.StatusOK, primaryDesignation)
 			altOK := Try(primaryOK).WhenStatus(http.StatusNotFound).Then(fallbackHandler)
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("GET", "/", nil)
+			req := httptest.NewRequest("GET", "/", http.NoBody)
 			altOK.ServeHTTP(w, req)
 
 			Convey("Then the primary handler's response is returned", func() {
@@ -62,7 +62,7 @@ func TestAlternativeBuilderChaining(t *testing.T) {
 
 		Convey("When the primary and secondary handlers return their respective fallback statuses", func() {
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("GET", "/", nil)
+			req := httptest.NewRequest("GET", "/", http.NoBody)
 			chain.ServeHTTP(w, req)
 
 			Convey("Then the final handler's response is returned", func() {

@@ -14,7 +14,7 @@ func TestGetCollectionID(t *testing.T) {
 	expectedToken := "foo"
 
 	Convey("should return collectionID from request header", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		req.Header.Set(CollectionIDHeaderKey, expectedToken)
 
 		actual, err := GetCollectionID(req)
@@ -24,7 +24,7 @@ func TestGetCollectionID(t *testing.T) {
 	})
 
 	Convey("should return collection id from request cookie", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: expectedToken})
 
 		actual, err := GetCollectionID(req)
@@ -34,7 +34,7 @@ func TestGetCollectionID(t *testing.T) {
 	})
 
 	Convey("should return empty token if no header or cookie is set", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 
 		actual, err := GetCollectionID(req)
 
@@ -54,7 +54,7 @@ func TestGetCollectionIDFromCookie(t *testing.T) {
 	expectedToken := "foo"
 
 	Convey("should return collection id from request cookie", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: expectedToken})
 
 		actual, err := getCollectionIDFromCookie(req)
@@ -64,7 +64,7 @@ func TestGetCollectionIDFromCookie(t *testing.T) {
 	})
 
 	Convey("should return empty id if collection id cookie not found", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 
 		actual, err := getCollectionIDFromCookie(req)
 

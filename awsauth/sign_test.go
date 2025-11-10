@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -53,7 +54,7 @@ func TestCreateNewSigner(t *testing.T) {
 				So(signer, ShouldNotBeNil)
 
 				Convey("And no error is returned when attempting to Sign the request", func() {
-					req := httptest.NewRequest("GET", "http://test-url", nil)
+					req := httptest.NewRequest("GET", "http://test-url", http.NoBody)
 
 					err := signer.Sign(req, nil, time.Now())
 					So(err, ShouldBeNil)
@@ -70,7 +71,7 @@ func TestSignFunc(t *testing.T) {
 		Convey("When the signer is nil", func() {
 			Convey("Then an error is returned when attempting to Sign the request", func() {
 				var signer *Signer
-				req := httptest.NewRequest("GET", "http://test-url", nil)
+				req := httptest.NewRequest("GET", "http://test-url", http.NoBody)
 
 				err := signer.Sign(req, nil, time.Now())
 				So(err, ShouldResemble, errors.New("v4 signer missing. Cannot sign request"))
@@ -82,7 +83,7 @@ func TestSignFunc(t *testing.T) {
 				signer := &Signer{
 					v4: nil,
 				}
-				req := httptest.NewRequest("GET", "http://test-url", nil)
+				req := httptest.NewRequest("GET", "http://test-url", http.NoBody)
 
 				err := signer.Sign(req, nil, time.Now())
 				So(err, ShouldResemble, errors.New("v4 signer missing. Cannot sign request"))
@@ -99,7 +100,7 @@ func TestSignFunc(t *testing.T) {
 			So(signer.v4, ShouldNotBeNil)
 
 			Convey("Then the request successfully signs and does not return an error", func() {
-				req := httptest.NewRequest("GET", "http://test-url", nil)
+				req := httptest.NewRequest("GET", "http://test-url", http.NoBody)
 
 				err = signer.Sign(req, nil, time.Now())
 				So(err, ShouldBeNil)
@@ -115,7 +116,7 @@ func TestSignFunc(t *testing.T) {
 			So(signer.v4, ShouldNotBeNil)
 
 			Convey("Then the request successfully signs and does not return an error", func() {
-				req := httptest.NewRequest("GET", "http://test-url", nil)
+				req := httptest.NewRequest("GET", "http://test-url", http.NoBody)
 
 				err = signer.Sign(req, nil, time.Now())
 				So(err, ShouldBeNil)

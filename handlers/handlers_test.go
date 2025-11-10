@@ -29,7 +29,7 @@ func (m *mockHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func TestCheckHeaderUserAccess(t *testing.T) {
 	Convey("given the request with a florence access token header ", t, func() {
-		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		r := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		r.Header.Set(UserAccess.Header(), testToken)
 		w := httptest.NewRecorder()
 
@@ -55,7 +55,7 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 	})
 
 	Convey("given the request does not contain a florence access token header ", t, func() {
-		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		r := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		w := httptest.NewRecorder()
 
 		mockHandler := &mockHandler{
@@ -81,7 +81,7 @@ func TestCheckHeaderUserAccess(t *testing.T) {
 
 func TestCheckHeaderLocale(t *testing.T) {
 	Convey("given the request with a locale header ", t, func() {
-		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		r := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		r.Header.Set(Locale.Header(), testLocale)
 		w := httptest.NewRecorder()
 
@@ -109,7 +109,7 @@ func TestCheckHeaderLocale(t *testing.T) {
 
 func TestCheckCookieUserAccess(t *testing.T) {
 	Convey("given the request contain a cookie for a florence access token header ", t, func() {
-		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		r := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		r.AddCookie(&http.Cookie{Name: UserAccess.Cookie(), Value: testToken})
 
 		w := httptest.NewRecorder()
@@ -136,7 +136,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 	})
 
 	Convey("given the request does not contain a cookie for a florence access token header ", t, func() {
-		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		r := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		w := httptest.NewRecorder()
 
 		mockHandler := &mockHandler{
@@ -162,7 +162,7 @@ func TestCheckCookieUserAccess(t *testing.T) {
 
 func TestCheckCookieLocale(t *testing.T) {
 	Convey("given the request contain a cookie for locale code ", t, func() {
-		r := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		r := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		r.AddCookie(&http.Cookie{Name: Locale.Cookie(), Value: testLocale})
 
 		w := httptest.NewRecorder()
@@ -191,7 +191,7 @@ func TestCheckCookieLocale(t *testing.T) {
 
 func TestControllerHandler(t *testing.T) {
 	Convey("given a controllerHandlerFunc with a collectionID, florence ID and a locale in cookies", t, func() {
-		request := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		request := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		request.AddCookie(&http.Cookie{Name: Locale.Cookie(), Value: testLocale})
 		request.AddCookie(&http.Cookie{Name: dprequest.FlorenceCookieKey, Value: testToken})
 		request.AddCookie(&http.Cookie{Name: dprequest.CollectionIDCookieKey, Value: testCollectionID})
@@ -217,7 +217,7 @@ func TestControllerHandler(t *testing.T) {
 
 	Convey("given a controllerHandlerFunc with a collection ID or florence ID and locale in the subdomain", t, func() {
 		target := fmt.Sprintf("http://%s.localhost:8080", testLocale)
-		request := httptest.NewRequest("GET", target, nil)
+		request := httptest.NewRequest("GET", target, http.NoBody)
 		request.Header.Set(UserAccess.Header(), testToken)
 		request.Header.Set(CollectionID.Header(), testCollectionID)
 		w := httptest.NewRecorder()
@@ -239,7 +239,7 @@ func TestControllerHandler(t *testing.T) {
 	})
 
 	Convey("given a controllerHandlerFunc with no context, no cookies and no subdomain", t, func() {
-		request := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		request := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		w := httptest.NewRecorder()
 
 		var controllerHandlerFunc ControllerHandlerFunc = func(w http.ResponseWriter, r *http.Request, lang, collectionID, accessToken string) {

@@ -11,7 +11,7 @@ import (
 
 func TestAddRequestIdHeader(t *testing.T) {
 	Convey("Given a request", t, func() {
-		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
+		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 
 		Convey("When AddRequestIdHeader is called", func() {
 			reqID := "123"
@@ -69,7 +69,7 @@ func TestHandler(t *testing.T) {
 	})
 
 	Convey("requestID should create a request ID if it doesn't exist", t, func() {
-		req, err := http.NewRequest("GET", "/", nil)
+		req, err := http.NewRequest("GET", "/", http.NoBody)
 		if err != nil {
 			t.Fail()
 		}
@@ -89,7 +89,7 @@ func TestHandler(t *testing.T) {
 	})
 
 	Convey("Existing request ID should be used if present", t, func() {
-		req, err := http.NewRequest("GET", "/", nil)
+		req, err := http.NewRequest("GET", "/", http.NoBody)
 		if err != nil {
 			t.Fail()
 		}
@@ -111,7 +111,7 @@ func TestHandler(t *testing.T) {
 	})
 
 	Convey("Length of requestID should be configurable", t, func() {
-		req, err := http.NewRequest("GET", "/", nil)
+		req, err := http.NewRequest("GET", "/", http.NoBody)
 		if err != nil {
 			t.Fail()
 		}
@@ -129,7 +129,7 @@ func TestHandler(t *testing.T) {
 	})
 
 	Convey("generated requestIDs should be added to the request context", t, func() {
-		req, err := http.NewRequest("GET", "/", nil)
+		req, err := http.NewRequest("GET", "/", http.NoBody)
 		if err != nil {
 			t.Fail()
 		}
@@ -154,7 +154,7 @@ func TestHandler(t *testing.T) {
 	})
 
 	Convey("existing requestIDs should be added to the request context", t, func() {
-		req, err := http.NewRequest("GET", "/", nil)
+		req, err := http.NewRequest("GET", "/", http.NoBody)
 		if err != nil {
 			t.Fail()
 		}

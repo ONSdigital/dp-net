@@ -257,8 +257,8 @@ func wantRetry(err error, resp *http.Response) bool {
 }
 
 // Get calls Do with a GET.
-func (c *Client) Get(ctx context.Context, url string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func (c *Client) Get(ctx context.Context, requestURL string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", requestURL, http.NoBody)
 	if err != nil {
 		return nil, err
 	}
@@ -267,8 +267,8 @@ func (c *Client) Get(ctx context.Context, url string) (*http.Response, error) {
 }
 
 // Head calls Do with a HEAD.
-func (c *Client) Head(ctx context.Context, url string) (*http.Response, error) {
-	req, err := http.NewRequest("HEAD", url, nil)
+func (c *Client) Head(ctx context.Context, requestURL string) (*http.Response, error) {
+	req, err := http.NewRequest("HEAD", requestURL, http.NoBody)
 	if err != nil {
 		return nil, err
 	}

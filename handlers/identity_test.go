@@ -470,7 +470,7 @@ func TestGetFlorenceToken(t *testing.T) {
 	ctx := context.Background()
 
 	Convey("should return florence token from request header", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		req.Header.Set(dprequest.FlorenceHeaderKey, expectedToken)
 
 		actual, err := GetFlorenceToken(ctx, req)
@@ -480,7 +480,7 @@ func TestGetFlorenceToken(t *testing.T) {
 	})
 
 	Convey("should return access token from request cookie", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		req.AddCookie(&http.Cookie{Name: dprequest.FlorenceCookieKey, Value: expectedToken})
 
 		actual, err := GetFlorenceToken(ctx, req)
@@ -490,7 +490,7 @@ func TestGetFlorenceToken(t *testing.T) {
 	})
 
 	Convey("should return empty token if no header or cookie is set", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 
 		actual, err := GetFlorenceToken(ctx, req)
 
@@ -512,7 +512,7 @@ func TestGetFlorenceTokenFromCookie(t *testing.T) {
 	ctx := context.Background()
 
 	Convey("should return florence token from request cookie", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		req.AddCookie(&http.Cookie{Name: dprequest.FlorenceCookieKey, Value: expectedToken})
 
 		actual, err := getFlorenceTokenFromCookie(ctx, req)
@@ -522,7 +522,7 @@ func TestGetFlorenceTokenFromCookie(t *testing.T) {
 	})
 
 	Convey("should return empty token if token cookie not found", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 
 		actual, err := getFlorenceTokenFromCookie(ctx, req)
 
@@ -542,7 +542,7 @@ func TestGetServiceAuthToken(t *testing.T) {
 	})
 
 	Convey("should return empty token if error equals headers.ErrHeaderNotFound", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 
 		token, err := getServiceAuthToken(ctx, req)
 
@@ -551,7 +551,7 @@ func TestGetServiceAuthToken(t *testing.T) {
 	})
 
 	Convey("should return token if header found", t, func() {
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
 		headers.SetServiceAuthToken(req, "666")
 
 		token, err := getServiceAuthToken(ctx, req)

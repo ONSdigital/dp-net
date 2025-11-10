@@ -70,7 +70,7 @@ func TestUser_emptyUserIdentity(t *testing.T) {
 
 func TestAddUserHeader(t *testing.T) {
 	Convey("Given a request", t, func() {
-		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
+		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 
 		Convey("When AddUserHeader is called", func() {
 			user := "someone@ons.gov.uk"
@@ -85,7 +85,7 @@ func TestAddUserHeader(t *testing.T) {
 
 func TestAddServiceTokenHeader(t *testing.T) {
 	Convey("Given a request", t, func() {
-		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
+		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 
 		Convey("When AddServiceTokenHeader is called", func() {
 			serviceToken := "123"
@@ -101,7 +101,7 @@ func TestAddServiceTokenHeader(t *testing.T) {
 func TestAddAuthHeaders(t *testing.T) {
 	Convey("Given a fresh request", t, func() {
 		Convey("When AddAuthHeaders is called with no auth", func() {
-			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
+			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 			ctx := context.Background()
 			AddAuthHeaders(ctx, r, "")
 
@@ -114,7 +114,7 @@ func TestAddAuthHeaders(t *testing.T) {
 		Convey("When AddAuthHeaders is called with a service token", func() {
 			serviceToken := "123"
 
-			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
+			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 			ctx := context.Background()
 			AddAuthHeaders(ctx, r, serviceToken)
 
@@ -128,7 +128,7 @@ func TestAddAuthHeaders(t *testing.T) {
 			serviceToken := "123"
 			userID := "user@test"
 
-			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
+			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 			ctx := SetUser(context.Background(), userID)
 			AddAuthHeaders(ctx, r, serviceToken)
 
@@ -141,7 +141,7 @@ func TestAddAuthHeaders(t *testing.T) {
 		Convey("When AddAuthHeaders is called with context that has user ID", func() {
 			userID := "user@test"
 
-			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", nil)
+			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
 			ctx := SetUser(context.Background(), userID)
 			AddAuthHeaders(ctx, r, "")
 
