@@ -111,7 +111,7 @@ func convertErrorToOutput(w io.Writer, contentType string, err error) {
 	if contentType != JsonContentType {
 		fmt.Fprint(w, err)
 	} else {
-		errJson := `{"error":"` + strings.Replace(err.Error(), `"`, "`", -1) + `"}` // replaces " with `
+		errJson := `{"error":"` + strings.ReplaceAll(err.Error(), `"`, "`") + `"}` // replaces " with `
 		fmt.Fprint(w, errJson)
 	}
 }
