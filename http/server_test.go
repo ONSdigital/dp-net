@@ -27,6 +27,12 @@ type listenAndServeCalls struct {
 	httpServer *Server
 }
 
+var (
+	dummyHandler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		// dummyHandler does nothing
+	})
+)
+
 func TestNew(t *testing.T) {
 	Convey("Given mocked network calls", t, func() {
 		doListenAndServe = func(httpServer *Server) error {
@@ -42,11 +48,10 @@ func TestNew(t *testing.T) {
 		}
 
 		Convey("New should return a new server with sensible defaults", func() {
-			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := NewServer(":0", h)
+			s := NewServer(":0", dummyHandler)
 
 			So(s, ShouldNotBeNil)
-			So(s.Handler, ShouldEqual, h)
+			So(s.Handler, ShouldEqual, dummyHandler)
 			So(s.Alice, ShouldBeNil)
 			So(s.Addr, ShouldEqual, ":0")
 			So(s.MaxHeaderBytes, ShouldEqual, 0)
@@ -80,16 +85,14 @@ func TestNew(t *testing.T) {
 
 		Convey("prep should prepare the server correctly", func() {
 			Convey("prep should create a valid Server instance", func() {
-				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-				s := NewServer(":0", h)
+				s := NewServer(":0", dummyHandler)
 
 				s.prep()
 				So(s.Server.Addr, ShouldEqual, ":0")
 			})
 
 			Convey("invalid middleware should panic", func() {
-				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-				s := NewServer(":0", h)
+				s := NewServer(":0", dummyHandler)
 
 				s.middlewareOrder = []string{"foo"}
 
@@ -99,8 +102,7 @@ func TestNew(t *testing.T) {
 			})
 
 			Convey("ListenAndServe with invalid middleware should panic", func() {
-				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-				s := NewServer(":0", h)
+				s := NewServer(":0", dummyHandler)
 
 				s.middlewareOrder = []string{"foo"}
 
@@ -110,8 +112,7 @@ func TestNew(t *testing.T) {
 			})
 
 			Convey("ListenAndServeTLS with invalid middleware should panic", func() {
-				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-				s := NewServer(":0", h)
+				s := NewServer(":0", dummyHandler)
 
 				s.middlewareOrder = []string{"foo"}
 
@@ -134,8 +135,7 @@ func TestNew(t *testing.T) {
 					return nil
 				}
 
-				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-				s := NewServer(":0", h)
+				s := NewServer(":0", dummyHandler)
 
 				// execute ListenAndServer and wait for it to finish
 				wg.Add(1)
@@ -153,8 +153,7 @@ func TestNew(t *testing.T) {
 			})
 
 			Convey("ListenAndServeTLS with only CertFile should panic", func() {
-				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-				s := NewServer(":0", h)
+				s := NewServer(":0", dummyHandler)
 
 				So(func() {
 					s.ListenAndServeTLS("certFile", "")
@@ -162,8 +161,7 @@ func TestNew(t *testing.T) {
 			})
 
 			Convey("ListenAndServeTLS with only KeyFile should panic", func() {
-				h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-				s := NewServer(":0", h)
+				s := NewServer(":0", dummyHandler)
 
 				So(func() {
 					s.ListenAndServeTLS("", "keyFile")
@@ -180,8 +178,7 @@ func TestNew(t *testing.T) {
 				return nil
 			}
 
-			h := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {})
-			s := NewServer(":0", h)
+			s := NewServer(":0", dummyHandler)
 
 			Convey("then ListenAndServe starts a working HTTP server", func() {
 				So(s.HandleOSSignals, ShouldBeTrue)
