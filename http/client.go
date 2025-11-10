@@ -17,7 +17,7 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
-// go:generate moq -out mock_client.go -pkg http . Clienter
+//go:generate moq -out mock_client.go -pkg http . Clienter
 
 const (
 	DefaultRequestTimeout = 10 * time.Second
