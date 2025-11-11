@@ -128,28 +128,25 @@ func TestAddAuthHeaders(t *testing.T) {
 
 		Convey("When AddAuthHeaders is called with a service token and context has user ID", func() {
 			serviceToken := "123"
-			userID := "user@test"
 
 			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
-			ctx := SetUser(context.Background(), userID)
+			ctx := SetUser(context.Background(), testUser)
 			AddAuthHeaders(ctx, r, serviceToken)
 
 			Convey("Then the request has the service token header set", func() {
 				So(r.Header.Get(AuthHeaderKey), ShouldEqual, BearerPrefix+serviceToken)
-				So(r.Header.Get(UserHeaderKey), ShouldEqual, userID)
+				So(r.Header.Get(UserHeaderKey), ShouldEqual, testUser)
 			})
 		})
 
 		Convey("When AddAuthHeaders is called with context that has user ID", func() {
-			userID := "user@test"
-
 			r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
-			ctx := SetUser(context.Background(), userID)
+			ctx := SetUser(context.Background(), testUser)
 			AddAuthHeaders(ctx, r, "")
 
 			Convey("Then the request has the user header set", func() {
 				So(r.Header.Get(AuthHeaderKey), ShouldBeBlank)
-				So(r.Header.Get(UserHeaderKey), ShouldEqual, userID)
+				So(r.Header.Get(UserHeaderKey), ShouldEqual, testUser)
 			})
 		})
 	})

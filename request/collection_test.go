@@ -10,26 +10,28 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestGetCollectionID(t *testing.T) {
-	expectedToken := "foo"
+const (
+	testToken = "foo"
+)
 
+func TestGetCollectionID(t *testing.T) {
 	Convey("should return collectionID from request header", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
-		req.Header.Set(CollectionIDHeaderKey, expectedToken)
+		req.Header.Set(CollectionIDHeaderKey, testToken)
 
 		actual, err := GetCollectionID(req)
 
-		So(actual, ShouldEqual, expectedToken)
+		So(actual, ShouldEqual, testToken)
 		So(err, ShouldBeNil)
 	})
 
 	Convey("should return collection id from request cookie", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
-		req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: expectedToken})
+		req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: testToken})
 
 		actual, err := GetCollectionID(req)
 
-		So(actual, ShouldEqual, expectedToken)
+		So(actual, ShouldEqual, testToken)
 		So(err, ShouldBeNil)
 	})
 
@@ -51,15 +53,13 @@ func TestGetCollectionID(t *testing.T) {
 }
 
 func TestGetCollectionIDFromCookie(t *testing.T) {
-	expectedToken := "foo"
-
 	Convey("should return collection id from request cookie", t, func() {
 		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
-		req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: expectedToken})
+		req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: testToken})
 
 		actual, err := getCollectionIDFromCookie(req)
 
-		So(actual, ShouldEqual, expectedToken)
+		So(actual, ShouldEqual, testToken)
 		So(err, ShouldBeNil)
 	})
 

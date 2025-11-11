@@ -88,13 +88,13 @@ func TestError(t *testing.T) {
 
 		Convey("Given a standard Go error", func() {
 			err := errors.New("test error")
+			expectedBody := `{"errors":["test error"]}`
 
 			Convey("when Error() is called", func() {
 				r.Error(ctx, w, http.StatusInternalServerError, err)
 
 				Convey("the response writer should record given status code and appropriate error response body", func() {
 					expectedCode := http.StatusInternalServerError
-					expectedBody := `{"errors":["test error"]}`
 
 					So(w.Code, ShouldEqual, expectedCode)
 					So(w.Body.String(), ShouldResemble, expectedBody)
@@ -106,7 +106,6 @@ func TestError(t *testing.T) {
 
 				Convey("the response writer should record status 500 and appropriate error response body", func() {
 					expectedCode := http.StatusInternalServerError
-					expectedBody := `{"errors":["test error"]}`
 
 					So(w.Code, ShouldEqual, expectedCode)
 					So(w.Body.String(), ShouldResemble, expectedBody)

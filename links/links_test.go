@@ -13,6 +13,10 @@ var (
 	defaultDownloadURL = &url.URL{Scheme: "https", Host: "download.api.host"}
 )
 
+const (
+	invalidURL = ":invalid/url"
+)
+
 func Test_FromHeadersOrDefault(t *testing.T) {
 	Convey("Given a list of test cases", t, func() {
 		tests := []struct {
@@ -172,7 +176,6 @@ func Test_BuildLink(t *testing.T) {
 
 	Convey("When an invalid old URL is provided", t, func() {
 		builder := &Builder{URL: &url.URL{}}
-		invalidURL := ":invalid/url"
 		newurl, err := builder.BuildLink(invalidURL)
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldContainSubstring, "unable to parse link to URL")
@@ -246,7 +249,6 @@ func Test_BuildDownloadLink(t *testing.T) {
 	})
 
 	Convey("When an invalid old URL is provided", t, func() {
-		invalidURL := ":invalid/url"
 		newurl, err := BuildDownloadLink(invalidURL, defaultDownloadURL)
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldContainSubstring, "unable to parse link to URL")
@@ -320,7 +322,6 @@ func Test_BuildDownloadNewLink(t *testing.T) {
 	})
 
 	Convey("When an invalid old URL is provided", t, func() {
-		invalidURL := ":invalid/url"
 		newurl, err := BuildDownloadNewLink(invalidURL, defaultDownloadURL)
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldContainSubstring, "unable to parse link to URL")
