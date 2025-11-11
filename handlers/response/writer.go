@@ -36,6 +36,10 @@ func (j *OnsJSONEncoder) WriteResponseJSON(w http.ResponseWriter, value interfac
 		return err
 	}
 	w.WriteHeader(status)
-	w.Write(b)
+	_, err = w.Write(b)
+	if err != nil {
+		// already written the header so cannot change status here
+		return err
+	}
 	return nil
 }
