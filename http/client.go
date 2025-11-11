@@ -318,20 +318,20 @@ func (c *Client) backoff(
 		case <-pingChan:
 		case <-ctx.Done():
 			err = ctx.Err()
-			return
+			return nil, err
 		}
 
 		resp, err = doer(ctx, client, req)
 		// prioritise any context cancellation
 		if ctx.Err() != nil {
 			err = ctx.Err()
-			return
+			return resp, err
 		}
 		if !wantRetry(err, resp) {
-			return
+			return resp, err
 		}
 	}
-	return
+	return resp, err
 }
 
 // getSleepTime will return a sleep time based on the attempt and initial retry time.
