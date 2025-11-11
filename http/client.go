@@ -78,10 +78,6 @@ type Clienter interface {
 	RoundTrip(req *http.Request) (*http.Response, error)
 }
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 // NewClient returns a copy of DefaultClient.
 func NewClient() Clienter {
 	return &Client{
