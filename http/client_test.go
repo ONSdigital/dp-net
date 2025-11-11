@@ -172,7 +172,8 @@ func TestClientDoesRetryAndContextTimeout(t *testing.T) {
 			delayByOneSecondOnNext := delayByOneSecondOn(expectedCallCount + 1)
 			expectedCallCount++
 
-			ctx, _ := context.WithTimeout(context.Background(), time.Duration(200*time.Millisecond))
+			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(200*time.Millisecond))
+			defer cancel()
 
 			resp, err := httpClient.Post(ctx, ts.URL, httptest.JsonContentType, strings.NewReader(delayByOneSecondOnNext))
 			So(err, ShouldNotBeNil)
