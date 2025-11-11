@@ -340,6 +340,7 @@ func (c *Client) backoff(
 // at the same time by many clients.
 func getSleepTime(attempt int, retryTime time.Duration) time.Duration {
 	n := (math.Pow(2, float64(attempt)))
+	//nolint:gosec // This randomization is used to avoid clients hitting at the same time, not for security purposes
 	rnd := time.Duration(rand.Intn(4)+1) * time.Millisecond
 	return (time.Duration(n) * retryTime) - rnd
 }

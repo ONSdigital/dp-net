@@ -39,6 +39,7 @@ func NewAWSSignerRoundTripper(ctx context.Context, awsFilename, awsProfile, awsR
 	// Create the transport and modify TLS settings if needed
 	transport := http.DefaultTransport.(*http.Transport).Clone() // Clone the default transport
 	if len(options) > 0 && options[0].TlsInsecureSkipVerify {
+		//nolint:gosec // InsecureSkipVerify is set based on user input
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 

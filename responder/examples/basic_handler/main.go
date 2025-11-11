@@ -82,6 +82,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/hello", handler)
 
+	//nolint:gosec // example code, doesn't need timeout
 	panic(http.ListenAndServe(":3333", mux))
 }
 

@@ -1,6 +1,7 @@
 package response
 
 import (
+	//nolint:gosec // SHA-1 is used for ETag generation only, not for security purposes
 	"crypto/sha1"
 	"fmt"
 	"net/http"
@@ -18,6 +19,7 @@ const (
 //
 // The definition of ETag is explained in https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
 func GenerateETag(body []byte, weak bool) (etag string) {
+	//nolint:gosec // SHA-1 is used for ETag generation only, not for security purposes
 	hash := sha1.Sum(body)
 
 	if weak {

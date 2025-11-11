@@ -32,6 +32,8 @@ func AddRequestIdHeader(r *http.Request, token string) {
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+//nolint:gosec // math/rand is used for generating request IDs, not for security purposes
 var requestIDRandom = rand.New(rand.NewSource(time.Now().UnixNano()))
 var randMutex sync.Mutex
 
