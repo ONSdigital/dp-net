@@ -87,10 +87,9 @@ func main() {
 }
 
 type testError struct {
-	err        error
-	statusCode int
-	logData    map[string]interface{}
-	message    string
+	err     error
+	logData map[string]interface{}
+	message string
 }
 
 // standard Go error interfaces
