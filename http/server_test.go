@@ -88,7 +88,7 @@ func TestNew(t *testing.T) {
 				s := NewServer(":0", dummyHandler)
 
 				s.prep()
-				So(s.Server.Addr, ShouldEqual, ":0")
+				So(s.Addr, ShouldEqual, ":0")
 			})
 
 			Convey("invalid middleware should panic", func() {

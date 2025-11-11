@@ -79,7 +79,7 @@ func (s *Server) prep() {
 		panic("middleware not found: " + v)
 	}
 
-	s.Server.Handler = alice.New(m...).Then(s.Handler)
+	s.Handler = alice.New(m...).Then(s.Handler)
 }
 
 // ListenAndServe sets up SIGINT/SIGTERM signals, builds the middleware
