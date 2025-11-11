@@ -31,9 +31,11 @@ func getCollectionIDFromCookie(req *http.Request) (string, error) {
 	var err error
 
 	c, err := req.Cookie(CollectionIDCookieKey)
-	if err == nil {
+
+	switch err {
+	case nil:
 		collectionID = c.Value
-	} else if err == http.ErrNoCookie {
+	case http.ErrNoCookie:
 		err = nil // we don't consider this scenario an error so we set err to nil and return an empty string
 	}
 
