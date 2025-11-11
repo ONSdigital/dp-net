@@ -1,4 +1,5 @@
 # dp-net
+
 Network library, containing an HTTP client and Server, handlers and other utilities for network communications.
 
 ## http
@@ -18,6 +19,7 @@ and the ability to perform exponential backoff when calling another HTTP server.
 
 This client should have a familiar feel to it when it is used.
 There are a few options available when you want to create a client
+
 - Simple client with no timeout value (shown below)
 - With timeout (both per request AND total timeout (spans all retries)) can be set
   - ClientWithTimeout (sets per try timeout duration)
@@ -94,9 +96,10 @@ This Server is intended to be used by all ONS digital publishing services that r
 #### Creation
 
 You have 2 options available (depending on if you want to specify a request timeout)
- - NewServer(bindAddr string, router http.Handler)
- - NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration, timeoutMessage string)
- 
+
+- NewServer(bindAddr string, router http.Handler)
+- NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration, timeoutMessage string)
+
 Assuming you have created a router with your API handlers, you can create the http server like so:
 
 ```go
@@ -106,11 +109,13 @@ import http "github.com/ONSdigital/dp-net/v3/http"
     httpServer.HandleOSSignals = false
     ...
 ```
+
 Note that HandleOSSignal is set to false, so that the main thread will be responsible to shutdown the server during graceful shutdown.
 
 #### Start
 
 Start the server in a new go-routine, because this operation is blocking:
+
 ```go
     ...
     go func() {
@@ -121,11 +126,13 @@ Start the server in a new go-routine, because this operation is blocking:
     }()
     ...
 ```
+
 Note that we ignore ErrServerClosed, because this is a valid scenario during graceful shutdown.
 
 #### Shutdown
 
 Shutdown the server when you no longer require it. Usually you will need to do this as part of the service graceful shutdown, after receiving a SIGINT or SIGTERM system call in your signal channel:
+
 ```go
     ...
     err := httpServer.Shutdown(shutdownCtx)
@@ -135,6 +142,24 @@ Shutdown the server when you no longer require it. Usually you will need to do t
         log.Info(shutdownCtx, "http server successful shutdown")
     }
     ...
+```
+
+### Fallback
+
+The fallback alternative builder is used for trying multiple other handlers in turn with a trigger to allow the calling service to 'fallover' to the next one in sequence.
+
+It is supplied with a `HandlerFunc` and can use the `WhenStatus` chain function to check the response for a status, in this case `http.StatusNotFound`. If that status is found then it tries the handler supplied by the `Then` chain function.
+
+```go
+    primaryHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(http.StatusNotFound)
+        w.Write([]byte("primary handler response"))
+    })
+    fallbackHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("secondary handler response"))
+    })
+    alt := Try(primaryHandler).WhenStatus(http.StatusNotFound).Then(fallbackHandler)
 ```
 
 ## Handlers
