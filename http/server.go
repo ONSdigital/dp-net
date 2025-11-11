@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"context"
@@ -131,7 +132,7 @@ func (s *Server) listenAndServe() error {
 
 func (s *Server) listenAndServeHandleOSSignals() error {
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, os.Kill)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	s.listenAndServeAsync()
 
