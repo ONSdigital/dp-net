@@ -110,8 +110,11 @@ func (s *Server) ListenAndServeTLS(certFile, keyFile string) error {
 // Shutdown will gracefully shutdown the server, using a default shutdown
 // timeout if a context is not provided.
 func (s *Server) Shutdown(ctx context.Context) error {
+	var cancel context.CancelFunc
+
 	if ctx == nil {
-		ctx, _ = context.WithTimeout(context.Background(), s.DefaultShutdownTimeout)
+		ctx, cancel = context.WithTimeout(context.Background(), s.DefaultShutdownTimeout)
+		defer cancel()
 	}
 
 	return doShutdown(ctx, &s.Server)
@@ -133,7 +136,8 @@ func (s *Server) listenAndServeHandleOSSignals() error {
 	s.listenAndServeAsync()
 
 	<-stop
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	return s.Shutdown(ctx)
 }
 
