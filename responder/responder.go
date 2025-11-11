@@ -116,15 +116,15 @@ func respondError(ctx context.Context, w http.ResponseWriter, status int, err er
 // defined as []error
 func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status int, errs []error) {
 	var errorLogs log.EventErrors
-	var errorMsgs []string
+	errorMsgs := make([]string, len(errs))
 
-	for _, err := range errs {
+	for i, err := range errs {
 		errorLogs = append(errorLogs, log.EventError{
 			Message:    err.Error(),
 			StackTrace: dperrors.StackTrace(err),
 			Data:       dperrors.UnwrapLogData(err),
 		})
-		errorMsgs = append(errorMsgs, dperrors.UnwrapErrorMessage(err))
+		errorMsgs[i] = dperrors.UnwrapErrorMessage(err)
 	}
 
 	log.Info(ctx, "error responding to HTTP request", log.ERROR, &errorLogs)
