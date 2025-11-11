@@ -308,7 +308,7 @@ func (c *Client) backoff(
 	req *http.Request,
 ) (resp *http.Response, err error) {
 	for retries := 1; retries <= c.GetMaxRetries(); retries++ {
-		pingChan := make(chan struct{}, 0)
+		pingChan := make(chan struct{})
 		go func() {
 			time.Sleep(getSleepTime(retries, c.RetryTime))
 			close(pingChan)
