@@ -23,8 +23,8 @@ type Signer struct {
 }
 
 func NewAwsSigner(ctx context.Context, awsFilename, awsProfile, awsRegion, awsService string) (signer *Signer, err error) {
-	if err = validateAwsSDKSigner(awsRegion, awsService); err != nil {
-		return
+	if err := validateAwsSDKSigner(awsRegion, awsService); err != nil {
+		return nil, err
 	}
 
 	// Initialize options for the AWS configuration

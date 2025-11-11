@@ -564,7 +564,7 @@ func TestGetServiceAuthToken(t *testing.T) {
 func newMockHTTPClient() *dphttp.ClienterMock {
 	return &dphttp.ClienterMock{
 		SetPathsWithNoRetriesFunc: func(paths []string) {
-			return
+			// do nothing
 		},
 		GetPathsWithNoRetriesFunc: func() []string {
 			return []string{"/healthcheck"}
