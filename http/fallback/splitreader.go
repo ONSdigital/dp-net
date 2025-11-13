@@ -101,7 +101,7 @@ func (s *splitReadCloser) setUpstreamError(err error) {
 }
 
 func (s *splitReadCloser) getUnreadBytes(p []byte) int {
-	if s.unreadBytes == nil || len(s.unreadBytes) == 0 {
+	if len(s.unreadBytes) == 0 {
 		return 0
 	}
 	read := 0
