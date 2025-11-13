@@ -333,9 +333,3 @@ func mockReadCloser(data []byte) *readCloserMock {
 		Reads:  make([]int, 0),
 	}
 }
-
-func (rcm *readCloserMock) reset() {
-	rcm.reader = bytes.NewReader(rcm.data)
-	rcm.CloseCount = 0
-	rcm.Reads = make([]int, 0)
-}

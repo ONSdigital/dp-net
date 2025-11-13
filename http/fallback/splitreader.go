@@ -11,7 +11,6 @@ type readCloserSplitter struct {
 	ReadCloser   io.ReadCloser
 	maxBytesRead int64
 	splits       map[int]*splitReadCloser
-	nextId       int
 }
 
 // ReadCloserSplit takes an [io.ReadCloser] and splits it into multiple [io.ReadCloser] interfaces that each read from
