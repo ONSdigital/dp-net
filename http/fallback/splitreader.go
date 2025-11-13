@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-//TODO implement mutexes
+// TODO implement mutexes
 
 type readCloserSplitter struct {
 	ReadCloser   io.ReadCloser
