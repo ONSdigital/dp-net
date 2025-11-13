@@ -93,6 +93,7 @@ func (alternative *Alternative) ServeHTTP(w http.ResponseWriter, r *http.Request
 			w.Header()[k] = vs
 		}
 		w.WriteHeader(w1.statusCode)
+		//nolint:errcheck // TODO handle error
 		w.Write(w1.body)
 		return
 	}
