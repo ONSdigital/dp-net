@@ -64,16 +64,16 @@ func BuildDownloadLink(link string, defaultURL *url.URL) (string, error) {
 	return apiURL.String(), nil
 }
 
-func BuildDownloadNewLink(link string, defaultURL *url.URL) (string, error) {
+func BuildDownloadFilesLink(link string, defaultURL *url.URL) (string, error) {
 	oldURL, err := url.Parse(link)
 	if err != nil {
 		return "", errors.Wrap(err, "unable to parse link to URL")
 	}
 
 	newPath := oldURL.Path
-	newPath = RemovePrefixFromPath(newPath, "/downloads-new")
+	newPath = RemovePrefixFromPath(newPath, "/downloads/files")
 
-	apiURL := defaultURL.JoinPath("downloads-new", newPath)
+	apiURL := defaultURL.JoinPath("downloads/files", newPath)
 	apiURL.RawQuery = oldURL.RawQuery
 
 	return apiURL.String(), nil
