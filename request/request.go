@@ -2,8 +2,10 @@ package request
 
 import (
 	"context"
+	"errors"
 	"math/rand"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -62,4 +64,16 @@ func HandlerRequestID(size int) func(http.Handler) http.Handler {
 			h.ServeHTTP(w, req.WithContext(WithRequestId(req.Context(), requestID)))
 		})
 	}
+}
+
+// GetAuthToken gets the auth token from the Authorization header (without Bearer prefix)
+// and returns it.
+func GetAuthToken(r *http.Request) (string, error) {
+	authToken := r.Header.Get(AuthHeaderKey)
+	if authToken == "" {
+		return "", errors.New("authorisation failed: no authorisation header in request")
+	}
+	authToken = strings.TrimPrefix(authToken, BearerPrefix)
+
+	return authToken, nil
 }
