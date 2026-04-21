@@ -100,6 +100,21 @@ func TestAddServiceTokenHeader(t *testing.T) {
 	})
 }
 
+func TestAddAuthorizationHeader(t *testing.T) {
+	Convey("Given a request", t, func() {
+		r, _ := http.NewRequest("POST", "http://localhost:21800/jobs", http.NoBody)
+
+		Convey("When AddAuthorizationHeader is called", func() {
+			credential := "Bearer 123"
+			AddAuthorizationHeader(r, credential)
+
+			Convey("Then the request has the authoriztion header set", func() {
+				So(r.Header.Get("Authorization"), ShouldEqual, credential)
+			})
+		})
+	})
+}
+
 func TestAddAuthHeaders(t *testing.T) {
 	Convey("Given a fresh request", t, func() {
 		Convey("When AddAuthHeaders is called with no auth", func() {

@@ -59,6 +59,12 @@ func AddServiceTokenHeader(r *http.Request, serviceToken string) {
 	}
 }
 
+// AddAuthorizationHeader adds the Authorization header to the request. This should include the schem and parameters,
+// for example `Bearer jwttoken` rather than just the token on its own.
+func AddAuthorizationHeader(r *http.Request, credential string) {
+	r.Header.Add(AuthHeaderKey, credential)
+}
+
 // AddDownloadServiceTokenHeader sets the given download service token on the given request
 func AddDownloadServiceTokenHeader(r *http.Request, serviceToken string) {
 	if serviceToken != "" {
