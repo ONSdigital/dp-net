@@ -177,7 +177,7 @@ func TestErrors(t *testing.T) {
 				},
 			}
 
-			var errs []error
+			errs := make([]error, 0, len(testErrs))
 			for _, err := range testErrs {
 				errs = append(errs, err)
 			}

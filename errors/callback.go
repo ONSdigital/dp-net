@@ -77,7 +77,7 @@ func StackTrace(err error) []log.EventStackTrace {
 	for errors.Unwrap(err) != nil {
 		if errors.As(err, &serr) {
 			st := serr.StackTrace()
-			resp = make([]log.EventStackTrace, 0)
+			resp = make([]log.EventStackTrace, 0, len(st))
 			for _, f := range st {
 				line, _ := strconv.Atoi(fmt.Sprintf("%d", f))
 				resp = append(resp, log.EventStackTrace{

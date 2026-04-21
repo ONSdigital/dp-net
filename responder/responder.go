@@ -115,7 +115,7 @@ func respondError(ctx context.Context, w http.ResponseWriter, status int, err er
 // error}. The underlying structs can be any type that implements error but the slice itself must be
 // defined as []error
 func (r *Responder) Errors(ctx context.Context, w http.ResponseWriter, status int, errs []error) {
-	var errorLogs log.EventErrors
+	errorLogs := make(log.EventErrors, 0, len(errs))
 	errorMsgs := make([]string, len(errs))
 
 	for i, err := range errs {

@@ -47,7 +47,7 @@ func (o PatchOp) String() string {
 }
 
 func getPatchOpsStringSlice(ops []PatchOp) []string {
-	opsStringSlice := []string{}
+	opsStringSlice := make([]string, 0, len(ops))
 	for _, op := range ops {
 		opsStringSlice = append(opsStringSlice, op.String())
 	}
