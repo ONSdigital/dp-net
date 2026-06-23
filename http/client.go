@@ -3,6 +3,7 @@ package http
 //go:generate moq -out mock_client.go . Clienter
 
 import (
+	"context"
 	"io"
 	"math"
 	"math/rand"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	request "github.com/ONSdigital/dp-net/v3/request"
-	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 )
 
