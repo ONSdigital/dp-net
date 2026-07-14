@@ -63,9 +63,10 @@ func NewServer(bindAddr string, router http.Handler) *Server {
 
 // NewServerWithTimeout creates a new server with request timeout duration
 // and a message that will be in the response body
-func NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration, timeoutMessage string) *Server {
+func NewServerWithTimeout(bindAddr string, router http.Handler, requestTimeout time.Duration, writeTimeout time.Duration, timeoutMessage string) *Server {
 	server := NewServer(bindAddr, router)
-	server.RequestTimeout = timeout
+	server.RequestTimeout = requestTimeout
+	server.WriteTimeout = writeTimeout
 	server.TimeoutMessage = timeoutMessage
 	return server
 }
