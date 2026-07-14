@@ -11,8 +11,9 @@ import (
 	"testing"
 	"time"
 
+	"context"
+
 	. "github.com/smartystreets/goconvey/convey"
-	"golang.org/x/net/context"
 )
 
 // listenAndServeTLSCalls keeps track of a listenAndServeTLS call

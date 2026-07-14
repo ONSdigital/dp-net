@@ -19,6 +19,7 @@ func TestDirectorFunc(t *testing.T) {
 		So(reverseProxy, ShouldImplement, (*http.Handler)(nil))
 
 		req, _ := http.NewRequest(`GET`, `https://cy.ons.gov.uk`, http.NoBody)
+		//nolint:staticcheck // ignore this as updating this would require in depth testing where it is used in other apps - out of scope for this change
 		So(func() { reverseProxy.(*httputil.ReverseProxy).Director(req) }, ShouldNotPanic)
 		So(req.URL.Host, ShouldEqual, `www.ons.gov.uk`)
 	})
@@ -36,6 +37,7 @@ func TestDirectorFunc(t *testing.T) {
 		So(reverseProxy, ShouldImplement, (*http.Handler)(nil))
 
 		req, _ := http.NewRequest(`GET`, `https://cy.ons.gov.uk`, http.NoBody)
+		//nolint:staticcheck // ignore this as updating this would require in depth testing where it is used in other apps - out of scope for this change
 		So(func() { reverseProxy.(*httputil.ReverseProxy).Director(req) }, ShouldNotPanic)
 		So(req.URL.Host, ShouldEqual, `host`)
 		So(directorCalled, ShouldBeTrue)

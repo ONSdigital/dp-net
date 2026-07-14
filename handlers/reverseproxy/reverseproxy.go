@@ -10,6 +10,7 @@ import (
 
 func Create(proxyURL *url.URL, directorFunc func(*http.Request), modifyResponseFunc func(*http.Response) error) http.Handler {
 	proxy := httputil.NewSingleHostReverseProxy(proxyURL)
+	//nolint:staticcheck // ignore this as updating this would require in depth testing where it is used in other apps - out of scope for this change
 	director := proxy.Director
 	proxy.Transport = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -22,6 +23,7 @@ func Create(proxyURL *url.URL, directorFunc func(*http.Request), modifyResponseF
 		TLSHandshakeTimeout:   5 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
+	//nolint:staticcheck // ignore this as updating this would require in depth testing where it is used in other apps - out of scope for this change
 	proxy.Director = func(req *http.Request) {
 		director(req)
 		req.Host = proxyURL.Host
