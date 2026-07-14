@@ -95,10 +95,10 @@ This Server is intended to be used by all ONS digital publishing services that r
 
 #### Creation
 
-You have 2 options available (depending on if you want to specify a request timeout)
+You have 2 options available (depending on if you want to specify a request and write timeout)
 
 - NewServer(bindAddr string, router http.Handler)
-- NewServerWithTimeout(bindAddr string, router http.Handler, timeout time.Duration, timeoutMessage string)
+- NewServerWithTimeout(bindAddr string, router http.Handler, requestTimeout time.Duration, writeTimeout time.Duration, timeoutMessage string)
 
 Assuming you have created a router with your API handlers, you can create the http server like so:
 
