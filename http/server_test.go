@@ -309,13 +309,13 @@ func TestServer_LongRunningOperation(t *testing.T) {
 			Convey("when a request is made to the server", func() {
 				resp, err := http.Get("http://" + a)
 
-				Convey("the request is terminated with a 'test server timeout' response", func() {
+				Convey("the request is terminated with a 'connection timeout' response", func() {
 					So(err, ShouldBeNil)
 					So(resp.StatusCode, ShouldEqual, http.StatusServiceUnavailable)
 
 					b, err := io.ReadAll(resp.Body)
 					So(err, ShouldEqual, nil)
-					So(string(b), ShouldEqual, "test server timeout")
+					So(string(b), ShouldEqual, "connection timeout")
 				})
 			})
 		})
