@@ -342,12 +342,8 @@ func TestGetFreePort(t *testing.T) {
 }
 
 func startServer(address string, handler http.Handler, writeTimeout, requestTimeout time.Duration) (errorChan chan error, shutdownFunc func()) {
-	var s *Server
-	if requestTimeout > 0 && writeTimeout > 0 {
-		s = NewServerWithTimeout(address, handler, requestTimeout, writeTimeout, "test server timeout")
-	} else {
-		s = NewServer(address, handler)
-	}
+	s := NewServer(address, handler)
+
 	s.WriteTimeout = writeTimeout
 	s.RequestTimeout = requestTimeout
 	s.HandleOSSignals = false
