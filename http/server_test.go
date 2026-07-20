@@ -84,6 +84,22 @@ func TestNew(t *testing.T) {
 			})
 		})
 
+		Convey("Setting up a server with custom timeouts should set them correctly", func() {
+			timeoutConfig := TimeoutConfig{
+				ReadTimeout:       10 * time.Second,
+				WriteTimeout:      10 * time.Second,
+				IdleTimeout:       0,
+				ReadHeaderTimeout: 0,
+			}
+			s := NewServer(":0", dummyHandler, timeoutConfig)
+
+			So(s, ShouldNotBeNil)
+			So(s.WriteTimeout, ShouldEqual, time.Second*10)
+			So(s.ReadTimeout, ShouldEqual, time.Second*10)
+			So(s.IdleTimeout, ShouldEqual, 0)
+			So(s.ReadHeaderTimeout, ShouldEqual, 0)
+		})
+
 		Convey("prep should prepare the server correctly", func() {
 			Convey("prep should create a valid Server instance", func() {
 				s := NewServer(":0", dummyHandler)

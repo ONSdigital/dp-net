@@ -20,6 +20,13 @@ const (
 	ResponseWriteGrace  time.Duration = 100 * time.Millisecond
 )
 
+type TimeoutConfig struct {
+	WriteTimeout      time.Duration
+	ReadTimeout       time.Duration
+	ReadHeaderTimeout time.Duration
+	IdleTimeout       time.Duration
+}
+
 // Server is a http.Server with sensible defaults, which supports
 // configurable middleware and timeouts, and shuts down cleanly
 // on SIGINT/SIGTERM
@@ -37,17 +44,31 @@ type Server struct {
 }
 
 // NewServer creates a new server
-func NewServer(bindAddr string, router http.Handler) *Server {
+func NewServer(bindAddr string, router http.Handler, opts ...TimeoutConfig) *Server {
 	middleware := map[string]alice.Constructor{
 		RequestIDHandlerKey: request.HandlerRequestID(16),
 		LogHandlerKey:       log.Middleware,
 	}
 
-	return &Server{
-		Alice:           nil,
-		middleware:      middleware,
-		middlewareOrder: []string{RequestIDHandlerKey, LogHandlerKey},
-		Server: http.Server{
+	server := Server{}
+	server.Alice = nil
+	server.middleware = middleware
+	server.middlewareOrder = []string{RequestIDHandlerKey, LogHandlerKey}
+	server.HandleOSSignals = true
+	server.DefaultShutdownTimeout = 10 * time.Second
+
+	if opts != nil {
+		server.Server = http.Server{
+			Handler:           router,
+			Addr:              bindAddr,
+			ReadTimeout:       opts[0].ReadTimeout,
+			WriteTimeout:      opts[0].WriteTimeout,
+			ReadHeaderTimeout: opts[0].ReadHeaderTimeout,
+			IdleTimeout:       opts[0].IdleTimeout,
+			MaxHeaderBytes:    0,
+		}
+	} else {
+		server.Server = http.Server{
 			Handler:           router,
 			Addr:              bindAddr,
 			ReadTimeout:       5 * time.Second,
@@ -55,20 +76,10 @@ func NewServer(bindAddr string, router http.Handler) *Server {
 			ReadHeaderTimeout: 0,
 			IdleTimeout:       0,
 			MaxHeaderBytes:    0,
-		},
-		HandleOSSignals:        true,
-		DefaultShutdownTimeout: 10 * time.Second,
+		}
 	}
-}
 
-// NewServerWithTimeout creates a new server with request timeout duration
-// and a message that will be in the response body
-func NewServerWithTimeout(bindAddr string, router http.Handler, requestTimeout, writeTimeout time.Duration, timeoutMessage string) *Server {
-	server := NewServer(bindAddr, router)
-	server.RequestTimeout = requestTimeout
-	server.WriteTimeout = writeTimeout
-	server.TimeoutMessage = timeoutMessage
-	return server
+	return &server
 }
 
 func (s *Server) prep() {
