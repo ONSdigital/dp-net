@@ -44,31 +44,17 @@ type Server struct {
 }
 
 // NewServer creates a new server
-func NewServer(bindAddr string, router http.Handler, opts ...TimeoutConfig) *Server {
+func NewServer(bindAddr string, router http.Handler) *Server {
 	middleware := map[string]alice.Constructor{
 		RequestIDHandlerKey: request.HandlerRequestID(16),
 		LogHandlerKey:       log.Middleware,
 	}
 
-	server := Server{}
-	server.Alice = nil
-	server.middleware = middleware
-	server.middlewareOrder = []string{RequestIDHandlerKey, LogHandlerKey}
-	server.HandleOSSignals = true
-	server.DefaultShutdownTimeout = 10 * time.Second
-
-	if opts != nil {
-		server.Server = http.Server{
-			Handler:           router,
-			Addr:              bindAddr,
-			ReadTimeout:       opts[0].ReadTimeout,
-			WriteTimeout:      opts[0].WriteTimeout,
-			ReadHeaderTimeout: opts[0].ReadHeaderTimeout,
-			IdleTimeout:       opts[0].IdleTimeout,
-			MaxHeaderBytes:    0,
-		}
-	} else {
-		server.Server = http.Server{
+	return &Server{
+		Alice:           nil,
+		middleware:      middleware,
+		middlewareOrder: []string{RequestIDHandlerKey, LogHandlerKey},
+		Server: http.Server{
 			Handler:           router,
 			Addr:              bindAddr,
 			ReadTimeout:       5 * time.Second,
@@ -76,10 +62,34 @@ func NewServer(bindAddr string, router http.Handler, opts ...TimeoutConfig) *Ser
 			ReadHeaderTimeout: 0,
 			IdleTimeout:       0,
 			MaxHeaderBytes:    0,
-		}
+		},
+		HandleOSSignals:        true,
+		DefaultShutdownTimeout: 10 * time.Second,
+	}
+}
+
+func NewServerWithCustomTimeouts(bindAddr string, router http.Handler, timeoutConfig TimeoutConfig) *Server {
+	middleware := map[string]alice.Constructor{
+		RequestIDHandlerKey: request.HandlerRequestID(16),
+		LogHandlerKey:       log.Middleware,
 	}
 
-	return &server
+	return &Server{
+		Alice:           nil,
+		middleware:      middleware,
+		middlewareOrder: []string{RequestIDHandlerKey, LogHandlerKey},
+		Server: http.Server{
+			Handler:           router,
+			Addr:              bindAddr,
+			ReadTimeout:       timeoutConfig.ReadTimeout,
+			WriteTimeout:      timeoutConfig.WriteTimeout,
+			ReadHeaderTimeout: timeoutConfig.ReadHeaderTimeout,
+			IdleTimeout:       timeoutConfig.IdleTimeout,
+			MaxHeaderBytes:    0,
+		},
+		HandleOSSignals:        true,
+		DefaultShutdownTimeout: 10 * time.Second,
+	}
 }
 
 func (s *Server) prep() {

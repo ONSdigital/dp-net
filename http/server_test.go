@@ -91,7 +91,7 @@ func TestNew(t *testing.T) {
 				IdleTimeout:       0,
 				ReadHeaderTimeout: 0,
 			}
-			s := NewServer(":0", dummyHandler, timeoutConfig)
+			s := NewServerWithCustomTimeouts(":0", dummyHandler, timeoutConfig)
 
 			So(s, ShouldNotBeNil)
 			So(s.WriteTimeout, ShouldEqual, time.Second*10)
