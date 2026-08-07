@@ -20,7 +20,7 @@ func New() *Responder {
 	return &Responder{}
 }
 
-const maxBodyLength = 1000 // used to limit max length of line to limit too much hittinh logstash
+const maxBodyLength = 1000 // used to limit max length of line to limit too much hitting logstash
 
 // JSON responds to a HTTP request, expecting the response body
 // to be marshall-able into JSON
