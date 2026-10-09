@@ -19,26 +19,26 @@ type testError struct {
 	logData    map[string]interface{}
 }
 
-func (e testError) Error() string {
+func (e *testError) Error() string {
 	if e.err == nil {
 		return "nil"
 	}
 	return e.err.Error()
 }
 
-func (e testError) Unwrap() error {
+func (e *testError) Unwrap() error {
 	return e.err
 }
 
-func (e testError) Code() int {
+func (e *testError) Code() int {
 	return e.statusCode
 }
 
-func (e testError) LogData() map[string]interface{} {
+func (e *testError) LogData() map[string]interface{} {
 	return e.logData
 }
 
-func (e testError) Message() string {
+func (e *testError) Message() string {
 	return e.message
 }
 
