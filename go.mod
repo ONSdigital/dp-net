@@ -1,6 +1,6 @@
 module github.com/ONSdigital/dp-net/v3
 
-go 1.26.0
+go 1.27.0
 
 retract (
 	v3.1.1 // The 'awsauth' package is broken in version v3.1.0 and should not be used.
