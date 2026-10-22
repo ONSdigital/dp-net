@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/ONSdigital/dp-net/v3/request"
@@ -60,7 +61,13 @@ func ControllerHandler(controllerHandlerFunc ControllerHandlerFunc) http.Handler
 		locale := request.GetLocaleCode(r)
 		collectionID, err := request.GetCollectionID(r)
 		if err != nil {
-			log.Error(ctx, "unexpected error when getting collection id", err)
+			if errors.Is(err, request.ErrInvalidCollectionId) {
+				log.Error(ctx, "invalid collection id", err)
+				http.Error(w, "invalid collection id", http.StatusBadRequest)
+				return
+			} else {
+				log.Error(ctx, "unexpected error when getting collection id", err)
+			}
 		}
 		accessToken, err := GetFlorenceToken(ctx, r)
 		if err != nil {

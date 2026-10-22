@@ -50,6 +50,48 @@ func TestGetCollectionID(t *testing.T) {
 		So(actual, ShouldBeEmpty)
 		So(err, ShouldResemble, headers.ErrRequestNil)
 	})
+
+	Convey("should accept letters, digits and hyphens in a header", t, func() {
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
+		req.Header.Set(CollectionIDHeaderKey, "AbC-123")
+
+		actual, err := GetCollectionID(req)
+
+		So(actual, ShouldEqual, "AbC-123")
+		So(err, ShouldBeNil)
+	})
+
+	Convey("should accept letters, digits and hyphens in a cookie", t, func() {
+		req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
+		req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: "AbC-123"})
+
+		actual, err := GetCollectionID(req)
+
+		So(actual, ShouldEqual, "AbC-123")
+		So(err, ShouldBeNil)
+	})
+
+	for _, invalidID := range []string{"abc_def", "abc def", "abc.def", "abc/def", "caf?something"} {
+		Convey("should reject invalid header collection id "+invalidID, t, func() {
+			req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
+			req.Header.Set(CollectionIDHeaderKey, invalidID)
+
+			actual, err := GetCollectionID(req)
+
+			So(actual, ShouldBeEmpty)
+			So(err, ShouldEqual, ErrInvalidCollectionId)
+		})
+
+		Convey("should reject invalid cookie collection id "+invalidID, t, func() {
+			req := httptest.NewRequest("GET", "http://localhost:8080", http.NoBody)
+			req.AddCookie(&http.Cookie{Name: CollectionIDCookieKey, Value: invalidID})
+
+			actual, err := GetCollectionID(req)
+
+			So(actual, ShouldBeEmpty)
+			So(err, ShouldEqual, ErrInvalidCollectionId)
+		})
+	}
 }
 
 func TestGetCollectionIDFromCookie(t *testing.T) {

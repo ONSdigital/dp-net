@@ -1,7 +1,9 @@
 package request
 
 import (
+	"errors"
 	"net/http"
+	"regexp"
 
 	"github.com/ONSdigital/dp-api-clients-go/v2/headers"
 )
@@ -10,6 +12,10 @@ import (
 const (
 	CollectionIDHeaderKey = "Collection-Id"
 	CollectionIDCookieKey = "collection"
+)
+
+var (
+	ErrInvalidCollectionId = errors.New("invalid collection id")
 )
 
 // GetCollectionID gets the collection id from the request
@@ -21,6 +27,15 @@ func GetCollectionID(req *http.Request) (string, error) {
 		collectionID = id
 	} else if headers.IsErrNotFound(err) {
 		collectionID, err = getCollectionIDFromCookie(req)
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	if collectionID != "" && !isCollectionIDValid(collectionID) {
+		collectionID = ""
+		err = ErrInvalidCollectionId
 	}
 
 	return collectionID, err
@@ -40,4 +55,10 @@ func getCollectionIDFromCookie(req *http.Request) (string, error) {
 	}
 
 	return collectionID, err
+}
+
+var collectionIDPattern = regexp.MustCompile(`^[A-Za-z0-9-]+$`)
+
+func isCollectionIDValid(collectionID string) bool {
+	return collectionIDPattern.MatchString(collectionID)
 }

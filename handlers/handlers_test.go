@@ -260,3 +260,45 @@ func TestControllerHandler(t *testing.T) {
 		h.ServeHTTP(w, request)
 	})
 }
+
+func TestControllerHandlerInvalidCollectionID(t *testing.T) {
+	tests := []struct {
+		name  string
+		setID func(*http.Request)
+	}{
+		{
+			name: "header",
+			setID: func(request *http.Request) {
+				request.Header.Set(CollectionID.Header(), "invalid_id")
+			},
+		},
+		{
+			name: "cookie",
+			setID: func(request *http.Request) {
+				request.AddCookie(&http.Cookie{Name: dprequest.CollectionIDCookieKey, Value: "invalid_id"})
+			},
+		},
+	}
+
+	for _, test := range tests {
+		Convey("Given an invalid collection ID in the "+test.name, t, func() {
+			request := httptest.NewRequest(http.MethodGet, "http://localhost:8080", http.NoBody)
+			test.setID(request)
+			response := httptest.NewRecorder()
+			controllerCalled := false
+			handler := ControllerHandler(func(http.ResponseWriter, *http.Request, string, string, string) {
+				controllerCalled = true
+			})
+
+			Convey("When the handler is called", func() {
+				handler.ServeHTTP(response, request)
+
+				Convey("Then the response should indicate a bad request", func() {
+					So(response.Code, ShouldEqual, http.StatusBadRequest)
+					So(response.Body.String(), ShouldEqual, "invalid collection id\n")
+					So(controllerCalled, ShouldBeFalse)
+				})
+			})
+		})
+	}
+}
