@@ -33,7 +33,7 @@ func GetCollectionID(req *http.Request) (string, error) {
 		return "", err
 	}
 
-	if collectionID != "" && !isCollectionIDValid(collectionID) {
+	if collectionID != "" && !IsCollectionIDValid(collectionID) {
 		collectionID = ""
 		err = ErrInvalidCollectionId
 	}
@@ -59,6 +59,7 @@ func getCollectionIDFromCookie(req *http.Request) (string, error) {
 
 var collectionIDPattern = regexp.MustCompile(`^[A-Za-z0-9-]+$`)
 
-func isCollectionIDValid(collectionID string) bool {
+// IsCollectionIDValid compares the supplied ID with a valid pattern and returns if it matches
+func IsCollectionIDValid(collectionID string) bool {
 	return collectionIDPattern.MatchString(collectionID)
 }
